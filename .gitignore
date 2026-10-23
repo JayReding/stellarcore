@@ -1,0 +1,14 @@
+# Godot editor and import cache
+.godot/
+*.import
+
+# Export output
+export/
+build/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Story outline - spoilers!
+OUTLINE.md

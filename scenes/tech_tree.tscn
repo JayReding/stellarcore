@@ -1,0 +1,257 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/tech_tree.gd" id="1_tree"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_normal"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.08, 0.19, 0.32, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.54, 0.86, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.12, 0.28, 0.46, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.05, 0.13, 0.23, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 0.9, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_funds"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+bg_color = Color(0.027, 0.052, 0.09, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.46, 0.74, 0.55)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.32)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[node name="TechTree" type="CanvasLayer"]
+layer = 10
+visible = false
+script = ExtResource("1_tree")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Background" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.011, 0.022, 1)
+
+[node name="UI" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Eyebrow" type="Label" parent="Root/UI"]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 26.0
+offset_right = 480.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
+theme_override_font_sizes/font_size = 12
+text = "RESEARCH & DEVELOPMENT"
+
+[node name="NameLabel" type="Label" parent="Root/UI"]
+layout_mode = 1
+offset_left = 38.0
+offset_top = 44.0
+offset_right = 640.0
+offset_bottom = 92.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 34
+text = "Technologies"
+
+[node name="MetaLabel" type="Label" parent="Root/UI"]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 40.0
+offset_top = 94.0
+offset_right = 720.0
+offset_bottom = 114.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.6, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "TECH TREE  •  1 TECHNOLOGY"
+
+[node name="BackButton" type="Button" parent="Root/UI"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 30.0
+offset_right = -40.0
+offset_bottom = 68.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+text = "BACK TO STELLAR VIEW"
+
+[node name="FundsPanel" type="PanelContainer" parent="Root/UI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -270.0
+offset_top = 86.0
+offset_right = -40.0
+offset_bottom = 194.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_funds")
+
+[node name="FundsContent" type="VBoxContainer" parent="Root/UI/FundsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="FundsCap" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "RESEARCH FUNDS"
+
+[node name="FundsLabel" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "0 RP"
+
+[node name="FundsNote" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
+theme_override_font_sizes/font_size = 10
+text = "Resource system pending"
+
+[node name="Content" type="CenterContainer" parent="Root/UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 180.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TreeColumn" type="VBoxContainer" parent="Root/UI/Content"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TierLabel" type="Label" parent="Root/UI/Content/TreeColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.7, 0.92, 1)
+theme_override_font_sizes/font_size = 11
+text = "TIER 1  •  PROPULSION"
+horizontal_alignment = 1
+
+[node name="TechList" type="HBoxContainer" parent="Root/UI/Content/TreeColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="FundingNote" type="Label" parent="Root/UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -38.0
+offset_right = 500.0
+offset_bottom = -20.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.4, 0.54, 0.68, 1)
+theme_override_font_sizes/font_size = 10
+text = "RESEARCH FUNDING WILL CONNECT TO THE RESOURCE SYSTEM"
+
+[node name="Hint" type="Label" parent="Root/UI"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -40.0
+offset_right = 120.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.48, 0.62, 0.78, 1)
+theme_override_font_sizes/font_size = 12
+text = "ESC TO RETURN"
+horizontal_alignment = 1

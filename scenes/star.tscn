@@ -1,0 +1,63 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/star.gd" id="1_star"]
+[ext_resource type="Shader" path="res://shaders/star_surface.gdshader" id="2_surface"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_star"]
+radius = 1.0
+height = 2.0
+radial_segments = 32
+rings = 16
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_surface"]
+shader = ExtResource("2_surface")
+shader_parameter/star_color = Color(1, 0.93, 0.82, 1)
+shader_parameter/intensity = 1.8
+shader_parameter/limb_darkening = 0.42
+
+[sub_resource type="QuadMesh" id="QuadMesh_halo"]
+size = Vector2(1, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_ring"]
+size = Vector2(1, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape_pick"]
+radius = 3.2
+
+[node name="Star" type="Node3D"]
+script = ExtResource("1_star")
+
+[node name="Halo" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("QuadMesh_halo")
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_star")
+material_override = SubResource("ShaderMaterial_surface")
+
+[node name="SelectionRing" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("QuadMesh_ring")
+
+[node name="HomeLabel" type="Label3D" parent="."]
+visible = false
+pixel_size = 0.04
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.9, 0.68, 1)
+outline_modulate = Color(0, 0, 0, 0.9)
+outline_size = 12
+text = "NEWHOME"
+font_size = 48
+horizontal_alignment = 1
+render_priority = 1
+
+[node name="PickBody" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PickBody"]
+shape = SubResource("SphereShape_pick")
