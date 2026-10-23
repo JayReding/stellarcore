@@ -52,6 +52,28 @@ func home_star() -> StarData:
 	return null
 
 
+func all_fleets() -> Array[FleetData]:
+	var result: Array[FleetData] = []
+	for star in stars:
+		for fleet in star.fleets:
+			result.append(fleet)
+	return result
+
+
+## Returns the first unused Greek-letter name for a production system.
+## Fleet names are galaxy-wide, so deleted fleets release their names even if
+## they were stationed in another system when they were removed.
+func next_fleet_name(system_name: String) -> String:
+	var used: Dictionary = {}
+	for fleet in all_fleets():
+		used[fleet.name] = true
+
+	var ordinal := 0
+	while used.has(FleetData.default_name(system_name, ordinal)):
+		ordinal += 1
+	return FleetData.default_name(system_name, ordinal)
+
+
 func stars_within_range(origin: StarData, range_ly: float) -> Array[StarData]:
 	var result: Array[StarData] = []
 	_ensure_distances()

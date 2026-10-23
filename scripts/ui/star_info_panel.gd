@@ -5,6 +5,7 @@ extends PanelContainer
 signal scan_requested(data: StarData)
 signal system_view_requested(data: StarData)
 signal shipyard_requested(data: StarData)
+signal fleet_selected(fleet: FleetData)
 
 @onready var swatch: ColorRect = %Swatch
 @onready var name_label: Label = %NameLabel
@@ -28,6 +29,8 @@ var _current_data: StarData
 
 func _ready() -> void:
 	hide_panel(true)
+	# The Scan button is retired now that arriving probes survey systems.
+	scan_button.visible = false
 	scan_button.pressed.connect(_on_scan_pressed)
 	shipyard_button.pressed.connect(_on_shipyard_pressed)
 
@@ -67,7 +70,6 @@ func _populate_planets(data: StarData) -> void:
 	planet_count_label.visible = data.surveyed
 	planet_list.visible = data.surveyed and not data.planets.is_empty()
 	survey_label.visible = not data.surveyed
-	scan_button.visible = not data.surveyed
 
 	if not data.surveyed:
 		survey_label.text = "Unsurveyed"
@@ -83,17 +85,44 @@ func _populate_fleets(data: StarData) -> void:
 		fleet_list.remove_child(child)
 		child.queue_free()
 
-	var fleets := data.fleets
+	var fleets: Array[FleetData] = []
+	for fleet in data.fleets:
+		if not fleet.in_transit:
+			fleets.append(fleet)
+
 	no_fleets_label.visible = fleets.is_empty()
 	fleet_list.visible = not fleets.is_empty()
 	for fleet in fleets:
 		fleet_list.add_child(_create_fleet_row(fleet))
 
 
-func _create_fleet_row(fleet: FleetData) -> HBoxContainer:
+func _create_fleet_row(fleet: FleetData) -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, 26)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.focus_mode = Control.FOCUS_NONE
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.tooltip_text = "%s — %s\nClick to manage this fleet" % [
+		fleet.name, fleet.ship_summary()
+	]
+	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	button.add_theme_stylebox_override(
+		"hover", _planet_row_style(Color(0.12, 0.25, 0.4, 0.45))
+	)
+	button.add_theme_stylebox_override(
+		"pressed", _planet_row_style(Color(0.05, 0.13, 0.23, 0.7))
+	)
+	button.pressed.connect(_on_fleet_pressed.bind(fleet))
+
 	var row := HBoxContainer.new()
+	button.add_child(row)
+	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = 6.0
+	row.offset_top = 2.0
+	row.offset_right = -6.0
+	row.offset_bottom = -2.0
 	row.add_theme_constant_override("separation", 8)
-	row.tooltip_text = "%s — %s" % [fleet.name, fleet.ship_summary()]
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var dot := ColorRect.new()
 	dot.custom_minimum_size = Vector2(7, 7)
@@ -119,7 +148,13 @@ func _create_fleet_row(fleet: FleetData) -> HBoxContainer:
 	summary_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(summary_label)
 
-	return row
+	return button
+
+
+func _on_fleet_pressed(fleet: FleetData) -> void:
+	if fleet == null:
+		return
+	fleet_selected.emit(fleet)
 
 
 func _update_shipyard(data: StarData) -> void:

@@ -1,0 +1,416 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/fleet_dialog.gd" id="1_dialog"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+content_margin_left = 22.0
+content_margin_top = 20.0
+content_margin_right = 22.0
+content_margin_bottom = 22.0
+bg_color = Color(0.027, 0.047, 0.082, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.6, 0.94, 0.65)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 18
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_normal"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.04, 0.1, 0.17, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.34, 0.52, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_hover"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.2, 0.34, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_pressed"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.03, 0.08, 0.14, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 0.9, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_disabled"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.022, 0.04, 0.068, 0.76)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.2, 0.3, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_primary_normal"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.24, 0.4, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.7, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_primary_hover"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.34, 0.55, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.82, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_primary_pressed"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.045, 0.16, 0.28, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.6, 0.9, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="FleetDialog" type="CanvasLayer"]
+layer = 20
+visible = false
+script = ExtResource("1_dialog")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.005, 0.009, 0.018, 0.7)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Content" type="VBoxContainer" parent="Root/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopRow" type="HBoxContainer" parent="Root/Center/Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Eyebrow" type="Label" parent="Root/Center/Panel/Content/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 10
+text = "FLEET COMMAND"
+
+[node name="CloseButton" type="Button" parent="Root/Center/Panel/Content/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.62, 0.74, 0.88, 1)
+theme_override_colors/font_hover_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBox_action_normal")
+theme_override_styles/hover = SubResource("StyleBox_action_hover")
+theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
+text = "CLOSE"
+
+[node name="FleetNameLabel" type="Label" parent="Root/Center/Panel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.97, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "Newhome Alpha"
+
+[node name="FleetMetaLabel" type="Label" parent="Root/Center/Panel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.72, 0.86, 1)
+theme_override_font_sizes/font_size = 12
+text = "Newhome  •  1 FTL Probe  •  10 ly / turn"
+autowrap_mode = 3
+
+[node name="Separator" type="HSeparator" parent="Root/Center/Panel/Content"]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="Menu" type="VBoxContainer" parent="Root/Center/Panel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="SetDestinationButton" type="Button" parent="Root/Center/Panel/Content/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_action_normal")
+theme_override_styles/hover = SubResource("StyleBox_action_hover")
+theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
+text = "Set Fleet Destination"
+alignment = 0
+
+[node name="RenameButton" type="Button" parent="Root/Center/Panel/Content/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/disabled = SubResource("StyleBox_action_disabled")
+text = "Rename Fleet"
+alignment = 0
+
+[node name="ModifyButton" type="Button" parent="Root/Center/Panel/Content/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/disabled = SubResource("StyleBox_action_disabled")
+text = "Modify Fleet"
+alignment = 0
+
+[node name="DeleteButton" type="Button" parent="Root/Center/Panel/Content/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.3, 0.28, 1)
+theme_override_colors/font_disabled_color = Color(1, 0.36, 0.32, 0.82)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/disabled = SubResource("StyleBox_action_disabled")
+text = "Delete Fleet"
+alignment = 0
+
+[node name="MenuNote" type="Label" parent="Root/Center/Panel/Content/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.54, 0.68, 1)
+theme_override_font_sizes/font_size = 10
+text = "Only Set Fleet Destination is available in this build."
+autowrap_mode = 3
+
+[node name="Confirmation" type="VBoxContainer" parent="Root/Center/Panel/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ConfirmationTitle" type="Label" parent="Root/Center/Panel/Content/Confirmation"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 10
+text = "SET FLEET DESTINATION"
+
+[node name="ConfirmationFleetLabel" type="Label" parent="Root/Center/Panel/Content/Confirmation"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.8, 0.93, 1)
+theme_override_font_sizes/font_size = 12
+text = "Newhome Alpha"
+
+[node name="DestinationNameLabel" type="Label" parent="Root/Center/Panel/Content/Confirmation"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "SC-004"
+
+[node name="Separator2" type="HSeparator" parent="Root/Center/Panel/Content/Confirmation"]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="Stats" type="GridContainer" parent="Root/Center/Panel/Content/Confirmation"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 5
+columns = 2
+
+[node name="DistanceKey" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "Distance"
+
+[node name="DistanceValue" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.9, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "23.4 ly"
+horizontal_alignment = 2
+
+[node name="SpeedKey" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "Fleet speed"
+
+[node name="SpeedValue" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.9, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+text = "10 ly / turn"
+horizontal_alignment = 2
+
+[node name="TurnsKey" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "Arrival"
+
+[node name="TurnsValue" type="Label" parent="Root/Center/Panel/Content/Confirmation/Stats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.8, 0.48, 1)
+theme_override_font_sizes/font_size = 18
+text = "3 turns"
+horizontal_alignment = 2
+
+[node name="ConfirmationNote" type="Label" parent="Root/Center/Panel/Content/Confirmation"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.54, 0.68, 1)
+theme_override_font_sizes/font_size = 10
+text = "The fleet will depart when the turn advances."
+autowrap_mode = 3
+
+[node name="ConfirmationButtons" type="HBoxContainer" parent="Root/Center/Panel/Content/Confirmation"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ConfirmationBackButton" type="Button" parent="Root/Center/Panel/Content/Confirmation/ConfirmationButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 38)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.7, 0.82, 0.94, 1)
+theme_override_colors/font_hover_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBox_action_normal")
+theme_override_styles/hover = SubResource("StyleBox_action_hover")
+theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
+text = "Back"
+
+[node name="ConfirmButton" type="Button" parent="Root/Center/Panel/Content/Confirmation/ConfirmationButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(184, 38)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBox_primary_normal")
+theme_override_styles/hover = SubResource("StyleBox_primary_hover")
+theme_override_styles/pressed = SubResource("StyleBox_primary_pressed")
+text = "Confirm Destination"

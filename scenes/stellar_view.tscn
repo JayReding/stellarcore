@@ -1,9 +1,9 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://culqv4t4qwv8l"]
 
-[ext_resource type="Script" path="res://scripts/stellar_view.gd" id="1_view"]
-[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="2_rig"]
-[ext_resource type="PackedScene" path="res://scenes/ui/star_info_panel.tscn" id="3_panel"]
-[ext_resource type="Script" path="res://scripts/turn_manager.gd" id="4_turn"]
+[ext_resource type="Script" uid="uid://bb1l3soqg3ffn" path="res://scripts/stellar_view.gd" id="1_view"]
+[ext_resource type="Script" uid="uid://bmlqbsmt0qbaf" path="res://scripts/camera_rig.gd" id="2_rig"]
+[ext_resource type="PackedScene" uid="uid://cfogiilbflrhn" path="res://scenes/ui/star_info_panel.tscn" id="3_panel"]
+[ext_resource type="Script" uid="uid://c68jx0c8umr53" path="res://scripts/turn_manager.gd" id="4_turn"]
 
 [sub_resource type="Environment" id="Environment_space"]
 background_mode = 1
@@ -12,21 +12,14 @@ ambient_light_source = 2
 ambient_light_color = Color(0.25, 0.35, 0.55, 1)
 ambient_light_energy = 0.1
 tonemap_mode = 2
-tonemap_exposure = 1.0
 tonemap_white = 2.5
 glow_enabled = true
-glow_levels/1 = 0.0
 glow_levels/2 = 0.0
 glow_levels/3 = 1.0
 glow_levels/4 = 0.0
 glow_levels/5 = 0.7
-glow_levels/6 = 0.0
-glow_levels/7 = 0.0
 glow_intensity = 0.6
-glow_strength = 1.0
 glow_bloom = 0.08
-glow_blend_mode = 1
-glow_hdr_threshold = 1.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_tech_normal"]
 content_margin_left = 16.0
@@ -39,22 +32,6 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.24, 0.54, 0.86, 0.65)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_tech_hover"]
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.24, 0.39, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -76,29 +53,49 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[node name="StellarView" type="Node3D"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_tech_hover"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1, 0.24, 0.39, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="StellarView" type="Node3D" unique_id=906409263]
 script = ExtResource("1_view")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1066347387]
 environment = SubResource("Environment_space")
 
-[node name="Stars" type="Node3D" parent="."]
+[node name="Stars" type="Node3D" parent="." unique_id=1301271322]
 
-[node name="CameraRig" type="Node3D" parent="."]
+[node name="FleetCourses" type="Node3D" parent="." unique_id=1982456192]
+
+[node name="Fleets" type="Node3D" parent="." unique_id=658342801]
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=2117116753]
 script = ExtResource("2_rig")
 
-[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+[node name="Camera3D" type="Camera3D" parent="CameraRig" unique_id=765033913]
 current = true
 fov = 55.0
 near = 0.1
 far = 2000.0
 
-[node name="TurnManager" type="Node" parent="."]
+[node name="TurnManager" type="Node" parent="." unique_id=1802781097]
 script = ExtResource("4_turn")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1528362885]
 
-[node name="HUD" type="Control" parent="UI"]
+[node name="HUD" type="Control" parent="UI" unique_id=2125632851]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -107,41 +104,39 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Title" type="Label" parent="UI/HUD"]
+[node name="Title" type="Label" parent="UI/HUD" unique_id=1677898033]
 layout_mode = 1
 offset_left = 28.0
 offset_top = 16.0
 offset_right = 480.0
 offset_bottom = 54.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.76, 0.89, 1, 1)
 theme_override_font_sizes/font_size = 28
 text = "STELLAR CORE"
 
-[node name="Subtitle" type="Label" parent="UI/HUD"]
+[node name="Subtitle" type="Label" parent="UI/HUD" unique_id=621854560]
 layout_mode = 1
 offset_left = 31.0
 offset_top = 56.0
 offset_right = 480.0
 offset_bottom = 74.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.36, 0.55, 0.76, 1)
 theme_override_font_sizes/font_size = 11
 text = "STELLAR VIEW"
 
-[node name="SeedLabel" type="Label" parent="UI/HUD"]
+[node name="SeedLabel" type="Label" parent="UI/HUD" unique_id=1289042639]
 layout_mode = 1
 offset_left = 31.0
 offset_top = 78.0
 offset_right = 480.0
 offset_bottom = 96.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.3, 0.44, 0.6, 1)
 theme_override_font_sizes/font_size = 10
 text = "GALAXY SEED  000000   /   25 SYSTEMS"
 
-[node name="TechnologiesButton" type="Button" parent="UI/HUD"]
+[node name="TechnologiesButton" type="Button" parent="UI/HUD" unique_id=890076077]
 layout_mode = 1
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -90.0
@@ -152,15 +147,15 @@ grow_horizontal = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.82, 0.92, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBox_tech_normal")
-theme_override_styles/hover = SubResource("StyleBox_tech_hover")
 theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
 text = "Technologies"
 
-[node name="TurnLabel" type="Label" parent="UI/HUD"]
+[node name="TurnLabel" type="Label" parent="UI/HUD" unique_id=1175682259]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -170,12 +165,12 @@ offset_top = -52.0
 offset_right = 300.0
 offset_bottom = -20.0
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.76, 0.89, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "Turn 1"
 
-[node name="TurnCountdownLabel" type="Label" parent="UI/HUD"]
+[node name="TurnCountdownLabel" type="Label" parent="UI/HUD" unique_id=89318405]
+visible = false
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -188,14 +183,35 @@ offset_right = -28.0
 offset_bottom = -66.0
 grow_horizontal = 0
 grow_vertical = 0
-visible = false
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.78, 0.45, 1)
 theme_override_font_sizes/font_size = 12
 text = "Ending turn in 5..."
 horizontal_alignment = 2
 
-[node name="EndTurnButton" type="Button" parent="UI/HUD"]
+[node name="StatusLabel" type="Label" parent="UI/HUD" unique_id=2110549018]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -62.0
+offset_right = 340.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.68, 0.84, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.88)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 13
+text = ""
+autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EndTurnButton" type="Button" parent="UI/HUD" unique_id=1431792995]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -208,16 +224,16 @@ offset_right = -28.0
 offset_bottom = -22.0
 grow_horizontal = 0
 grow_vertical = 0
+tooltip_text = "End the turn after the countdown"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-tooltip_text = "End the turn after the countdown"
 theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBox_tech_normal")
-theme_override_styles/hover = SubResource("StyleBox_tech_hover")
 theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
 text = "End Turn"
 
-[node name="StarInfoPanel" parent="UI" instance=ExtResource("3_panel")]
+[node name="StarInfoPanel" parent="UI" unique_id=167650799 instance=ExtResource("3_panel")]

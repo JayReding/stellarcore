@@ -14,7 +14,10 @@ const HULLS := [
 		"icon": "FTL",
 		"description": (
 			"A small, unmanned faster-than-light probe built for deep-space "
-			+ "reconnaissance and survey support."
+			+ "reconnaissance and survey support. FTL Probes are single-use "
+			+ "vehicles. The power needed to transmit system data casuses them "
+			+ "to burn out after arrival and data transmission. However, they "
+			+ "can be built quickly from limited resources."
 		),
 		"customization": "None",
 	},
@@ -42,6 +45,7 @@ const HULLS := [
 @onready var produce_button: Button = %ProduceButton
 
 var _system_data: StarData
+var _galaxy: Galaxy
 var _selected_hull: Dictionary = HULLS[0]
 var _selected_fleet: FleetData
 var _feedback := ""
@@ -59,7 +63,8 @@ func _ready() -> void:
 	visible = false
 
 
-func open(data: StarData) -> void:
+func open(data: StarData, galaxy: Galaxy = null) -> void:
+	_galaxy = galaxy
 	if data == null or not data.has_shipyard():
 		return
 
@@ -170,7 +175,7 @@ func _populate_fleets() -> void:
 		no_fleets_label.visible = true
 		return
 
-	var fleets := _system_data.fleets
+	var fleets := _stationed_fleets()
 	fleet_count_label.text = str(fleets.size())
 	fleet_scroll.visible = not fleets.is_empty()
 	fleet_spacer.visible = fleets.is_empty()
@@ -178,6 +183,16 @@ func _populate_fleets() -> void:
 
 	for fleet in fleets:
 		fleet_list.add_child(_create_fleet_row(fleet))
+
+
+func _stationed_fleets() -> Array[FleetData]:
+	var fleets: Array[FleetData] = []
+	if _system_data == null:
+		return fleets
+	for fleet in _system_data.fleets:
+		if not fleet.in_transit:
+			fleets.append(fleet)
+	return fleets
 
 
 func _create_fleet_row(fleet: FleetData) -> Button:
@@ -258,12 +273,10 @@ func _on_produce_pressed() -> void:
 
 	var hull_name := str(_selected_hull.get("name", "FTL Probe"))
 	var fleet: FleetData = _selected_fleet
-	if fleet == null or not _system_data.fleets.has(fleet):
+	if fleet == null or fleet.in_transit or not _system_data.fleets.has(fleet):
 		fleet = FleetData.new()
-		fleet.name = FleetData.default_name(
-			_system_data.display_name, _system_data.fleets.size()
-		)
-		fleet.system_name = _system_data.display_name
+		fleet.name = _next_fleet_name()
+		fleet.dock_at(_system_data)
 		_system_data.fleets.append(fleet)
 		_selected_fleet = null
 
@@ -274,11 +287,24 @@ func _on_produce_pressed() -> void:
 	_update_production_status()
 
 
+func _next_fleet_name() -> String:
+	if _galaxy != null:
+		return _galaxy.next_fleet_name(_system_data.display_name)
+
+	var used: Dictionary = {}
+	for fleet in _system_data.fleets:
+		used[fleet.name] = true
+	var ordinal := 0
+	while used.has(FleetData.default_name(_system_data.display_name, ordinal)):
+		ordinal += 1
+	return FleetData.default_name(_system_data.display_name, ordinal)
+
+
 func _update_header() -> void:
 	if _system_data == null or not _system_data.has_shipyard():
 		return
 
-	var count := _system_data.fleets.size()
+	var count := _stationed_fleets().size()
 	var noun := "FLEET" if count == 1 else "FLEETS"
 	meta_label.text = "%s  •  %s SYSTEM  •  %d %s" % [
 		_system_data.shipyard_planet.designation.to_upper(),
@@ -286,6 +312,14 @@ func _update_header() -> void:
 		count,
 		noun,
 	]
+
+
+func refresh() -> void:
+	if not visible:
+		return
+	_populate_fleets()
+	_update_header()
+	_update_production_status()
 
 
 func _update_production_status() -> void:

@@ -83,14 +83,14 @@ func _run() -> void:
 
 	panel.show_star(unsurveyed)
 	_check(not panel.planet_list.visible, "Unsurveyed systems hide the planet list")
-	_check(panel.scan_button.visible, "Unsurveyed systems expose Scan")
+	_check(not panel.scan_button.visible, "Unsurveyed systems hide Scan")
 	scene._on_system_view_requested(unsurveyed)
 	_check(not system_view.visible, "Unsurveyed systems cannot open System View")
 
 	scene._on_scan_requested(unsurveyed)
-	_check(unsurveyed.surveyed, "Scanning marks the system surveyed")
-	_check(panel.planet_list.visible, "Scanning reveals clickable planets")
-	_check(not panel.scan_button.visible, "Scanning hides Scan")
+	_check(unsurveyed.surveyed, "The debug survey marks the system surveyed")
+	_check(panel.planet_list.visible, "Surveying reveals clickable planets")
+	_check(not panel.scan_button.visible, "Surveyed systems hide Scan")
 
 	planet_row = panel.planet_list.get_child(0) as Button
 	_check(planet_row != null, "Scanned planets are clickable")

@@ -241,6 +241,7 @@ text = "Unsurveyed"
 
 [node name="ScanButton" type="Button" parent="Content" unique_id=459747371]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
