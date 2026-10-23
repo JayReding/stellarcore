@@ -30,8 +30,8 @@ func setup(technology: Dictionary) -> void:
 		status_label.add_theme_color_override("font_color", Color(0.46, 0.84, 0.65))
 		tooltip_text = "%s\n%s\nAvailable by default." % [display_name, description]
 	else:
-		cost_label.text = "REQUIRES %d RP" % cost
+		cost_label.text = "REQUIRES %d RD" % cost
 		cost_label.add_theme_color_override("font_color", Color(1, 0.78, 0.38))
 		status_label.text = "AWAITING FUNDING"
 		status_label.add_theme_color_override("font_color", Color(0.8, 0.6, 0.3))
-		tooltip_text = "%s\n%s\nResearch cost: %d RP" % [display_name, description, cost]
+		tooltip_text = "%s\n%s\nResearch cost: %d RD" % [display_name, description, cost]

@@ -31,6 +31,8 @@ const CLASS_SIZE_FACTORS: Array[float] = [1.50, 1.32, 1.16, 1.03, 0.92, 0.80]
 @export var planets: Array[PlanetData] = []
 ## Fleets stationed in this system.
 @export var fleets: Array[FleetData] = []
+## Player-owned resources stockpiled in this system.
+@export var resources: ResourceStockpile = ResourceStockpile.new()
 ## Planet that hosts this system's shipyard, if any.
 @export var shipyard_planet: PlanetData = null
 

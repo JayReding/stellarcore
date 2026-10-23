@@ -38,6 +38,7 @@ static func generate(count: int, seed_value: int) -> Galaxy:
 		data.visual_radius = BASE_VISUAL_RADIUS * StarData.size_factor_for(cls)
 		data.pick_radius = maxf(3.3, data.visual_radius + 1.5)
 		data.planets = _generate_planets(data, rng)
+		data.resources = ResourceStockpile.new()
 
 		stars.append(data)
 
@@ -63,6 +64,8 @@ static func _build_home_star() -> StarData:
 	home.pick_radius = maxf(3.3, home.visual_radius + 1.5)
 	home.surveyed = true
 	home.planets = _build_home_planets()
+	# The player's starting resources are stockpiled at Newhome.
+	home.resources = ResourceStockpile.starting_home()
 	# Newhome III is the only shipyard in the current slice.
 	home.shipyard_planet = home.planets[2]
 	return home

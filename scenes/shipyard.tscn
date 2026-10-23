@@ -432,7 +432,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
 theme_override_font_sizes/font_size = 12
-text = "Not yet implemented"
+text = "Titanium — TBD"
 horizontal_alignment = 2
 
 [node name="NoOptionsPanel" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
@@ -464,10 +464,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="ResourceNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
 theme_override_font_sizes/font_size = 10
-text = "Resources are not yet required to produce ships."
+text = "Ship production costs are not yet assigned."
 autowrap_mode = 3
 
 [node name="FleetColumn" type="PanelContainer" parent="Root/UI/Content"]

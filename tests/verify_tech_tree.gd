@@ -36,7 +36,10 @@ func _run() -> void:
 			_check(node.cost_label.text == "NO RESEARCH REQUIRED", "Default technology has no research cost")
 			_check(node.status_label.text == "AVAILABLE BY DEFAULT", "Default technology is available")
 	_check(tech_tree.meta_label.text.contains("1 TECHNOLOGY"), "Technology count is displayed")
-	_check(tech_tree.funds_label.text == "0 RP", "Research funds placeholder is displayed")
+	_check(
+		tech_tree.funds_label.text == "0 RD",
+		"Galaxy-wide Research Data is displayed"
+	)
 
 	tech_tree.back_button.pressed.emit()
 	_check(not tech_tree.visible, "Back button closes the technology tree")

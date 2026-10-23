@@ -214,6 +214,21 @@ horizontal_alignment = 2
 modulate = Color(0.45, 0.6, 0.8, 0.35)
 layout_mode = 2
 
+[node name="ResourceEyebrow" type="Label" parent="Content" unique_id=381245900]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 10
+text = "SYSTEM RESOURCES"
+
+[node name="ResourceList" type="VBoxContainer" parent="Content" unique_id=1592848077]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SeparatorSurvey" type="HSeparator" parent="Content" unique_id=586318509]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
 [node name="SurveyEyebrow" type="Label" parent="Content" unique_id=1651518925]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)

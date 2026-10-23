@@ -179,20 +179,20 @@ theme_override_constants/separation = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
 theme_override_font_sizes/font_size = 10
-text = "RESEARCH FUNDS"
+text = "RESEARCH DATA"
 
 [node name="FundsLabel" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 26
-text = "0 RP"
+text = "0 RD"
 
 [node name="FundsNote" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
 theme_override_font_sizes/font_size = 10
-text = "Resource system pending"
+text = "Earned by surveying systems"
 
 [node name="Content" type="CenterContainer" parent="Root/UI"]
 layout_mode = 1
@@ -235,7 +235,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.4, 0.54, 0.68, 1)
 theme_override_font_sizes/font_size = 10
-text = "RESEARCH FUNDING WILL CONNECT TO THE RESOURCE SYSTEM"
+text = "RESEARCH DATA IS SPENT TO UNLOCK TECHNOLOGIES"
 
 [node name="Hint" type="Label" parent="Root/UI"]
 layout_mode = 1

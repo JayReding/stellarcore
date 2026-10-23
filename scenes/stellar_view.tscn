@@ -69,6 +69,22 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_research"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.027, 0.052, 0.09, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.46, 0.74, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="StellarView" type="Node3D" unique_id=906409263]
 script = ExtResource("1_view")
 
@@ -154,6 +170,61 @@ theme_override_styles/normal = SubResource("StyleBox_tech_normal")
 theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
 theme_override_styles/hover = SubResource("StyleBox_tech_hover")
 text = "Technologies"
+
+[node name="ResearchPanel" type="PanelContainer" parent="UI/HUD" unique_id=1837429194]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 108.0
+offset_right = 268.0
+offset_bottom = 108.0
+grow_horizontal = 1
+grow_vertical = 1
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_research")
+
+[node name="ResearchContent" type="VBoxContainer" parent="UI/HUD/ResearchPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ResearchEyebrow" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
+theme_override_font_sizes/font_size = 9
+text = "GALAXY-WIDE"
+
+[node name="ResearchRow" type="HBoxContainer" parent="UI/HUD/ResearchPanel/ResearchContent"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="ResearchDot" type="ColorRect" parent="UI/HUD/ResearchPanel/ResearchContent/ResearchRow"]
+custom_minimum_size = Vector2(7, 7)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.52, 0.92, 0.78, 1)
+
+[node name="ResearchName" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ResearchRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
+theme_override_font_sizes/font_size = 10
+text = "RESEARCH DATA"
+
+[node name="ResearchAmount" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ResearchRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.52, 0.92, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 RD"
+horizontal_alignment = 2
 
 [node name="TurnLabel" type="Label" parent="UI/HUD" unique_id=1175682259]
 layout_mode = 1

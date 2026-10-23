@@ -1,6 +1,7 @@
 class_name StarInfoPanel
 extends PanelContainer
-## Right-hand readout for the currently selected star system.
+## Right-hand readout for the selected star system, including its local
+## resource stockpile.
 
 signal scan_requested(data: StarData)
 signal system_view_requested(data: StarData)
@@ -17,6 +18,7 @@ signal fleet_selected(fleet: FleetData)
 @onready var survey_label: Label = %SurveyLabel
 @onready var planet_count_label: Label = %PlanetCountLabel
 @onready var planet_list: VBoxContainer = %PlanetList
+@onready var resource_list: VBoxContainer = %ResourceList
 @onready var scan_button: Button = %ScanButton
 @onready var fleet_list: VBoxContainer = %FleetList
 @onready var no_fleets_label: Label = %NoFleetsLabel
@@ -25,6 +27,7 @@ signal fleet_selected(fleet: FleetData)
 
 var _tween: Tween
 var _current_data: StarData
+var _revealed_resources: Array[String] = []
 
 
 func _ready() -> void:
@@ -35,11 +38,16 @@ func _ready() -> void:
 	shipyard_button.pressed.connect(_on_shipyard_pressed)
 
 
-func show_star(data: StarData, distance_from_home: float = 0.0) -> void:
+func show_star(
+	data: StarData,
+	distance_from_home: float = 0.0,
+	revealed_resources: Array[String] = []
+) -> void:
 	if data == null:
 		return
 
 	_current_data = data
+	_revealed_resources = revealed_resources.duplicate()
 	name_label.text = data.display_name
 	swatch.color = data.class_color()
 	class_label.text = data.classification()
@@ -50,6 +58,7 @@ func show_star(data: StarData, distance_from_home: float = 0.0) -> void:
 	temperature_label.text = data.temperature_display()
 	size_label.text = "%.2f × G-class" % data.size_factor()
 	distance_label.text = "Home system" if data.is_home else "%.1f ly" % distance_from_home
+	_populate_resources(data)
 	_populate_planets(data)
 	_populate_fleets(data)
 	_update_shipyard(data)
@@ -78,6 +87,66 @@ func _populate_planets(data: StarData) -> void:
 	planet_count_label.text = "%d planets" % data.planets.size()
 	for planet in data.planets:
 		planet_list.add_child(_create_planet_row(planet))
+
+
+func refresh_resources(revealed_resources: Array[String] = []) -> void:
+	_revealed_resources = revealed_resources.duplicate()
+	if _current_data != null:
+		_populate_resources(_current_data)
+
+
+func _populate_resources(data: StarData) -> void:
+	for child in resource_list.get_children():
+		resource_list.remove_child(child)
+		child.queue_free()
+
+	if data == null:
+		return
+
+	var stockpile := data.resources
+	if stockpile == null:
+		stockpile = ResourceStockpile.new()
+		data.resources = stockpile
+
+	for resource in stockpile.visible_definitions(_revealed_resources):
+		var resource_id := str(resource.get("id", ""))
+		var row := HBoxContainer.new()
+		row.name = "Resource_%s" % resource_id
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_theme_constant_override("separation", 8)
+
+		var dot := ColorRect.new()
+		dot.custom_minimum_size = Vector2(7, 7)
+		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		dot.color = resource.get("color", Color.WHITE)
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(dot)
+
+		var name_label := Label.new()
+		name_label.text = str(resource.get("name", resource_id))
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_label.add_theme_font_size_override("font_size", 12)
+		name_label.add_theme_color_override(
+			"font_color", Color(0.68, 0.77, 0.88)
+		)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(name_label)
+
+		var amount_label := Label.new()
+		amount_label.name = "Amount"
+		amount_label.text = str(stockpile.get_amount(resource_id))
+		amount_label.custom_minimum_size = Vector2(48, 0)
+		amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		amount_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		amount_label.add_theme_font_size_override("font_size", 13)
+		amount_label.add_theme_color_override(
+			"font_color", resource.get("color", Color.WHITE)
+		)
+		amount_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(amount_label)
+
+		resource_list.add_child(row)
 
 
 func _populate_fleets(data: StarData) -> void:

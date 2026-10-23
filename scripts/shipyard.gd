@@ -1,8 +1,8 @@
 class_name ShipyardView
 extends CanvasLayer
 ## Full-screen shipyard. Hull selection is on the left, customization in the
-## center, and the system's fleets on the right. Production is free until the
-## resource system exists.
+## center, and the system's fleets on the right. Production is free until ship
+## costs are assigned.
 
 signal closed
 
@@ -42,10 +42,12 @@ const HULLS := [
 @onready var fleet_count_label: Label = %FleetCountLabel
 @onready var no_fleets_label: Label = %NoFleetsLabel
 @onready var feedback_label: Label = %FeedbackLabel
+@onready var resource_note: Label = %ResourceNote
 @onready var produce_button: Button = %ProduceButton
 
 var _system_data: StarData
 var _galaxy: Galaxy
+var _resources: ResourceStockpile
 var _selected_hull: Dictionary = HULLS[0]
 var _selected_fleet: FleetData
 var _feedback := ""
@@ -63,8 +65,13 @@ func _ready() -> void:
 	visible = false
 
 
-func open(data: StarData, galaxy: Galaxy = null) -> void:
+func open(
+	data: StarData,
+	galaxy: Galaxy = null,
+	resources: ResourceStockpile = null
+) -> void:
 	_galaxy = galaxy
+	_resources = resources
 	if data == null or not data.has_shipyard():
 		return
 
@@ -76,6 +83,7 @@ func open(data: StarData, galaxy: Galaxy = null) -> void:
 	_show_hull(_selected_hull)
 	_populate_fleets()
 	_update_header()
+	_update_resource_note()
 	_update_production_status()
 
 	visible = true
@@ -319,7 +327,18 @@ func refresh() -> void:
 		return
 	_populate_fleets()
 	_update_header()
+	_update_resource_note()
 	_update_production_status()
+
+
+func _update_resource_note() -> void:
+	if _resources == null:
+		resource_note.text = "Ship production costs are not yet assigned."
+		return
+	resource_note.text = (
+		"Local Titanium: %d. Ship production costs are not yet assigned."
+		% _resources.get_amount(ResourceStockpile.TITANIUM)
+	)
 
 
 func _update_production_status() -> void:

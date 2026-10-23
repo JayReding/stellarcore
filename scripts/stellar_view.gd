@@ -1,5 +1,6 @@
 extends Node3D
-## Stellar View: procedural galaxy, camera navigation, and star selection.
+## Stellar View: procedural galaxy, camera navigation, star selection, and the
+## galaxy-wide Research Data pool.
 
 const STAR_SCENE: PackedScene = preload("res://scenes/star.tscn")
 const SYSTEM_VIEW_SCENE: PackedScene = preload("res://scenes/system_view.tscn")
@@ -33,12 +34,17 @@ const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
 @onready var star_panel: StarInfoPanel = $UI/StarInfoPanel
 @onready var seed_label: Label = $UI/HUD/SeedLabel
 @onready var technologies_button: Button = $UI/HUD/TechnologiesButton
+@onready var research_amount_label: Label = %ResearchAmount
 @onready var turn_manager: TurnManager = $TurnManager
 @onready var turn_label: Label = $UI/HUD/TurnLabel
 @onready var end_turn_button: Button = $UI/HUD/EndTurnButton
 @onready var turn_countdown_label: Label = $UI/HUD/TurnCountdownLabel
 @onready var status_label: Label = $UI/HUD/StatusLabel
 
+## Research Data is the only galaxy-wide resource.
+var research_data: int = 0
+## Hidden system resources become visible in every system once revealed.
+var revealed_resources: Array[String] = []
 var _galaxy: Galaxy
 var _home_star: StarData
 var _star_nodes: Array[StarNode] = []
@@ -83,6 +89,7 @@ func _ready() -> void:
 	turn_label.text = _turn_text(turn_manager.current_turn)
 	_reset_end_turn_ui()
 	status_label.text = ""
+	_update_research_data_hud()
 	_rebuild_fleet_markers()
 	_rebuild_fleet_courses()
 
@@ -93,6 +100,43 @@ func _ready() -> void:
 		"Stellar Core | seed %d | %d systems | %d ly across"
 		% [seed_value, _galaxy.stars.size(), int(GalaxyScale.DIAMETER_LY)]
 	)
+
+
+func refresh_resources() -> void:
+	if not is_node_ready():
+		return
+	_update_research_data_hud()
+	if star_panel.visible:
+		star_panel.refresh_resources(revealed_resources)
+	if _tech_tree != null:
+		_tech_tree.refresh_research_data(research_data)
+	if _shipyard != null and _shipyard.visible:
+		_shipyard.refresh()
+
+
+func set_research_data(amount: int) -> void:
+	research_data = maxi(amount, 0)
+	if is_node_ready():
+		refresh_resources()
+
+
+func add_research_data(amount: int) -> void:
+	set_research_data(research_data + amount)
+
+
+## Reveals a hidden system resource in every system's resource list.
+func reveal_resource(resource_id: String) -> bool:
+	if not ResourceStockpile.is_hidden_by_default(resource_id):
+		return false
+	if revealed_resources.has(resource_id):
+		return false
+	revealed_resources.append(resource_id)
+	refresh_resources()
+	return true
+
+
+func _update_research_data_hud() -> void:
+	research_amount_label.text = "%d RD" % research_data
 
 
 func _process(delta: float) -> void:
@@ -232,7 +276,7 @@ func _show_star_panel(star: StarNode) -> void:
 	var distance_from_home := 0.0
 	if _galaxy != null and _home_star != null:
 		distance_from_home = _galaxy.distance_between(star.data, _home_star)
-	star_panel.show_star(star.data, distance_from_home)
+	star_panel.show_star(star.data, distance_from_home, revealed_resources)
 
 
 ## Debug/test hook for surveying a system before the full discovery system.
@@ -247,7 +291,7 @@ func _on_scan_requested(data: StarData) -> void:
 		distance_from_home = _galaxy.distance_between(data, _home_star)
 
 	print("Scanned %s | %d planets" % [data.display_name, data.planets.size()])
-	star_panel.show_star(data, distance_from_home)
+	star_panel.show_star(data, distance_from_home, revealed_resources)
 
 
 func _on_system_view_requested(data: StarData) -> void:
@@ -264,7 +308,7 @@ func _on_technologies_requested() -> void:
 	if _tech_tree == null:
 		_tech_tree = TECH_TREE_SCENE.instantiate() as TechTree
 		add_child(_tech_tree)
-	_tech_tree.open()
+	_tech_tree.open(research_data)
 
 
 func _on_shipyard_requested(data: StarData) -> void:
@@ -277,7 +321,9 @@ func _on_shipyard_requested(data: StarData) -> void:
 			return
 		add_child(_shipyard)
 		_shipyard.closed.connect(_on_shipyard_closed)
-	_shipyard.open(data, _galaxy)
+	if data.resources == null:
+		data.resources = ResourceStockpile.new()
+	_shipyard.open(data, _galaxy, data.resources)
 
 
 func _on_shipyard_closed() -> void:

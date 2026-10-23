@@ -3,7 +3,8 @@
 A 4X space strategy game in development with Godot 4.7. This repository
 currently contains the first playable slice: the **Stellar View**, the
 full-screen **System View**, the **Technologies** tree, the **Newhome III
-Shipyard**, the turn loop, and the first **fleet exploration** flow.
+Shipyard**, per-system **resource stockpiles**, the turn loop, and the first
+**fleet exploration** flow.
 
 ## Running
 
@@ -57,6 +58,15 @@ godot --path .
   procedural stars; Newhome adds one more G).
 - Seeded generation; the seed is shown in the HUD. Set `galaxy_seed` on the
   `StellarView` root node to reproduce a specific map.
+- Resources are stockpiled per star system. **Newhome** begins with **200
+  Titanium**, **200 Helium 3**, and **50 Antimatter**; every other system starts
+  empty. **Composites** and **Meta-Matter** are tracked at zero but remain hidden
+  until they are revealed through progression.
+- Selecting a system shows its local resource list in the **Selected System**
+  panel. The per-system stockpiles are the foundation for the planned cargo
+  transport mechanic.
+- **Research Data** is galaxy-wide. Its readout appears in the top-left HUD and
+  in the technology tree, beginning at **0 RD**.
 - A turn loop starting at **Turn 1**. The current turn is shown in the bottom-left
   HUD. **End Turn** in the bottom-right starts a five-second countdown; clicking
   the button again cancels it. When the countdown finishes, the turn advances,
@@ -118,12 +128,12 @@ godot --path .
   Omega**. Names are allocated from the galaxy's active fleets, so a deleted
   fleet releases its name. Once all 24 letters are used, a generation number is
   appended (**Newhome Alpha 2**, then **Newhome Omega 2**, and so on).
-- Ship production is free for now. The interface notes that resource costs are
-  not yet implemented.
+- Ship production is free for now. The shipyard shows the current system's local
+  Titanium stockpile and notes that production costs are not yet assigned.
 - A **Technologies** button in the top bar opens a full-screen technology tree.
   **FTL Probes** is available from the start and appears as a rounded-square card
-  marked "AVAILABLE BY DEFAULT" with no research requirement. The **0 RP**
-  research-funds readout remains a placeholder for the future resource system.
+  marked "AVAILABLE BY DEFAULT" with no research requirement. The **Research
+  Data** readout is driven by the galaxy-wide Research Data pool.
 - Procedural planets in the System View with star-driven light and dark sides.
   Each class has its own deterministic, cached surface texture:
   - **Rocky**: brown and gray terrain with craters.
@@ -161,11 +171,12 @@ scripts/
   fleet_data.gd            Fleet position, speed, route, and ship composition
   fleet_marker.gd          Clickable in-transit fleet marker
   turn_manager.gd          Turn counter and cancellable end-turn countdown
+  resource_stockpile.gd    Per-system resource definitions and balances
   planet_texture_factory.gd  Procedural planet and cloud textures
   galaxy_generator.gd      Seeded star placement, Newhome, class mix
   galaxy.gd                Star list and light-year distance matrix
   galaxy_scale.gd          Light years <-> view world units
-  star_data.gd             Spectra table, planets, fleets, shipyard data
+  star_data.gd             Spectra table, planets, fleets, resources, shipyard
   planet_data.gd           Planet classes, colors, and designations
   star.gd                  Per-star visuals
   camera_rig.gd            Orbit/tilt/zoom/focus camera
@@ -179,10 +190,15 @@ shaders/
 
 `StarData` is a `Resource` independent of the view, ready to carry ownership
 and colony state as the turn-based layer is built. It also owns the system's
-`PlanetData` list, `FleetData` list, shipyard planet reference, and `surveyed`
-flag. `FleetData` stores a fleet's name, current system, light-year position,
-ship composition, speed, and any active route (origin, destination, distance,
-turns elapsed, and turns total) while formal ship models are still provisional.
+`PlanetData` list, `FleetData` list, local `ResourceStockpile`, shipyard planet
+reference, and `surveyed` flag. `FleetData` stores a fleet's name, current
+system, light-year position, ship composition, speed, and any active route
+(origin, destination, distance, turns elapsed, and turns total) while formal ship
+models are still provisional.
+`ResourceStockpile` holds one system's raw-resource balances, resource metadata,
+and the add/spend/transfer helpers used by the system panel, shipyard, and future
+production costs. Research Data is stored separately on `StellarView` because it
+is galaxy-wide, along with the global hidden-resource reveal state.
 
 ## Verification
 
@@ -235,8 +251,17 @@ the five-second countdown and cancellation path, and the advance to later turns:
 godot --headless --path . --script res://tests/verify_turns.gd
 ```
 
+The resource check validates Newhome's starting balances, empty non-home
+systems, independent per-system stockpiles, the selected-system resource list,
+hidden-resource reveal state, transfer/spending helpers, galaxy-wide Research
+Data, and the shipyard's local Titanium readout:
+
+```bash
+godot --headless --path . --script res://tests/verify_resources.gd
+```
+
 The technology tree check validates the top-bar button, the default-available
-FTL Probes card, the research-funds placeholder, and the close paths:
+FTL Probes card, the Research Data readout, and the close paths:
 
 ```bash
 godot --headless --path . --script res://tests/verify_tech_tree.gd
@@ -244,7 +269,8 @@ godot --headless --path . --script res://tests/verify_tech_tree.gd
 
 ## Not yet implemented
 
-Fleet management (rename, modify, and delete), research durations and spending,
-the full scanning/discovery system, resource costs for ship production,
+Fleet management (rename, modify, and delete), cargo transport between systems,
+resource extraction from surveyed planets, research durations and spending, the
+full scanning/discovery system, resource costs for ship production,
 colonization, industry, combat, advanced hull customization, save/load, and the
 Combat View.
