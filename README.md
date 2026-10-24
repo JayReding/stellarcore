@@ -1,7 +1,8 @@
 # Stellar Core
 
 A 4X space strategy game in development with Godot 4.7. This repository
-currently contains the first playable slice: the **Stellar View**, the
+currently contains the first playable slice: the **title screen**, the
+**Stellar View**, the
 full-screen **System View** with a structure and economy sidebar, the
 **Technologies** tree, the **Newhome III Shipyard**, per-system **resource
 stockpiles**, planet-attached **structures**, the turn loop, and the first
@@ -30,8 +31,10 @@ godot --path .
 | Mouse wheel | Zoom in/out |
 | Click a star | Select it and open the system panel |
 | Double-click a star | Focus the camera on it |
-| Click a fleet row | Open the fleet actions dialog |
-| Click an in-transit fleet marker | Open that fleet's actions dialog |
+| Click a fleet row | Open the fleet orders popup |
+| Click an in-transit fleet marker | Open that fleet's orders popup |
+| Right-click a fleet or marker | Open the fleet orders popup at the cursor |
+| Click away from the orders popup | Dismiss it |
 | Set Fleet Destination | Enter destination-selection mode |
 | Click a star while choosing a destination | Open the course confirmation dialog |
 | Confirm Destination | Send the fleet and close the dialog |
@@ -43,10 +46,16 @@ godot --path .
 | Produce Ship | Build one FTL Probe; creates a fleet if none is selected |
 | Click a fleet (Shipyard) | Select it to reinforce it, or deselect it to create a new fleet |
 | End Turn | Start or cancel the five-second countdown to advance the turn |
-| `Esc` (Stellar View) | Deselect, cancel destination selection, or close a fleet dialog |
+| `Esc` (Stellar View) | Deselect, cancel destination selection, or close the fleet orders popup |
 | `Esc` (System View, Technologies, or Shipyard) | Return to Stellar View |
 
 ## What is implemented
+
+- A **title screen** using the `StellarCoreTitle.svg` art with a five-item
+  menu: **New Game** starts a fresh game, **Quit to Desktop** exits,
+  **Credits** opens a credits panel, and **Load Saved Game** and **Options**
+  are greyed out until later slices. The looping `Mirage.mp3` title theme
+  plays until a new game starts.
 
 - A 100-light-year-diameter play area. Star positions and all travel distances are
   stored in light years, with stars within ±4 ly of the galactic plane.
@@ -235,7 +244,8 @@ godot --path .
 
 ```
 scenes/
-  stellar_view.tscn        Main scene
+  title_screen.tscn        Title screen (main scene)
+  stellar_view.tscn        Stellar View galaxy map
   system_view.tscn         Full-screen system overlay
   tech_tree.tscn           Full-screen technology tree
   shipyard.tscn            Full-screen Newhome III shipyard
@@ -266,6 +276,7 @@ scripts/
   ui/fleet_menu.gd       Fleet orders popup at the cursor
   ui/fleet_dialog.gd       Course confirmation popup
   ui/tech_node.gd          Technology card population
+  title_screen.gd          Title menu, theme music, and credits
 shaders/
   star_surface.gdshader    Emissive star surface
   planet_atmosphere.gdshader  Rim haze for Earth-like and Dead Worlds
@@ -291,6 +302,14 @@ Data is stored separately on `StellarView` because it is galaxy-wide, along with
 the global hidden-resource reveal state.
 
 ## Verification
+
+The headless title screen check validates the background art, the looping
+title theme, the five menu entries in order, the disabled Load/Options
+entries, the Credits popup, and the New Game transition into the Stellar View:
+
+```bash
+godot --headless --path . --script res://tests/verify_title_screen.gd
+```
 
 The headless galaxy check validates Newhome, the 100 ly bounds, class mix,
 minimum separation, the distance matrix, the reduced star visual scale, and the

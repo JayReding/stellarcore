@@ -24,8 +24,8 @@ const DEFINITIONS := {
 			+ "star system and produce a small amount of resources."
 		),
 		"production": {
-			ResourceStockpile.TITANIUM: 5,
-			ResourceStockpile.HELIUM_3: 1,
+			ResourceStockpile.TITANIUM: 10,
+			ResourceStockpile.HELIUM_3: 2,
 		},
 		"upkeep": {},
 		"research_per_turn": 5,
@@ -51,22 +51,23 @@ const DEFINITIONS := {
 		"description": (
 			"An orbital refinery that turns raw ore into usable Titanium."
 		),
-		"production": {ResourceStockpile.TITANIUM: 5},
+		"production": {ResourceStockpile.TITANIUM: 25},
 		"upkeep": {ResourceStockpile.HELIUM_3: 2},
 		"research_per_turn": 0,
 		"cost": {ResourceStockpile.TITANIUM: 200},
 		"build_time": 3,
 	},
 	HELIUM_3_STATION: {
-		"name": "Helium 3 Station",
+		"name": "Helium3 Station",
 		"location": Location.ORBIT,
 		"role": "Harvests helium-3",
 		"color": Color(0.45, 0.86, 0.96),
 		"description": (
-			"An orbital harvesting station that skims Helium 3 from a gas giant."
+			"An orbital harvesting station that skims Helium3 from a gas giant."
+			+ " Also produces a small amount of antimatter as a byproduct."
 		),
 		"production": {
-			ResourceStockpile.HELIUM_3: 5,
+			ResourceStockpile.HELIUM_3: 20,
 			ResourceStockpile.ANTIMATTER: 1
 		},
 		"upkeep": {},
@@ -80,11 +81,11 @@ const DEFINITIONS := {
 		"role": "Refines antimatter",
 		"color": Color(0.8, 0.58, 1.0),
 		"description": (
-			"An orbital refinery that processes Helium 3 into Antimatter for "
+			"An orbital refinery that processes Helium3 into Antimatter for "
 			+ "ship operations."
 		),
-		"production": {ResourceStockpile.ANTIMATTER: 2},
-		"upkeep": {ResourceStockpile.HELIUM_3: 3},
+		"production": {ResourceStockpile.ANTIMATTER: 5},
+		"upkeep": {ResourceStockpile.HELIUM_3: 5},
 		"research_per_turn": 0,
 		"unlocked_by": "antimatter_refining",
 		"cost": {ResourceStockpile.TITANIUM: 200},

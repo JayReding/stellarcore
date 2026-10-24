@@ -1,0 +1,284 @@
+[gd_scene format=3 uid="uid://veelaydk3asv"]
+
+[ext_resource type="Script" uid="uid://lbqpd55ola63" path="res://scripts/title_screen.gd" id="1_title"]
+[ext_resource type="Texture2D" uid="uid://up3ddmcwmqds" path="res://assets/StellarCoreTitle.svg" id="2_art"]
+[ext_resource type="AudioStream" uid="uid://drx63b1guqa6k" path="res://assets/music/Mirage.mp3" id="3_music"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_menu_normal"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.04, 0.1, 0.17, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.54, 0.86, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_menu_pressed"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.03, 0.08, 0.14, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 0.9, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_menu_hover"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.08, 0.2, 0.34, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_menu_disabled"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.022, 0.04, 0.068, 0.76)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.2, 0.3, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_credits"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 28.0
+bg_color = Color(0.027, 0.047, 0.082, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.6, 0.94, 0.65)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="TitleScreen" type="Control" unique_id=1237953807]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Background" type="TextureRect" parent="." unique_id=443935866]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_art")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=60631066]
+unique_name_in_owner = true
+stream = ExtResource("3_music")
+
+[node name="Menu" type="VBoxContainer" parent="." unique_id=1104008965]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -170.0
+offset_top = -420.0
+offset_right = 170.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="NewGameButton" type="Button" parent="Menu" unique_id=109543765]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
+text = "New Game"
+
+[node name="LoadButton" type="Button" parent="Menu" unique_id=1938825669]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
+text = "Load Saved Game"
+
+[node name="OptionsButton" type="Button" parent="Menu" unique_id=1556042564]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
+text = "Options"
+
+[node name="CreditsButton" type="Button" parent="Menu" unique_id=22372091]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
+text = "Credits"
+
+[node name="QuitButton" type="Button" parent="Menu" unique_id=552461294]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
+text = "Quit to Desktop"
+
+[node name="CreditsBackdrop" type="ColorRect" parent="." unique_id=1579231201]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CreditsPanel" type="PanelContainer" parent="." unique_id=414845156]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -160.0
+offset_right = 250.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_credits")
+
+[node name="CreditsContent" type="VBoxContainer" parent="CreditsPanel" unique_id=533631296]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CreditsEyebrow" type="Label" parent="CreditsPanel/CreditsContent" unique_id=858967233]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
+theme_override_font_sizes/font_size = 11
+text = "CREDITS"
+
+[node name="CreditsTitle" type="Label" parent="CreditsPanel/CreditsContent" unique_id=87769303]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "Stellar Core"
+
+[node name="CreditsBody" type="Label" parent="CreditsPanel/CreditsContent" unique_id=1364047173]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
+theme_override_font_sizes/font_size = 14
+text = "(c) 2026 Jay Reding
+
+A space strategy prototype.
+
+\"Mirage\" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/ 
+
+Built with Godot 4.
+Released under the MIT License"
+autowrap_mode = 3
+
+[node name="CreditsButtons" type="HBoxContainer" parent="CreditsPanel/CreditsContent" unique_id=1875782240]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="CreditsCloseButton" type="Button" parent="CreditsPanel/CreditsContent/CreditsButtons" unique_id=27496398]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_menu_normal")
+theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
+theme_override_styles/hover = SubResource("StyleBox_menu_hover")
+text = "Close"
