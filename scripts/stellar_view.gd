@@ -7,6 +7,7 @@ const SYSTEM_VIEW_SCENE: PackedScene = preload("res://scenes/system_view.tscn")
 const TECH_TREE_SCENE: PackedScene = preload("res://scenes/tech_tree.tscn")
 const SHIPYARD_SCENE: PackedScene = preload("res://scenes/shipyard.tscn")
 const FLEET_DIALOG_SCENE: PackedScene = preload("res://scenes/ui/fleet_dialog.tscn")
+const FLEET_MENU_SCENE: PackedScene = preload("res://scenes/ui/fleet_menu.tscn")
 const STAR_COLLISION_LAYER := 2
 const FLEET_COLLISION_LAYER := 4
 const DRAG_THRESHOLD := 5.0
@@ -35,6 +36,11 @@ const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
 @onready var seed_label: Label = $UI/HUD/SeedLabel
 @onready var technologies_button: Button = $UI/HUD/TechnologiesButton
 @onready var research_amount_label: Label = %ResearchAmount
+@onready var research_project_label: Label = %ResearchProject
+@onready var research_turns_label: Label = %ResearchTurns
+@onready var research_progress: ProgressBar = %ResearchProgress
+@onready var construction_panel: PanelContainer = %ConstructionPanel
+@onready var construction_list: VBoxContainer = %ConstructionList
 @onready var turn_manager: TurnManager = $TurnManager
 @onready var turn_label: Label = $UI/HUD/TurnLabel
 @onready var end_turn_button: Button = $UI/HUD/EndTurnButton
@@ -45,6 +51,9 @@ const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
 var research_data: int = 0
 ## Hidden system resources become visible in every system once revealed.
 var revealed_resources: Array[String] = []
+## Structure and ship types unlocked by completed research.
+var unlocked_structures: Array[String] = []
+var unlocked_ships: Array[String] = []
 var _galaxy: Galaxy
 var _home_star: StarData
 var _star_nodes: Array[StarNode] = []
@@ -53,6 +62,7 @@ var _system_view: SystemView
 var _tech_tree: TechTree
 var _shipyard: ShipyardView
 var _fleet_dialog: FleetDialog
+var _fleet_menu: FleetMenu
 var _destination_fleet: FleetData
 var _fleet_markers: Array[FleetMarker] = []
 var _course_mesh: ImmediateMesh
@@ -73,6 +83,7 @@ func _ready() -> void:
 	if seed_value == 0:
 		seed_value = randi() % 900000 + 100000
 
+	unlocked_structures = StructureData.base_structure_ids()
 	_build_reference_grid()
 	_build_fleet_course_layer()
 	_spawn_galaxy(seed_value)
@@ -90,6 +101,7 @@ func _ready() -> void:
 	_reset_end_turn_ui()
 	status_label.text = ""
 	_update_research_data_hud()
+	_update_construction_hud()
 	_rebuild_fleet_markers()
 	_rebuild_fleet_courses()
 
@@ -106,12 +118,18 @@ func refresh_resources() -> void:
 	if not is_node_ready():
 		return
 	_update_research_data_hud()
+	_update_construction_hud()
 	if star_panel.visible:
 		star_panel.refresh_resources(revealed_resources)
 	if _tech_tree != null:
 		_tech_tree.refresh_research_data(research_data)
 	if _shipyard != null and _shipyard.visible:
 		_shipyard.refresh()
+	if _system_view != null and _system_view.visible:
+		_system_view.refresh_economy(
+			revealed_resources, research_data, _galaxy.research_per_turn(),
+			unlocked_structures
+		)
 
 
 func set_research_data(amount: int) -> void:
@@ -138,6 +156,93 @@ func reveal_resource(resource_id: String) -> bool:
 func _update_research_data_hud() -> void:
 	research_amount_label.text = "%d RD" % research_data
 
+	var active: Dictionary = {}
+	if _tech_tree != null:
+		active = _tech_tree.active_research()
+
+	if active.is_empty():
+		research_project_label.text = "NO ACTIVE RESEARCH"
+		research_project_label.add_theme_color_override(
+			"font_color", Color(0.45, 0.58, 0.72)
+		)
+		research_turns_label.text = ""
+		research_progress.visible = false
+		return
+
+	var turns_remaining := _tech_tree.research_turns_remaining()
+	var turns_total := maxi(_tech_tree.research_turns_total(), 1)
+	research_project_label.text = str(
+		active.get("name", "Research")
+	).to_upper()
+	research_project_label.add_theme_color_override(
+		"font_color", Color(0.95, 0.78, 0.45)
+	)
+	research_turns_label.text = "%d %s LEFT" % [
+		turns_remaining, "TURN" if turns_remaining == 1 else "TURNS"
+	]
+	research_progress.visible = true
+	research_progress.max_value = turns_total
+	research_progress.value = turns_total - turns_remaining
+
+
+## Lists every in-progress structure build across the galaxy with its remaining
+## turns. Construction is limited to one project per star system at a time.
+func _update_construction_hud() -> void:
+	for child in construction_list.get_children():
+		construction_list.remove_child(child)
+		child.queue_free()
+
+	var projects: Array[Dictionary] = []
+	if _galaxy != null:
+		for star in _galaxy.stars:
+			if star != null and star.is_constructing():
+				projects.append({
+					"system_name": star.display_name,
+					"structure_name": star.construction_display_name(),
+					"turns_remaining": star.construction_turns_remaining,
+				})
+
+	construction_panel.visible = not projects.is_empty()
+	for project in projects:
+		construction_list.add_child(_make_construction_hud_row(project))
+
+
+func _make_construction_hud_row(project: Dictionary) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 6)
+
+	var name_label := Label.new()
+	name_label.text = "%s — %s" % [
+		str(project.get("system_name", "System")),
+		str(project.get("structure_name", "Structure")),
+	]
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.add_theme_color_override(
+		"font_color", Color(0.82, 0.89, 0.97)
+	)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(name_label)
+
+	var turns_remaining := int(project.get("turns_remaining", 0))
+	var turns_label := Label.new()
+	turns_label.text = "%d %s LEFT" % [
+		turns_remaining, "TURN" if turns_remaining == 1 else "TURNS"
+	]
+	turns_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	turns_label.add_theme_font_size_override("font_size", 10)
+	turns_label.add_theme_color_override(
+		"font_color", Color(0.95, 0.78, 0.45)
+	)
+	turns_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	turns_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(turns_label)
+
+	return row
+
 
 func _process(delta: float) -> void:
 	if _is_overlay_open():
@@ -154,7 +259,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_on_right_pressed(event)
+		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_on_left_pressed(event)
 			else:
@@ -224,6 +331,21 @@ func _on_mouse_motion(event: InputEventMouseMotion) -> void:
 	camera_rig.orbit_by_screen_delta(event.relative)
 
 
+## Right-click summons the fleet orders popup for the fleet under the cursor.
+## A right-click anywhere else cancels destination selection; clicking away
+## from an open popup dismisses the popup itself.
+func _on_right_pressed(event: InputEventMouseButton) -> void:
+	if _destination_fleet != null:
+		_cancel_destination_selection("Destination selection canceled.")
+		get_viewport().set_input_as_handled()
+		return
+	if _fleet_menu != null and _fleet_menu.visible:
+		return
+	var marker := _fleet_under_position(event.position)
+	if marker != null:
+		_on_fleet_selected(marker.fleet)
+
+
 func _on_left_released() -> void:
 	_press_active = false
 
@@ -286,6 +408,7 @@ func _on_scan_requested(data: StarData) -> void:
 		return
 
 	data.surveyed = true
+	_refresh_star_survey_label(data)
 	var distance_from_home := 0.0
 	if _home_star != null and data != _home_star:
 		distance_from_home = _galaxy.distance_between(data, _home_star)
@@ -301,14 +424,77 @@ func _on_system_view_requested(data: StarData) -> void:
 	if _system_view == null:
 		_system_view = SYSTEM_VIEW_SCENE.instantiate() as SystemView
 		add_child(_system_view)
-	_system_view.open(data)
+		_system_view.structures_changed.connect(_on_system_structures_changed)
+		_system_view.closed.connect(_on_system_view_closed)
+	_system_view.open(
+		data, revealed_resources, research_data, _galaxy.research_per_turn(),
+		unlocked_structures
+	)
+
+
+func _on_system_structures_changed() -> void:
+	refresh_resources()
+
+
+func _on_system_view_closed() -> void:
+	refresh_resources()
+	if _selected_star != null:
+		_show_star_panel(_selected_star)
 
 
 func _on_technologies_requested() -> void:
 	if _tech_tree == null:
 		_tech_tree = TECH_TREE_SCENE.instantiate() as TechTree
 		add_child(_tech_tree)
+		_tech_tree.research_started.connect(_on_research_started)
+		_tech_tree.research_progressed.connect(_on_research_progressed)
+		_tech_tree.research_completed.connect(_on_research_completed)
 	_tech_tree.open(research_data)
+
+
+func _on_research_started(technology: Dictionary) -> void:
+	var cost := int(technology.get("cost", 0))
+	set_research_data(research_data - cost)
+	var tech_name := str(technology.get("name", "Research"))
+	var turns := int(technology.get("time", 0))
+	_set_status(
+		"Research started: %s — %d %s." % [
+			tech_name, turns, "turn" if turns == 1 else "turns"
+		],
+		STATUS_INFO_COLOR
+	)
+	_update_research_data_hud()
+
+
+func _on_research_progressed(
+	_technology: Dictionary, _turns_remaining: int
+) -> void:
+	_update_research_data_hud()
+
+
+func _on_research_completed(technology: Dictionary) -> void:
+	_apply_research_unlocks(technology)
+	_update_research_data_hud()
+	_set_status(
+		"Research complete: %s." % str(technology.get("name", "Technology")),
+		STATUS_SUCCESS_COLOR
+	)
+
+
+func _apply_research_unlocks(technology: Dictionary) -> void:
+	var unlocks: Dictionary = technology.get("unlocks", {})
+	for structure_id in unlocks.get("structures", []):
+		var id := str(structure_id)
+		if not id.is_empty() and not unlocked_structures.has(id):
+			unlocked_structures.append(id)
+	for ship_id in unlocks.get("ships", []):
+		var id := str(ship_id)
+		if not id.is_empty() and not unlocked_ships.has(id):
+			unlocked_ships.append(id)
+
+
+func has_unlocked_structure(type_id: String) -> bool:
+	return unlocked_structures.has(type_id)
 
 
 func _on_shipyard_requested(data: StarData) -> void:
@@ -323,7 +509,7 @@ func _on_shipyard_requested(data: StarData) -> void:
 		_shipyard.closed.connect(_on_shipyard_closed)
 	if data.resources == null:
 		data.resources = ResourceStockpile.new()
-	_shipyard.open(data, _galaxy, data.resources)
+	_shipyard.open(data, _galaxy, data.resources, unlocked_ships)
 
 
 func _on_shipyard_closed() -> void:
@@ -335,10 +521,20 @@ func _on_shipyard_closed() -> void:
 func _on_fleet_selected(fleet: FleetData) -> void:
 	if fleet == null:
 		return
-	_ensure_fleet_dialog()
-	if _fleet_dialog == null:
+	_ensure_fleet_menu()
+	if _fleet_menu == null:
 		return
-	_fleet_dialog.open_menu(fleet)
+	_fleet_menu.open_menu(fleet, get_viewport().get_mouse_position())
+
+
+func _ensure_fleet_menu() -> void:
+	if _fleet_menu != null:
+		return
+	_fleet_menu = FLEET_MENU_SCENE.instantiate() as FleetMenu
+	if _fleet_menu == null:
+		return
+	add_child(_fleet_menu)
+	_fleet_menu.destination_requested.connect(_on_destination_requested)
 
 
 func _ensure_fleet_dialog() -> void:
@@ -348,7 +544,6 @@ func _ensure_fleet_dialog() -> void:
 	if _fleet_dialog == null:
 		return
 	add_child(_fleet_dialog)
-	_fleet_dialog.destination_requested.connect(_on_destination_requested)
 	_fleet_dialog.destination_confirmed.connect(_on_destination_confirmed)
 	_fleet_dialog.confirmation_cancelled.connect(
 		_on_destination_confirmation_cancelled
@@ -468,7 +663,64 @@ func _on_end_turn_cancelled() -> void:
 func _on_turn_advanced(turn: int) -> void:
 	turn_label.text = _turn_text(turn)
 	_reset_end_turn_ui()
+	if _tech_tree != null:
+		_tech_tree.advance_research()
+	_advance_construction()
 	_advance_fleets()
+	_apply_structure_economy()
+
+
+## Advances every system's construction project. Completed structures are added
+## to their planets before the economy runs, so they produce on arrival.
+func _advance_construction() -> void:
+	if _galaxy == null:
+		return
+
+	var completions: Array[String] = []
+	for star in _galaxy.stars:
+		if star == null or not star.is_constructing():
+			continue
+		var completed := star.advance_construction()
+		if completed.is_empty():
+			continue
+		var type_id := str(completed.get("type_id", ""))
+		var structure_name := str(
+			StructureData.definition_for(type_id).get("name", "Structure")
+		)
+		var planet: PlanetData = completed.get("planet")
+		var planet_name := (
+			planet.designation if planet != null else "unknown planet"
+		)
+		completions.append("Construction complete: %s on %s (%s)." % [
+			structure_name, planet_name, star.display_name
+		])
+
+	if not completions.is_empty():
+		_set_status(completions[-1], STATUS_SUCCESS_COLOR)
+
+
+## Applies every system's net local-resource flow and adds galaxy-wide Research
+## Data production. Base structure figures are used until planetary richness is
+## implemented.
+func _apply_structure_economy() -> void:
+	if _galaxy == null:
+		return
+
+	var research_gain := 0
+	for star in _galaxy.stars:
+		if star == null:
+			continue
+		if star.resources == null:
+			star.resources = ResourceStockpile.new()
+
+		var flow := star.resource_flow()
+		for resource_id in flow:
+			star.resources.add_amount(str(resource_id), int(flow[resource_id]))
+		research_gain += star.research_flow()
+
+	# Refreshes the HUD, selected-system panel, shipyard, tech tree, and an open
+	# System View with the new balances.
+	add_research_data(research_gain)
 
 
 func _set_countdown_text(seconds_left: float) -> void:
@@ -512,16 +764,20 @@ func _advance_fleets() -> void:
 			any_moved = true
 			if arrived:
 				var probe_destroyed := fleet.ships.has("FTL Probe")
-				var fleet_destroyed := _complete_fleet_arrival(
+				var colony_planet := _complete_fleet_arrival(
 					star, fleet, destination
 				)
+				var fleet_destroyed := not destination.fleets.has(fleet)
 				arrivals.append(
 					_arrival_notice(
-						fleet, destination, probe_destroyed, fleet_destroyed
+						fleet, destination, probe_destroyed, fleet_destroyed,
+						colony_planet
 					)
 				)
 				if _fleet_dialog != null:
 					_fleet_dialog.close_if_showing_fleet(fleet)
+				if _fleet_menu != null:
+					_fleet_menu.close_if_showing_fleet(fleet)
 				panel_changed = true
 
 	if any_moved:
@@ -538,13 +794,13 @@ func _advance_fleets() -> void:
 
 func _complete_fleet_arrival(
 	origin: StarData, fleet: FleetData, destination: StarData
-) -> bool:
+) -> String:
 	if origin != null:
 		origin.fleets.erase(fleet)
 
 	fleet.remove_one_ship("FTL Probe")
-	var fleet_destroyed := fleet.ships.is_empty()
-	if fleet_destroyed:
+	var colony_planet := _found_colony(fleet, destination)
+	if fleet.ships.is_empty():
 		fleet.clear_route()
 		fleet.in_transit = false
 	else:
@@ -552,15 +808,40 @@ func _complete_fleet_arrival(
 			destination.fleets.append(fleet)
 		fleet.dock_at(destination)
 
-	destination.surveyed = true
-	return fleet_destroyed
+	if destination.surveyed == false:
+		destination.surveyed = true
+		add_research_data(25)
+		_refresh_star_survey_label(destination)
+	return colony_planet
+
+
+## A Colony Ship that reaches a colony-less system is consumed to found a
+## Colony on the system's first open planet. Enemy-held systems will refuse
+## colonies once hostile fleets exist.
+func _found_colony(fleet: FleetData, destination: StarData) -> String:
+	if fleet == null or destination == null:
+		return ""
+	if destination.has_colony() or not fleet.ships.has("Colony Ship"):
+		return ""
+
+	var target: PlanetData = null
+	for planet in destination.planets:
+		if planet != null and not planet.has_structure(StructureData.COLONY):
+			target = planet
+			break
+	if target == null or not fleet.remove_one_ship("Colony Ship"):
+		return ""
+
+	target.add_structure(StructureData.COLONY)
+	return target.designation
 
 
 func _arrival_notice(
 	fleet: FleetData,
 	destination: StarData,
 	probe_destroyed: bool,
-	fleet_destroyed: bool
+	fleet_destroyed: bool,
+	colony_planet: String = ""
 ) -> String:
 	var status := "%s arrived at %s" % [
 		fleet.name, destination.display_name
@@ -569,6 +850,8 @@ func _arrival_notice(
 		status += " — an FTL Probe was destroyed"
 		if fleet_destroyed:
 			status += " and the fleet was disbanded"
+	if not colony_planet.is_empty():
+		status += "; colony founded on %s" % colony_planet
 
 	var count := destination.planets.size()
 	if count == 0:
@@ -592,6 +875,13 @@ func _star_by_id(star_id: String) -> StarData:
 		if star.id == star_id:
 			return star
 	return null
+
+
+func _refresh_star_survey_label(data: StarData) -> void:
+	for node in _star_nodes:
+		if node.data == data:
+			node.refresh_survey_label()
+			return
 
 
 func _build_fleet_course_layer() -> void:
@@ -689,6 +979,7 @@ func _is_overlay_open() -> bool:
 		or (_tech_tree != null and _tech_tree.visible)
 		or (_shipyard != null and _shipyard.visible)
 		or (_fleet_dialog != null and _fleet_dialog.visible)
+		or (_fleet_menu != null and _fleet_menu.visible)
 	)
 
 

@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://dh2y3qpinqgn"]
 
-[ext_resource type="Script" path="res://scripts/system_view.gd" id="1_view"]
+[ext_resource type="Script" uid="uid://bdlqq28mpk3ld" path="res://scripts/system_view.gd" id="1_view"]
 
 [sub_resource type="Environment" id="Environment_space"]
 background_mode = 1
@@ -9,21 +9,14 @@ ambient_light_source = 2
 ambient_light_color = Color(0.18, 0.28, 0.48, 1)
 ambient_light_energy = 0.22
 tonemap_mode = 2
-tonemap_exposure = 1.0
 tonemap_white = 2.5
 glow_enabled = true
-glow_levels/1 = 0.0
 glow_levels/2 = 0.0
 glow_levels/3 = 1.0
 glow_levels/4 = 0.0
 glow_levels/5 = 0.7
-glow_levels/6 = 0.0
-glow_levels/7 = 0.0
 glow_intensity = 0.55
-glow_strength = 1.0
 glow_bloom = 0.06
-glow_blend_mode = 1
-glow_hdr_threshold = 1.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_normal"]
 content_margin_left = 14.0
@@ -36,22 +29,6 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
-content_margin_left = 14.0
-content_margin_top = 9.0
-content_margin_right = 14.0
-content_margin_bottom = 9.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -73,21 +50,55 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="SystemView" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.12, 0.28, 0.46, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_sidebar"]
+content_margin_left = 18.0
+content_margin_top = 16.0
+content_margin_right = 18.0
+content_margin_bottom = 16.0
+bg_color = Color(0.027, 0.047, 0.082, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.52, 0.85, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 14
+shadow_offset = Vector2(0, 6)
+
+[node name="SystemView" type="CanvasLayer" unique_id=1643796303]
 layer = 10
 visible = false
 script = ExtResource("1_view")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=1743858869]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="Space" type="SubViewportContainer" parent="Root"]
+[node name="Space" type="SubViewportContainer" parent="Root" unique_id=1589511559]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,29 +108,29 @@ grow_vertical = 2
 mouse_filter = 2
 stretch = true
 
-[node name="SystemViewport" type="SubViewport" parent="Root/Space"]
+[node name="SystemViewport" type="SubViewport" parent="Root/Space" unique_id=71111114]
 unique_name_in_owner = true
 own_world_3d = true
 handle_input_locally = false
-size = Vector2i(1280, 720)
 msaa_3d = 2
 use_debanding = true
-render_target_update_mode = 2
+size = Vector2i(1920, 1080)
+render_target_update_mode = 0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Root/Space/SystemViewport"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Root/Space/SystemViewport" unique_id=1570318290]
 environment = SubResource("Environment_space")
 
-[node name="SystemRoot" type="Node3D" parent="Root/Space/SystemViewport"]
+[node name="SystemRoot" type="Node3D" parent="Root/Space/SystemViewport" unique_id=2005328388]
 unique_name_in_owner = true
 
-[node name="Camera3D" type="Camera3D" parent="Root/Space/SystemViewport"]
+[node name="Camera3D" type="Camera3D" parent="Root/Space/SystemViewport" unique_id=1588057802]
 unique_name_in_owner = true
-current = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 20)
 projection = 1
+current = true
 size = 26.0
-position = Vector3(0, 18, 20)
 
-[node name="UI" type="Control" parent="Root"]
+[node name="UI" type="Control" parent="Root" unique_id=460239210]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -128,42 +139,49 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Eyebrow" type="Label" parent="Root/UI"]
+[node name="PlanetHitLayer" type="Control" parent="Root/UI" unique_id=1007981668]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Eyebrow" type="Label" parent="Root/UI" unique_id=1429676977]
 layout_mode = 1
 offset_left = 40.0
 offset_top = 26.0
 offset_right = 480.0
 offset_bottom = 46.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
 theme_override_font_sizes/font_size = 12
 text = "SYSTEM VIEW"
 
-[node name="NameLabel" type="Label" parent="Root/UI"]
+[node name="NameLabel" type="Label" parent="Root/UI" unique_id=1564929503]
 unique_name_in_owner = true
 layout_mode = 1
 offset_left = 38.0
 offset_top = 44.0
 offset_right = 640.0
 offset_bottom = 92.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 32
 text = "Newhome"
 
-[node name="MetaLabel" type="Label" parent="Root/UI"]
+[node name="MetaLabel" type="Label" parent="Root/UI" unique_id=1004730978]
 unique_name_in_owner = true
 layout_mode = 1
 offset_left = 40.0
 offset_top = 92.0
 offset_right = 720.0
 offset_bottom = 114.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.66, 0.77, 0.9, 1)
 theme_override_font_sizes/font_size = 14
 text = "G2V  •  Yellow-class star  •  4 planets"
 
-[node name="BackButton" type="Button" parent="Root/UI"]
+[node name="BackButton" type="Button" parent="Root/UI" unique_id=895897493]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 1
@@ -177,29 +195,332 @@ grow_horizontal = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
-theme_override_styles/hover = SubResource("StyleBox_back_hover")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
 text = "BACK TO STELLAR VIEW"
 
-[node name="Hint" type="Label" parent="Root/UI"]
+[node name="Hint" type="Label" parent="Root/UI" unique_id=1270767296]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -120.0
+offset_left = -280.0
 offset_top = -40.0
-offset_right = 120.0
+offset_right = 280.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.48, 0.62, 0.78, 1)
 theme_override_font_sizes/font_size = 12
-text = "ESC TO RETURN"
+text = "ESC TO RETURN  •  CLICK A PLANET TO INSPECT"
 horizontal_alignment = 1
+
+[node name="Sidebar" type="PanelContainer" parent="Root/UI" unique_id=1080115699]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = 130.0
+offset_right = -30.0
+offset_bottom = -54.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_sidebar")
+
+[node name="SidebarScroll" type="ScrollContainer" parent="Root/UI/Sidebar" unique_id=972484678]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="SidebarContent" type="VBoxContainer" parent="Root/UI/Sidebar/SidebarScroll" unique_id=1032101493]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="OverviewEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1396579680]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
+theme_override_font_sizes/font_size = 20
+text = "SYSTEM OVERVIEW"
+
+[node name="SystemResourceEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=5198778]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "SYSTEM RESOURCES"
+
+[node name="ResourceLegend" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1964172740]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.53, 0.66, 1)
+theme_override_font_sizes/font_size = 10
+text = "AMOUNT  /  PER-TURN CHANGE"
+horizontal_alignment = 2
+
+[node name="SystemResourceList" type="VBoxContainer" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1096081028]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SeparatorResources" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2100750431]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="GalaxyEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=817719292]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "GALAXY-WIDE"
+
+[node name="ResearchResourceList" type="VBoxContainer" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2042370407]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SeparatorStructures" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1572863705]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="StructureEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=651569532]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "STRUCTURES"
+
+[node name="StructureSummary" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=315650036]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.72, 0.84, 1)
+theme_override_font_sizes/font_size = 13
+text = "No structures built in this system."
+autowrap_mode = 2
+
+[node name="StructureList" type="VBoxContainer" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1758344525]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SeparatorPlanet" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2013506923]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="PlanetDetailEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=601752313]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "PLANET DETAIL"
+
+[node name="PlanetHint" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=673528798]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.52, 0.63, 0.76, 1)
+theme_override_font_sizes/font_size = 13
+text = "Click a planet in the view above, or a structure row, to inspect its output and upkeep."
+autowrap_mode = 2
+
+[node name="PlanetSidebar" type="PanelContainer" parent="Root/UI" unique_id=1717334503]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = 130.0
+offset_right = -30.0
+offset_bottom = -54.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_sidebar")
+
+[node name="PlanetSidebarScroll" type="ScrollContainer" parent="Root/UI/PlanetSidebar" unique_id=1717334504]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="PlanetDetail" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll" unique_id=2138889000]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="PlanetDetailEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334505]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "PLANET DETAIL"
+
+[node name="PlanetHeader" type="HBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334506]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlanetTitle" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail/PlanetHeader" unique_id=1669515829]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 19
+text = "Planet"
+
+[node name="PlanetCloseButton" type="Button" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail/PlanetHeader" unique_id=1717334507]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+text = "CLOSE"
+
+[node name="PlanetMeta" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=740470036]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56, 0.68, 0.82, 1)
+theme_override_font_sizes/font_size = 13
+text = "Class  •  0 structures"
+
+[node name="PlanetStructureEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1234878711]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "STRUCTURES"
+
+[node name="PlanetStructureList" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=517115294]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PlanetFlowEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1244405942]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
+theme_override_font_sizes/font_size = 11
+text = "RESOURCE FLOW"
+
+[node name="PlanetFlowList" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1463207530]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SeparatorBuild" type="HSeparator" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334508]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="BuildButton" type="Button" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334509]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+text = "BUILD STRUCTURE"
+tooltip_text = "Open construction options for this planet."
+
+[node name="BuildFeedback" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334510]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.52, 0.9, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = ""
+autowrap_mode = 2
+
+[node name="ConstructBackdrop" type="ColorRect" parent="Root/UI" unique_id=1717334511]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.6)
+
+[node name="ConstructPopup" type="PanelContainer" parent="Root/UI" unique_id=1717334512]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -250.0
+offset_right = 230.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_sidebar")
+
+[node name="ConstructContent" type="VBoxContainer" parent="Root/UI/ConstructPopup" unique_id=1717334513]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ConstructEyebrow" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334514]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
+theme_override_font_sizes/font_size = 11
+text = "CONSTRUCT STRUCTURE"
+
+[node name="ConstructSubtitle" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334515]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Planet"
+
+[node name="ConstructSeparator" type="HSeparator" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334516]
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+layout_mode = 2
+
+[node name="ConstructStatus" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334501]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.52, 0.63, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "Select a structure to build."
+autowrap_mode = 2
+
+[node name="ConstructList" type="VBoxContainer" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334502]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ConstructButtons" type="HBoxContainer" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334517]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="ConstructCloseButton" type="Button" parent="Root/UI/ConstructPopup/ConstructContent/ConstructButtons" unique_id=1717334518]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+text = "CLOSE"

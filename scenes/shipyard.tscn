@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/shipyard.gd" id="1_shipyard"]
 
@@ -118,6 +118,22 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.32, 0.6, 0.9, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_produce_disabled"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.035, 0.055, 0.08, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.22, 0.3, 0.8)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -282,6 +298,7 @@ theme_override_font_sizes/font_size = 10
 text = "HULL TYPES"
 
 [node name="HullCountLabel" type="Label" parent="Root/UI/Content/HullColumn/HullContent/HullHeader"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.68, 0.82, 1)
 theme_override_font_sizes/font_size = 10
@@ -297,6 +314,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="HullNote" type="Label" parent="Root/UI/Content/HullColumn/HullContent"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
 theme_override_font_sizes/font_size = 10
@@ -427,13 +445,12 @@ theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
 theme_override_font_sizes/font_size = 12
 text = "Resource cost"
 
-[node name="CostValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="CostValue" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
-text = "Titanium — TBD"
-horizontal_alignment = 2
+theme_override_constants/separation = 10
+alignment = 2
 
 [node name="NoOptionsPanel" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
 layout_mode = 2
@@ -571,10 +588,12 @@ mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBox_produce_normal")
 theme_override_styles/hover = SubResource("StyleBox_produce_hover")
 theme_override_styles/pressed = SubResource("StyleBox_produce_pressed")
+theme_override_styles/disabled = SubResource("StyleBox_produce_disabled")
 text = "Produce Ship"
 
 [node name="Hint" type="Label" parent="Root/UI"]

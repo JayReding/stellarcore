@@ -1,8 +1,8 @@
 class_name ShipyardView
 extends CanvasLayer
 ## Full-screen shipyard. Hull selection is on the left, customization in the
-## center, and the system's fleets on the right. Production is free until ship
-## costs are assigned.
+## center, and the system's fleets on the right. Production spends resources
+## from the system's local stockpile.
 
 signal closed
 
@@ -17,9 +17,37 @@ const HULLS := [
 			+ "reconnaissance and survey support. FTL Probes are single-use "
 			+ "vehicles. The power needed to transmit system data casuses them "
 			+ "to burn out after arrival and data transmission. However, they "
-			+ "can be built quickly from limited resources."
+			+ "can be built quickly from limited resources. Exploring new "
+			+ "worlds grants bonus Research Data."
 		),
 		"customization": "None",
+		"cost": {
+			ResourceStockpile.TITANIUM: 25,
+			ResourceStockpile.ANTIMATTER: 10,
+		},
+	},
+]
+
+
+## Hulls gated behind research. Each unlocks when its ship name appears in the
+## player's unlocked-ships list.
+const LOCKED_HULLS := [
+	{
+		"id": "colony_ship",
+		"name": "Colony Ship",
+		"role": "Colonization",
+		"icon": "COL",
+		"description": (
+			"A slow sleeper ship that carries colonists to a new star system. "
+			+ "It is consumed on arrival to found a Colony on the system's "
+			+ "first open planet. Travels at 5 light years per turn and costs "
+			+ "1 Antimatter for now; loading fuel for longer voyages comes later."
+		),
+		"customization": "None",
+		"cost": {
+			ResourceStockpile.TITANIUM: 500,
+			ResourceStockpile.ANTIMATTER: 1,
+		},
 	},
 ]
 
@@ -27,6 +55,8 @@ const HULLS := [
 @onready var back_button: Button = %BackButton
 @onready var meta_label: Label = %MetaLabel
 @onready var hull_list: VBoxContainer = %HullList
+@onready var hull_count_label: Label = %HullCountLabel
+@onready var hull_note: Label = %HullNote
 @onready var hull_icon_label: Label = %HullIconLabel
 @onready var hull_name_label: Label = %HullNameLabel
 @onready var hull_role_label: Label = %HullRoleLabel
@@ -34,6 +64,7 @@ const HULLS := [
 @onready var hull_type_value: Label = %HullTypeValue
 @onready var hull_role_value: Label = %HullRoleValue
 @onready var hull_customization_value: Label = %HullCustomizationValue
+@onready var cost_value: HBoxContainer = %CostValue
 @onready var no_options_label: Label = %NoOptionsLabel
 @onready var no_options_note: Label = %NoOptionsNote
 @onready var fleet_list: VBoxContainer = %FleetList
@@ -51,7 +82,18 @@ var _resources: ResourceStockpile
 var _selected_hull: Dictionary = HULLS[0]
 var _selected_fleet: FleetData
 var _feedback := ""
+var _unlocked_ships: Array[String] = []
 var _tween: Tween
+
+
+## Hulls the player may currently build: the default set plus every locked
+## hull whose ship name was unlocked by research.
+static func available_hulls(unlocked_ships: Array[String] = []) -> Array:
+	var hulls: Array = HULLS.duplicate()
+	for hull in LOCKED_HULLS:
+		if unlocked_ships.has(str(hull.get("name", ""))):
+			hulls.append(hull)
+	return hulls
 
 
 func _ready() -> void:
@@ -68,16 +110,18 @@ func _ready() -> void:
 func open(
 	data: StarData,
 	galaxy: Galaxy = null,
-	resources: ResourceStockpile = null
+	resources: ResourceStockpile = null,
+	unlocked_ships: Array[String] = []
 ) -> void:
 	_galaxy = galaxy
-	_resources = resources
 	if data == null or not data.has_shipyard():
 		return
 
+	_resources = resources if resources != null else data.resources
 	_system_data = data
 	_selected_fleet = null
-	_selected_hull = HULLS[0]
+	_unlocked_ships = unlocked_ships.duplicate()
+	_selected_hull = _available_hulls()[0]
 	_feedback = ""
 	_populate_hulls()
 	_show_hull(_selected_hull)
@@ -122,7 +166,17 @@ func _populate_hulls() -> void:
 		hull_list.remove_child(child)
 		child.queue_free()
 
-	for hull in HULLS:
+	var available := _available_hulls()
+	hull_count_label.text = str(available.size())
+	if available.size() == 1:
+		hull_note.text = (
+			"One hull type is available.\n"
+			+ "Additional hulls will unlock through research."
+		)
+	else:
+		hull_note.text = "%d hull types are available." % available.size()
+
+	for hull in available:
 		var button := Button.new()
 		button.text = str(hull.get("name", "Hull"))
 		button.custom_minimum_size = Vector2(0, 56)
@@ -275,9 +329,41 @@ func _on_fleet_pressed(fleet: FleetData) -> void:
 	_update_production_status()
 
 
+func _selected_hull_cost() -> Dictionary:
+	var cost: Dictionary = _selected_hull.get("cost", {})
+	return cost
+
+
+func _can_afford_selected_hull() -> bool:
+	var cost := _selected_hull_cost()
+	if cost.is_empty():
+		return true
+	return _resources != null and _resources.can_afford(cost)
+
+
+func _missing_resources() -> Dictionary:
+	var missing: Dictionary = {}
+	if _resources == null:
+		return _selected_hull_cost().duplicate()
+	for resource_id in _selected_hull_cost():
+		var shortfall := (
+			int(_selected_hull_cost()[resource_id])
+			- _resources.get_amount(str(resource_id))
+		)
+		if shortfall > 0:
+			missing[str(resource_id)] = shortfall
+	return missing
+
+
 func _on_produce_pressed() -> void:
 	if _system_data == null:
 		return
+	if not _can_afford_selected_hull():
+		_feedback = "Insufficient resources — %s." % _missing_resources_text()
+		_update_production_status()
+		return
+	if _resources != null:
+		_resources.spend(_selected_hull_cost())
 
 	var hull_name := str(_selected_hull.get("name", "FTL Probe"))
 	var fleet: FleetData = _selected_fleet
@@ -325,26 +411,116 @@ func _update_header() -> void:
 func refresh() -> void:
 	if not visible:
 		return
+	_ensure_selected_hull()
+	_populate_hulls()
+	_show_hull(_selected_hull)
 	_populate_fleets()
 	_update_header()
 	_update_resource_note()
 	_update_production_status()
 
 
-func _update_resource_note() -> void:
-	if _resources == null:
-		resource_note.text = "Ship production costs are not yet assigned."
+func _available_hulls() -> Array:
+	return available_hulls(_unlocked_ships)
+
+
+## Keeps the selection valid when the available hull set changes.
+func _ensure_selected_hull() -> void:
+	var hulls := _available_hulls()
+	if hulls.is_empty():
 		return
-	resource_note.text = (
-		"Local Titanium: %d. Ship production costs are not yet assigned."
-		% _resources.get_amount(ResourceStockpile.TITANIUM)
-	)
+	if not hulls.has(_selected_hull):
+		_selected_hull = hulls[0]
+
+
+func _update_resource_note() -> void:
+	var cost := _selected_hull_cost()
+	if cost.is_empty():
+		resource_note.text = "This hull has no resource cost."
+		return
+	if _resources == null:
+		resource_note.text = "No local stockpile is available for production."
+		return
+
+	var parts: Array[String] = []
+	for resource_id in cost:
+		var id := str(resource_id)
+		parts.append("%d %s" % [
+			_resources.get_amount(id),
+			ResourceStockpile.display_name(id),
+		])
+	resource_note.text = "Local stockpile: %s" % "  •  ".join(parts)
+
+
+func _update_cost_readout() -> void:
+	for child in cost_value.get_children():
+		cost_value.remove_child(child)
+		child.queue_free()
+
+	var cost := _selected_hull_cost()
+	if cost.is_empty():
+		_add_cost_label("Free", Color(0.78, 0.86, 0.96), "")
+		return
+
+	var missing := _missing_resources()
+	for resource_id in cost:
+		var id := str(resource_id)
+		var required := int(cost[resource_id])
+		var shortfall := int(missing.get(id, 0))
+		var text := "%d %s" % [
+			required, ResourceStockpile.display_name(id)
+		]
+		var color := Color(0.78, 0.86, 0.96)
+		if shortfall > 0:
+			text += " (%d short)" % shortfall
+			color = Color(0.96, 0.45, 0.45)
+		_add_cost_label(text, color, id)
+
+
+func _add_cost_label(text: String, color: Color, resource_id: String) -> void:
+	var label := Label.new()
+	label.name = "Cost_%s" % resource_id if not resource_id.is_empty() else "Cost"
+	label.text = text
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", color)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	cost_value.add_child(label)
+
+
+func _missing_resources_text() -> String:
+	var missing := _missing_resources()
+	var parts: Array[String] = []
+	for resource_id in missing:
+		parts.append("%d %s" % [
+			int(missing[resource_id]),
+			ResourceStockpile.display_name(str(resource_id)),
+		])
+	if parts.is_empty():
+		return "none"
+	return " and ".join(parts)
 
 
 func _update_production_status() -> void:
+	_update_cost_readout()
+	_update_resource_note()
+
+	var affordable := _system_data != null and _can_afford_selected_hull()
+	produce_button.disabled = not affordable
+	if affordable:
+		produce_button.tooltip_text = "Build one %s" % str(
+			_selected_hull.get("name", "ship")
+		)
+	else:
+		produce_button.tooltip_text = "Insufficient resources: %s" % (
+			_missing_resources_text()
+		)
+
 	if _system_data == null:
 		feedback_label.text = ""
 		return
+
+	if affordable and _feedback.begins_with("Insufficient resources"):
+		_feedback = ""
 
 	var status := _feedback
 	if status.is_empty():
@@ -355,6 +531,9 @@ func _update_production_status() -> void:
 				_selected_fleet.name,
 				str(_selected_hull.get("name", "ship")),
 			]
+	if not affordable:
+		var warning := "Insufficient resources — %s." % _missing_resources_text()
+		status = warning if status.is_empty() else "%s %s" % [status, warning]
 	feedback_label.text = status
 
 

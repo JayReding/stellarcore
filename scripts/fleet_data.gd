@@ -7,8 +7,11 @@ extends Resource
 ## advance them independently of the selected system panel.
 
 const FTL_PROBE_SPEED_LY_PER_TURN := 10.0
+const COLONY_SHIP_NAME := "Colony Ship"
+const COLONY_SHIP_SPEED_LY_PER_TURN := 5.0
 const SHIP_SPEEDS_LY_PER_TURN := {
 	"FTL Probe": FTL_PROBE_SPEED_LY_PER_TURN,
+	"Colony Ship": COLONY_SHIP_SPEED_LY_PER_TURN,
 }
 
 const GREEK_LETTERS: Array[String] = [

@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	root.size = Vector2i(1920, 1080)
 	var scene := preload("res://scenes/stellar_view.tscn").instantiate()
 	scene.galaxy_seed = 424242
 	root.add_child(scene)
@@ -28,6 +29,14 @@ func _run() -> void:
 	if home_node == null:
 		_finish()
 		return
+	_check(
+		home_node.home_label.visible and home_node.home_label.text == "NEWHOME",
+		"Newhome keeps its dedicated home label"
+	)
+	_check(
+		not home_node.survey_label.visible,
+		"Newhome does not duplicate its name with a survey label"
+	)
 
 	var fleet := FleetData.new()
 	fleet.name = "Newhome Alpha"
@@ -68,30 +77,64 @@ func _run() -> void:
 	fleet_row.pressed.emit()
 	await process_frame
 
-	var dialog: FleetDialog = scene._fleet_dialog
-	_check(dialog != null, "Clicking a fleet opens the fleet dialog")
-	if dialog == null:
+	# Fleet orders arrive as a cursor popup, not a modal screen.
+	var menu: FleetMenu = scene._fleet_menu
+	_check(menu != null, "Clicking a fleet opens the orders popup")
+	if menu == null:
 		_finish()
 		return
-	_check(dialog.visible, "Fleet dialog is visible")
-	_check(scene._is_overlay_open(), "Fleet dialog blocks Stellar View input")
-	_check(dialog.fleet_name_label.text == "Newhome Alpha", "Dialog names the fleet")
+	_check(menu.visible, "The orders popup is visible")
+	_check(scene._is_overlay_open(), "The Stellar View treats the popup as an overlay")
+	var dialog: FleetDialog = scene._fleet_dialog
 	_check(
-		dialog.set_destination_button.text == "Set Fleet Destination",
+		dialog == null or not dialog.visible,
+		"No modal dialog appears for fleet orders"
+	)
+	_check(menu.fleet_name_label.text == "Newhome Alpha", "Popup names the fleet")
+	_check(
+		menu.set_destination_button.text == "Set Fleet Destination",
 		"Set Fleet Destination is present"
 	)
-	_check(dialog.rename_button.text == "Rename Fleet", "Rename Fleet is present")
-	_check(dialog.modify_button.text == "Modify Fleet", "Modify Fleet is present")
-	_check(dialog.delete_button.text == "Delete Fleet", "Delete Fleet is present")
-	_check(not dialog.set_destination_button.disabled, "Set Destination is available")
-	_check(dialog.rename_button.disabled, "Rename is not implemented yet")
-	_check(dialog.modify_button.disabled, "Modify is not implemented yet")
-	_check(dialog.delete_button.disabled, "Delete is not implemented yet")
-	var delete_color := dialog.delete_button.get_theme_color("font_disabled_color")
+	_check(menu.rename_button.text == "Rename Fleet", "Rename Fleet is present")
+	_check(menu.modify_button.text == "Modify Fleet", "Modify Fleet is present")
+	_check(menu.delete_button.text == "Delete Fleet", "Delete Fleet is present")
+	_check(not menu.set_destination_button.disabled, "Set Destination is available")
+	_check(menu.rename_button.disabled, "Rename is not implemented yet")
+	_check(menu.modify_button.disabled, "Modify is not implemented yet")
+	_check(menu.delete_button.disabled, "Delete is not implemented yet")
+	var delete_color := menu.delete_button.get_theme_color("font_disabled_color")
 	_check(
 		delete_color.r > 0.8 and delete_color.g < 0.6,
 		"Delete Fleet uses red text"
 	)
+
+	# Clicking away dismisses the popup; right-clicking summons it back.
+	var away_click := InputEventMouseButton.new()
+	away_click.button_index = MOUSE_BUTTON_LEFT
+	away_click.pressed = true
+	away_click.position = Vector2(960, 540)
+	menu.root.gui_input.emit(away_click)
+	await process_frame
+	_check(not menu.visible, "Clicking away closes the orders popup")
+
+	var right_click := InputEventMouseButton.new()
+	right_click.button_index = MOUSE_BUTTON_RIGHT
+	right_click.pressed = true
+	fleet_row.gui_input.emit(right_click)
+	await process_frame
+	_check(menu.visible, "Right-clicking a fleet reopens the orders popup")
+
+	var escape := InputEventKey.new()
+	escape.keycode = KEY_ESCAPE
+	escape.physical_keycode = KEY_ESCAPE
+	escape.pressed = true
+	menu._unhandled_input(escape)
+	await process_frame
+	_check(not menu.visible, "Escape closes the orders popup")
+
+	fleet_row.pressed.emit()
+	await process_frame
+	_check(menu.visible, "The orders popup reopens")
 
 	var destination: StarData
 	var destination_distance := -1.0
@@ -117,15 +160,19 @@ func _run() -> void:
 	if destination_node == null:
 		_finish()
 		return
+	_check(
+		not destination_node.survey_label.visible,
+		"Unsurveyed systems do not show a survey label"
+	)
 
 	var expected_turns := ceili(
 		destination_distance / FleetData.FTL_PROBE_SPEED_LY_PER_TURN
 	)
 	var turn_word := "turn" if expected_turns == 1 else "turns"
 
-	dialog.set_destination_button.pressed.emit()
+	menu.set_destination_button.pressed.emit()
 	await process_frame
-	_check(not dialog.visible, "Choosing Set Destination closes the menu")
+	_check(not menu.visible, "Choosing Set Destination closes the popup")
 	_check(scene._destination_fleet == fleet, "Destination selection targets the fleet")
 	_check(
 		not panel.visible,
@@ -138,9 +185,10 @@ func _run() -> void:
 
 	scene._choose_destination_star(destination_node)
 	await process_frame
-	_check(dialog.visible, "Choosing a star opens the confirmation dialog")
+	dialog = scene._fleet_dialog
+	_check(dialog != null, "Choosing a star opens the confirmation dialog")
+	_check(dialog.visible, "The confirmation dialog is visible")
 	_check(dialog.confirmation.visible, "Confirmation section is shown")
-	_check(not dialog.menu.visible, "Fleet action menu is hidden in confirmation")
 	_check(
 		dialog.destination_name_label.text == destination.display_name,
 		"Confirmation names the destination"
@@ -207,6 +255,21 @@ func _run() -> void:
 			marker.get_node_or_null("PickBody") != null,
 			"The fleet marker is clickable"
 		)
+		var marker_screen: Vector2 = scene.camera_rig.camera.unproject_position(
+			marker.global_position
+		)
+		var marker_click := InputEventMouseButton.new()
+		marker_click.button_index = MOUSE_BUTTON_RIGHT
+		marker_click.pressed = true
+		marker_click.position = marker_screen
+		root.push_input(marker_click)
+		await process_frame
+		_check(
+			scene._fleet_menu.visible,
+			"Right-clicking a marker opens the orders popup"
+		)
+		scene._fleet_menu.close()
+		await process_frame
 	_check(
 		panel.fleet_list.get_child_count() == 0,
 		"In-transit fleets leave Fleet Command"
@@ -215,18 +278,18 @@ func _run() -> void:
 
 	scene._on_fleet_selected(fleet)
 	await process_frame
-	_check(dialog.visible, "An in-transit fleet can be opened from its marker")
+	_check(menu.visible, "An in-transit fleet can be opened from its marker")
 	_check(
-		dialog.set_destination_button.disabled,
+		menu.set_destination_button.disabled,
 		"An in-transit fleet cannot receive a new destination"
 	)
 	_check(
-		dialog.fleet_meta_label.text.contains("In transit"),
-		"The dialog reports the fleet's transit state"
+		menu.fleet_meta_label.text.contains("In transit"),
+		"The popup reports the fleet's transit state"
 	)
-	dialog.close_button.pressed.emit()
+	menu.close()
 	await process_frame
-	_check(not dialog.visible, "The fleet dialog closes")
+	_check(not menu.visible, "The orders popup closes")
 
 	var turns_to_check := maxi(expected_turns - 1, 0)
 	for i in turns_to_check:
@@ -236,14 +299,22 @@ func _run() -> void:
 
 	scene._on_fleet_selected(fleet)
 	await process_frame
-	_check(dialog.visible, "The in-transit fleet dialog can remain open")
+	_check(menu.visible, "The in-transit fleet popup can remain open")
 
 	scene.turn_manager.advance_turn()
 	await process_frame
-	_check(not dialog.visible, "Arrival closes the destroyed fleet's dialog")
+	_check(not menu.visible, "Arrival closes the destroyed fleet's popup")
 
 	_check(not fleet.in_transit, "The fleet completes its course")
 	_check(destination.surveyed, "Arrival surveys the destination")
+	_check(
+		destination_node.survey_label.visible,
+		"Arrival adds the survey label to the explored system"
+	)
+	_check(
+		destination_node.survey_label.text == destination.display_name,
+		"The survey label shows the explored system's name"
+	)
 	_check(fleet.ships.is_empty(), "The arriving FTL Probe is destroyed")
 	_check(not home.fleets.has(fleet), "The destroyed fleet leaves its origin system")
 	_check(

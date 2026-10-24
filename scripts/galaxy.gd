@@ -60,6 +60,15 @@ func all_fleets() -> Array[FleetData]:
 	return result
 
 
+## Research Data is galaxy-wide, so this sums every system's colonies.
+func research_per_turn() -> int:
+	var total := 0
+	for star in stars:
+		if star != null:
+			total += star.research_flow()
+	return total
+
+
 ## Returns the first unused Greek-letter name for a production system.
 ## Fleet names are galaxy-wide, so deleted fleets release their names even if
 ## they were stationed in another system when they were removed.

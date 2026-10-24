@@ -80,6 +80,32 @@ func _run() -> void:
 	)
 	_check(shipyard.produce_button.text == "Produce Ship", "Produce button has the right label")
 	_check(
+		not shipyard.produce_button.disabled,
+		"Produce button is enabled while resources are sufficient"
+	)
+	var titanium_cost := _cost_label(shipyard, "Titanium")
+	var antimatter_cost := _cost_label(shipyard, "Antimatter")
+	_check(titanium_cost != null, "Cost readout lists Titanium")
+	_check(antimatter_cost != null, "Cost readout lists Antimatter")
+	if titanium_cost != null:
+		_check(
+			titanium_cost.text.contains("25"),
+			"FTL Probe costs 25 Titanium"
+		)
+		_check(
+			not _color_is_red(titanium_cost),
+			"Affordable Titanium cost is not red"
+		)
+	if antimatter_cost != null:
+		_check(
+			antimatter_cost.text.contains("10"),
+			"FTL Probe costs 10 Antimatter"
+		)
+		_check(
+			not _color_is_red(antimatter_cost),
+			"Affordable Antimatter cost is not red"
+		)
+	_check(
 		shipyard.produce_button.anchor_left == 0.5
 		and shipyard.produce_button.anchor_right == 0.5
 		and shipyard.produce_button.anchor_top == 1.0,
@@ -97,6 +123,8 @@ func _run() -> void:
 	)
 
 	shipyard.produce_button.pressed.emit()
+	_check(home.resources.titanium == 175, "Production spends 25 Titanium")
+	_check(home.resources.antimatter == 40, "Production spends 10 Antimatter")
 	_check(home.fleets.size() == 1, "Producing without a selection creates a fleet")
 	if home.fleets.size() == 1:
 		var first := home.fleets[0]
@@ -173,6 +201,101 @@ func _run() -> void:
 	panel.shipyard_button.pressed.emit()
 	_check(shipyard.visible, "Shipyard reopens with its fleet data")
 	_check(shipyard.fleet_count_label.text == "3", "Existing fleets are restored")
+
+	# Five probes cost 125 Titanium and all 50 starting Antimatter.
+	shipyard.produce_button.pressed.emit()
+	_check(home.resources.titanium == 75, "Five probes leave 75 Titanium")
+	_check(home.resources.antimatter == 0, "Five probes exhaust Antimatter")
+	_check(
+		shipyard.produce_button.disabled,
+		"The produce button greys out when resources are missing"
+	)
+	_check(
+		shipyard.feedback_label.text.contains("Insufficient resources"),
+		"The shipyard reports insufficient resources"
+	)
+	antimatter_cost = _cost_label(shipyard, "Antimatter")
+	_check(
+		antimatter_cost != null and _color_is_red(antimatter_cost),
+		"Missing Antimatter is shown in red"
+	)
+	_check(
+		antimatter_cost != null and antimatter_cost.text.contains("short"),
+		"The missing amount is shown on the cost readout"
+	)
+	titanium_cost = _cost_label(shipyard, "Titanium")
+	_check(
+		titanium_cost != null and not _color_is_red(titanium_cost),
+		"Affordable Titanium stays out of red"
+	)
+	var fleets_before := home.fleets.size()
+	shipyard.produce_button.pressed.emit()
+	_check(
+		home.fleets.size() == fleets_before,
+		"Insufficient resources block production"
+	)
+
+	# Researching Colony Ships unlocks the hull in the shipyard.
+	scene.unlocked_ships.append("Colony Ship")
+	shipyard.back_button.pressed.emit()
+	_check(not shipyard.visible, "Shipyard closes before reopening unlocked")
+	panel.shipyard_button.pressed.emit()
+	_check(shipyard.visible, "Shipyard reopens with unlocked hulls")
+	_check(shipyard.hull_list.get_child_count() == 2, "Hull list gains the Colony Ship")
+	_check(shipyard.hull_count_label.text == "2", "Hull count includes the Colony Ship")
+	var colony_button := shipyard.hull_list.get_child(1) as Button
+	_check(colony_button != null, "Colony Ship hull is a button")
+	if colony_button != null:
+		_check(colony_button.text == "Colony Ship", "The second hull is Colony Ship")
+		colony_button.pressed.emit()
+		await process_frame
+	_check(shipyard.hull_name_label.text == "Colony Ship", "Center shows Colony Ship")
+	_check(
+		shipyard.hull_role_value.text == "Colonization",
+		"Colony Ship reports its role"
+	)
+	var colony_titanium := _cost_label(shipyard, "Titanium")
+	var colony_antimatter := _cost_label(shipyard, "Antimatter")
+	if colony_titanium != null:
+		_check(
+			colony_titanium.text.contains("500"),
+			"Colony Ship costs 500 Titanium"
+		)
+	if colony_antimatter != null:
+		_check(
+			colony_antimatter.text.contains("1"),
+			"Colony Ship costs 1 Antimatter"
+		)
+	_check(
+		shipyard.produce_button.disabled,
+		"Colony Ship production waits on resources"
+	)
+
+	home.resources.titanium = 600
+	home.resources.antimatter = 5
+	shipyard.refresh()
+	await process_frame
+	_check(
+		not shipyard.produce_button.disabled,
+		"Funded Colony Ship production is enabled"
+	)
+	shipyard.produce_button.pressed.emit()
+	_check(home.resources.titanium == 100, "Colony Ship spends 500 Titanium")
+	_check(home.resources.antimatter == 4, "Colony Ship spends 1 Antimatter")
+	_check(home.fleets.size() == 5, "Colony Ship production creates a fleet")
+	if home.fleets.size() == 5:
+		var colony_fleet := home.fleets[4]
+		_check(colony_fleet.name == "Newhome Epsilon", "Fifth fleet is Newhome Epsilon")
+		_check(colony_fleet.ships == ["Colony Ship"], "Fleet contains one Colony Ship")
+		_check(
+			colony_fleet.ship_summary() == "1 Colony Ship",
+			"Fleet summary shows the Colony Ship"
+		)
+		_check(
+			is_equal_approx(colony_fleet.speed_ly_per_turn(), 5.0),
+			"A Colony Ship travels 5 light years per turn"
+		)
+
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.physical_keycode = KEY_ESCAPE
@@ -190,6 +313,20 @@ func _run() -> void:
 	_check(not shipyard.visible, "Systems without a shipyard cannot open the view")
 
 	_finish()
+
+
+func _cost_label(shipyard: ShipyardView, needle: String) -> Label:
+	for child in shipyard.cost_value.get_children():
+		if child is Label and (child as Label).text.contains(needle):
+			return child as Label
+	return null
+
+
+func _color_is_red(label: Label) -> bool:
+	if label == null:
+		return false
+	var color := label.get_theme_color("font_color")
+	return color.r > color.g and color.r > color.b
 
 
 func _check(condition: bool, message: String) -> void:

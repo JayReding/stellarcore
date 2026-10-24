@@ -250,12 +250,12 @@ func _run() -> void:
 	_check(shipyard != null and shipyard.visible, "The shipyard opens")
 	if shipyard != null:
 		_check(
-			shipyard.resource_note.text.contains("Local Titanium: 175"),
+			shipyard.resource_note.text.contains("175 Titanium"),
 			"The shipyard uses Newhome's local Titanium"
 		)
 		_check(
-			shipyard.resource_note.text.contains("not yet assigned"),
-			"The shipyard marks production costs as unassigned"
+			shipyard.resource_note.text.contains("Antimatter"),
+			"The shipyard reads both production resources locally"
 		)
 		shipyard.close()
 		await process_frame

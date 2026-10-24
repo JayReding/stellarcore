@@ -171,7 +171,7 @@ func _create_fleet_row(fleet: FleetData) -> Button:
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	button.tooltip_text = "%s — %s\nClick to manage this fleet" % [
+	button.tooltip_text = "%s — %s\nRight-click for fleet orders" % [
 		fleet.name, fleet.ship_summary()
 	]
 	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
@@ -182,6 +182,7 @@ func _create_fleet_row(fleet: FleetData) -> Button:
 		"pressed", _planet_row_style(Color(0.05, 0.13, 0.23, 0.7))
 	)
 	button.pressed.connect(_on_fleet_pressed.bind(fleet))
+	button.gui_input.connect(_on_fleet_row_input.bind(fleet))
 
 	var row := HBoxContainer.new()
 	button.add_child(row)
@@ -224,6 +225,16 @@ func _on_fleet_pressed(fleet: FleetData) -> void:
 	if fleet == null:
 		return
 	fleet_selected.emit(fleet)
+
+
+func _on_fleet_row_input(event: InputEvent, fleet: FleetData) -> void:
+	if (
+		event is InputEventMouseButton
+		and event.pressed
+		and event.button_index == MOUSE_BUTTON_RIGHT
+		and fleet != null
+	):
+		fleet_selected.emit(fleet)
 
 
 func _update_shipyard(data: StarData) -> void:

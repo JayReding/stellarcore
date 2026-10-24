@@ -1,6 +1,6 @@
 class_name PlanetData
 extends Resource
-## A planet orbiting a star. Attributes and resources will be added later.
+## A planet orbiting a star, including the structures built on or around it.
 
 enum PlanetClass { ROCKY, HIGH_MINERAL, EARTH_LIKE, DEAD_WORLD, GAS_GIANT, ICE_WORLD }
 
@@ -13,6 +13,8 @@ const CLASS_NAMES: Array[String] = [
 @export var planet_class: PlanetClass = PlanetClass.ROCKY
 ## Average orbital distance in astronomical units. Used to order the system.
 @export var orbit_au: float = 0.0
+## Structures built on the surface or in orbit of this planet.
+@export var structures: Array[StructureData] = []
 
 
 static func class_name_for(cls: int) -> String:
@@ -58,3 +60,61 @@ func class_name_label() -> String:
 
 func class_color() -> Color:
 	return class_color_for(planet_class)
+
+
+func add_structure(type_id: String) -> StructureData:
+	var structure := StructureData.new()
+	structure.type_id = type_id
+	structures.append(structure)
+	return structure
+
+
+func has_structure(type_id: String) -> bool:
+	for structure in structures:
+		if structure != null and structure.type_id == type_id:
+			return true
+	return false
+
+
+func structure_count() -> int:
+	return structures.size()
+
+
+## Net local-resource production minus upkeep. Research Data is separate because
+## it is galaxy-wide.
+func local_resource_flow() -> Dictionary:
+	var flow: Dictionary = {}
+	for structure in structures:
+		if structure == null:
+			continue
+		var structure_flow := structure.net_resource_flow()
+		for resource_id in structure_flow:
+			flow[resource_id] = (
+				int(flow.get(resource_id, 0)) + int(structure_flow[resource_id])
+			)
+	return flow
+
+
+func research_per_turn() -> int:
+	var total := 0
+	for structure in structures:
+		if structure != null:
+			total += structure.research_per_turn()
+	return total
+
+
+## Individual contribution and upkeep lines, tagged with the structure that
+## causes them. Used by the System View planet detail.
+func flow_entries() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for structure in structures:
+		if structure == null:
+			continue
+		for entry in structure.flow_entries():
+			entries.append({
+				"resource_id": entry["resource_id"],
+				"amount": entry["amount"],
+				"kind": entry["kind"],
+				"structure_name": structure.display_name(),
+			})
+	return entries

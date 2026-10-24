@@ -9,6 +9,7 @@ const HOME_LABEL_REFERENCE_DISTANCE := 120.0
 @onready var halo: MeshInstance3D = $Halo
 @onready var selection_ring: MeshInstance3D = $SelectionRing
 @onready var home_label: Label3D = $HomeLabel
+@onready var survey_label: Label3D = $SurveyLabel
 @onready var pick_body: StaticBody3D = $PickBody
 @onready var pick_shape: CollisionShape3D = $PickBody/CollisionShape3D
 
@@ -17,6 +18,7 @@ var data: StarData
 var _star_color := Color.WHITE
 var _ring_base_scale := 1.0
 var _selected := false
+var _surveyed := false
 var _pulse_time := 0.0
 
 static var _halo_texture: ImageTexture
@@ -39,6 +41,8 @@ func setup(star_data: StarData) -> void:
 	if data.is_home:
 		home_label.text = data.display_name.to_upper()
 		home_label.position = Vector3(0.0, radius + 2.0, 0.0)
+
+	refresh_survey_label()
 
 	var surface_material := visual.material_override as ShaderMaterial
 	if surface_material != null:
@@ -71,19 +75,42 @@ func set_selected(value: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	if home_label.visible:
-		var camera := get_viewport().get_camera_3d()
-		if camera != null:
-			var camera_distance := camera.global_position.distance_to(global_position)
-			home_label.scale = Vector3.ONE * clampf(
-				camera_distance / HOME_LABEL_REFERENCE_DISTANCE, 0.3, 1.5
-			)
+	if data != null and data.surveyed != _surveyed:
+		refresh_survey_label()
+
+	if home_label.visible or survey_label.visible:
+		_update_label_scales()
 
 	if not _selected:
 		return
 	_pulse_time += delta
 	var pulse := 1.0 + sin(_pulse_time * 4.0) * 0.05
 	selection_ring.scale = Vector3.ONE * _ring_base_scale * pulse
+
+
+## Names explored systems beneath the star. Newhome keeps its dedicated
+## home label, so its survey label stays hidden to avoid duplicating the name.
+func refresh_survey_label() -> void:
+	_surveyed = data != null and data.surveyed
+	survey_label.visible = _surveyed and not data.is_home
+	if not survey_label.visible:
+		return
+	survey_label.text = data.display_name
+	survey_label.position = Vector3(0.0, -(data.visual_radius + 1.35), 0.0)
+
+
+func _update_label_scales() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var camera_distance := camera.global_position.distance_to(global_position)
+	var scale_factor := clampf(
+		camera_distance / HOME_LABEL_REFERENCE_DISTANCE, 0.3, 1.5
+	)
+	if home_label.visible:
+		home_label.scale = Vector3.ONE * scale_factor
+	if survey_label.visible:
+		survey_label.scale = Vector3.ONE * scale_factor
 
 
 func _refresh_halo() -> void:

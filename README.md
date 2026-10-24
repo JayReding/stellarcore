@@ -2,8 +2,9 @@
 
 A 4X space strategy game in development with Godot 4.7. This repository
 currently contains the first playable slice: the **Stellar View**, the
-full-screen **System View**, the **Technologies** tree, the **Newhome III
-Shipyard**, per-system **resource stockpiles**, the turn loop, and the first
+full-screen **System View** with a structure and economy sidebar, the
+**Technologies** tree, the **Newhome III Shipyard**, per-system **resource
+stockpiles**, planet-attached **structures**, the turn loop, and the first
 **fleet exploration** flow.
 
 ## Running
@@ -37,6 +38,7 @@ godot --path .
 | `Esc` while choosing a destination | Cancel destination selection |
 | Technologies button | Open the technology tree |
 | Click a planet (surveyed) | Open that system in the full-screen System View |
+| Click a planet (System View) | Inspect that planet's structures and resource flow |
 | Shipyard button (Newhome) | Open the Newhome III shipyard |
 | Produce Ship | Build one FTL Probe; creates a fleet if none is selected |
 | Click a fleet (Shipyard) | Select it to reinforce it, or deselect it to create a new fleet |
@@ -66,14 +68,19 @@ godot --path .
   panel. The per-system stockpiles are the foundation for the planned cargo
   transport mechanic.
 - **Research Data** is galaxy-wide. Its readout appears in the top-left HUD and
-  in the technology tree, beginning at **0 RD**.
+  in the technology tree, beginning at **0 RD**. Colonies produce Research Data
+  each turn.
 - A turn loop starting at **Turn 1**. The current turn is shown in the bottom-left
   HUD. **End Turn** in the bottom-right starts a five-second countdown; clicking
   the button again cancels it. When the countdown finishes, the turn advances,
-  `TurnManager` emits `turn_advanced`, and every fleet in transit moves one leg
-  of its course.
-- A 3D star per system with an emissive surface, halo, and selection ring.
+  `TurnManager` emits `turn_advanced`, every fleet in transit moves one leg of
+  its course, and structures apply their output and upkeep.
+- A 3D star per system with an emissive surface, halo, and selection ring. Stars
+  render at 80% of their original radius so the map stays readable.
 - Newhome is marked with a floating `NEWHOME` label and a home-system panel.
+- Explored systems show their star name beneath the star. The name appears as
+  soon as a probe surveys the system and stays visible in the Stellar View;
+  Newhome keeps its separate gold `NEWHOME` label.
 - Every system carries 2–6 procedurally generated planets ordered outward from
   its star. Classes are position-weighted: rocky and high-mineral worlds in the
   inner system, rare Earth-like worlds in the middle, dead worlds just beyond
@@ -81,30 +88,77 @@ godot --path .
 - Planets are named after their star with Roman numerals (`SC-002 I`,
   `Newhome III`). Newhome always has four: **Newhome I** (Rocky), **Newhome II**
   (High-Mineral), **Newhome III** (Earth-like), and **Newhome IV** (Gas Giant).
+- Structures are attached to planets and are either **surface** or **orbital**.
+  Newhome starts with four:
+  - **Newhome II** (orbit): **Ore Processing Station**, producing 5 Titanium and
+    consuming 2 Helium 3 per turn.
+  - **Newhome III** (surface): **Colony**, producing 5 Titanium, 1 Helium 3, and
+    5 Research Data per turn. A Colony permits construction in its system.
+  - **Newhome III** (orbit): **Shipyard**, consuming 2 Helium 3 per turn and
+    enabling ship production.
+  - **Newhome IV** (orbit): **Helium 3 Station**, producing 5 Helium 3 and 1
+    Antimatter per turn.
+- Those base figures give Newhome a net **+10 Titanium**, **+2 Helium 3**,
+  **+1 Antimatter**, and **+5 Research Data** per turn. Production is
+  intentionally flat for now;
+  planetary richness will scale it later.
 - Only Newhome starts surveyed, so its planet list is the only one visible at
   first. The other systems already own their planets but report as unsurveyed.
-  When an exploring fleet arrives, the system becomes surveyed and the arrival
-  notice reports the number and types of its planets. The old **Scan** button is
-  hidden now that probe arrival is the survey path.
+  When an exploring fleet arrives, the system becomes surveyed, its name appears
+  on the map, and the arrival notice reports the number and types of its planets.
+  The old **Scan** button is hidden now that probe arrival is the survey path.
 - Clicking any planet in a surveyed system's **Planetary Survey** list opens the
-  full-screen 3D **System View**. It shows the star at the center, compressed
-  orbital rings, planet labels, and a back button (or `Esc`) to return to the
-  Stellar View. The overlay uses 4x MSAA and adaptive 3D supersampling, with
-  enlarged outlined labels for readability.
+  full-screen 3D **System View**. It shows the star system centered in the space
+  left of the sidebar, compressed orbital rings, planet labels, and a back button
+  (or `Esc`) to return to the Stellar View. The overlay uses 4x MSAA and adaptive
+  3D supersampling, with enlarged outlined labels for readability.
+- The System View's right-hand sidebar shows the system's current resource
+  balances and per-turn change for every visible local resource, with positive
+  changes in green and negative changes in red. Galaxy-wide Research Data is
+  shown separately. The sidebar opens with a large **SYSTEM OVERVIEW** heading,
+  followed by the resource lists and the structures built in the system, grouped
+  by planet. Clicking a planet (or a structure row) opens a separate
+  **Planet Detail** sidebar on top of the overview, showing every structure on
+  that planet and each individual resource contribution or upkeep line, plus a
+  **BUILD STRUCTURE** button and a close button (`Esc` also dismisses it,
+  topmost layer first).
+- **BUILD STRUCTURE** opens a centered popup with the construction options for
+  the selected planet. Construction is available only in systems with a
+  **Colony** and offers every unlocked non-Colony structure with its
+  production/upkeep summary plus its construction cost and build time. Every
+  player-built structure except the **Shipyard** costs **200 Titanium** from
+  the system's local stockpile, spent up front, and takes **3 turns** to
+  complete; the Shipyard is free and instant. Locked structures
+  appear greyed out as **REQUIRES RESEARCH** until their technology completes
+  (for example, the **Antimatter Refinery** needs **Antimatter Refining**); only
+  one Shipyard per system is allowed, and a structure already on the planet
+  shows **ALREADY PRESENT**. Unaffordable rows are disabled with a red
+  shortfall amount. Only one construction project runs per star system at a
+  time; the other rows read **IN PROGRESS** until it finishes. The popup stays
+  open with a confirmation message, and the sidebars, flows, summaries, and
+  per-turn economy pick finished structures up the turn they complete. `Esc`
+  closes the popup first, then the Planet Detail sidebar, then the System View
+  itself.
+- While anything is under construction, a **CONSTRUCTION** panel on the
+  Stellar View lists each project with its system, structure, and turns left.
+  The status line announces each completion.
 - The selected-system panel includes a **Fleet Command** section listing that
-  system's fleets and their ships. Newhome starts with no fleets. Fleet rows are
-  clickable and open the fleet actions dialog. Docked fleets stay in Fleet
-  Command; only in-transit fleets get map markers, and a marker disappears as
-  soon as the fleet arrives.
-- The fleet actions dialog offers **Set Fleet Destination**, **Rename Fleet**,
+  system's fleets and their ships. Newhome starts with no fleets. Clicking or
+  right-clicking a fleet (in Fleet Command or on its map marker) opens a small
+  orders popup at the cursor instead of a modal screen. Clicking anywhere else
+  or pressing `Esc` dismisses it. Docked fleets stay in Fleet Command; only
+  in-transit fleets get map markers, and a marker disappears as soon as the
+  fleet arrives.
+- The fleet orders popup offers **Set Fleet Destination**, **Rename Fleet**,
   **Modify Fleet**, and **Delete Fleet** (red text). Only destination assignment
   is implemented in this slice; the other actions are present but disabled.
 - **Set Fleet Destination** lets the player click a star. A confirmation dialog
   shows the destination, distance, fleet speed, and required turns before the
   course is accepted. `Back` returns to star selection, and `Esc` cancels.
-- Fleets travel at the speed of their slowest ship. The FTL Probe currently
-  moves **10 light years per turn**, so the number of turns is
-  `ceil(distance / speed)` and the fleet moves on each turn advance.
+- Fleets travel at the speed of their slowest ship. The FTL Probe moves
+  **10 light years per turn** while the **Colony Ship** manages only **5**, so
+  the number of turns is `ceil(distance / speed)` and the fleet moves on each
+  turn advance.
 - A sent fleet gets a moving map marker and a dashed course line from its origin
   to its destination. The marker shows only the fleet name, keeping the map
   uncluttered, and is removed when the fleet arrives.
@@ -115,25 +169,51 @@ godot --path .
   arrivals. Arrival notices include the probe loss, the system's planet count and
   planet types, and the destination's panel immediately exposes its surveyed
   planet list.
-- **Newhome III** is the only shipyard in the current slice. The panel's
-  **Shipyard** button is enabled only for Newhome and opens a full-screen
-  construction interface: hull types on the left, customization in the center,
-  and the system's fleets on the right.
-- The only hull type is the **FTL Probe**, a reconnaissance craft with no
-  customization options. **Produce Ship** at the bottom center builds one probe.
-  If no fleet is selected, a new fleet is created; otherwise the probe joins the
-  selected fleet. Selecting a fleet again clears the selection.
+- The **Shipyard structure** in orbit of **Newhome III** is the only shipyard in
+  the current slice and consumes 2 Helium 3 per turn. The panel's **Shipyard**
+  button is enabled only for Newhome and opens a full-screen construction
+  interface: hull types on the left, customization in the center, and the
+  system's fleets on the right.
+- The only default hull type is the **FTL Probe**, a reconnaissance craft with
+  no customization options. It costs **25 Titanium** and **10 Antimatter**.
+  Researching **Colony Ships** unlocks a second hull, the **Colony Ship**
+  (**500 Titanium** and **1 Antimatter**), which appears in the shipyard hull
+  list once unlocked. The 1 Antimatter is a placeholder until the ship
+  refueling mechanic lands.
+  **Produce Ship** at the bottom center builds one probe and spends the cost from
+  the system's local stockpile. If no fleet is selected, a new fleet is created;
+  otherwise the probe joins the selected fleet. Selecting a fleet again clears
+  the selection.
 - Fleets are named after their production system plus a Greek letter, beginning
   with **Newhome Alpha**, **Newhome Beta**, and continuing through **Newhome
   Omega**. Names are allocated from the galaxy's active fleets, so a deleted
   fleet releases its name. Once all 24 letters are used, a generation number is
   appended (**Newhome Alpha 2**, then **Newhome Omega 2**, and so on).
-- Ship production is free for now. The shipyard shows the current system's local
-  Titanium stockpile and notes that production costs are not yet assigned.
+- The shipyard's cost readout shows each required resource and turns missing
+  resources red with the shortfall amount. **Produce Ship** is disabled and
+  greyed out when the local stockpile cannot cover the full cost, and the status
+  line explains what is missing.
 - A **Technologies** button in the top bar opens a full-screen technology tree.
-  **FTL Probes** is available from the start and appears as a rounded-square card
-  marked "AVAILABLE BY DEFAULT" with no research requirement. The **Research
-  Data** readout is driven by the galaxy-wide Research Data pool.
+  Technologies are grouped into **tier rows** with labelled **category sections**
+  inside them, sorted by tier and then by category. Tier 1 contains **Propulsion**
+  (**FTL Probes**), **Exploration** (**Colony Ships**, 100 RD, 5 turns), and
+  **Industrial** (**Ore Processing**); Tier 2 contains **Industrial**
+  (**Antimatter Refining**, 50 RD, 3 turns). Default technologies
+  appear on rounded-square cards marked "AVAILABLE BY DEFAULT".
+- Clicking a researchable technology while no project is active opens a
+  confirmation dialog that restates the technology, its Research Data cost, and
+  its research time. **Begin Research** spends the Research Data up front; it is
+  disabled with a red warning if the player cannot afford the project.
+- While research is active, the HUD Research Data panel shows the project name,
+  turns remaining, and a progress bar. Research advances one turn at a time with
+  **End Turn**. Completing a technology marks its card **UNLOCKED** and applies
+  its unlocked ships or structures. **Antimatter Refining** unlocks the
+  **Antimatter Refinery** orbital structure, and **Colony Ships** unlocks the
+  **Colony Ship** hull in the shipyard.
+- A Colony Ship that reaches a system without a Colony is consumed on arrival
+  to found one on the system's first open planet, and the arrival notice says
+  where. Systems that already have a Colony keep the ship. Enemy-held systems
+  will refuse colonies once hostile fleets exist.
 - Procedural planets in the System View with star-driven light and dark sides.
   Each class has its own deterministic, cached surface texture:
   - **Rocky**: brown and gray terrain with craters.
@@ -161,27 +241,30 @@ scenes/
   shipyard.tscn            Full-screen Newhome III shipyard
   star.tscn                Star visuals and pick collider
   ui/star_info_panel.tscn  Selected-system readout
-  ui/fleet_dialog.tscn     Fleet actions and course confirmation popup
+  ui/fleet_menu.tscn     Cursor-anchored fleet orders popup
+  ui/fleet_dialog.tscn     Course confirmation popup
   ui/tech_node.tscn        Rounded-square technology card
 scripts/
-  stellar_view.gd          Spawning, input, selection, fleet courses, and turns
-  system_view.gd           System View layout, lighting, and lifecycle
+  stellar_view.gd          Spawning, input, selection, fleets, turns, economy
+  system_view.gd           System View layout, planet picking, economy sidebar
   tech_tree.gd             Technology data and tree overlay
   shipyard.gd              Hull selection, production, and fleet UI
   fleet_data.gd            Fleet position, speed, route, and ship composition
   fleet_marker.gd          Clickable in-transit fleet marker
   turn_manager.gd          Turn counter and cancellable end-turn countdown
   resource_stockpile.gd    Per-system resource definitions and balances
+  structure_data.gd        Structure definitions, output, upkeep, and location
   planet_texture_factory.gd  Procedural planet and cloud textures
-  galaxy_generator.gd      Seeded star placement, Newhome, class mix
+  galaxy_generator.gd      Seeded star placement, Newhome, starting structures
   galaxy.gd                Star list and light-year distance matrix
   galaxy_scale.gd          Light years <-> view world units
-  star_data.gd             Spectra table, planets, fleets, resources, shipyard
-  planet_data.gd           Planet classes, colors, and designations
+  star_data.gd             Spectra, planets, fleets, resources, structures
+  planet_data.gd           Planet classes, colors, designations, structures
   star.gd                  Per-star visuals
   camera_rig.gd            Orbit/tilt/zoom/focus camera
   ui/star_info_panel.gd    Panel population, clickable fleet rows, and fades
-  ui/fleet_dialog.gd       Fleet action menu and course confirmation
+  ui/fleet_menu.gd       Fleet orders popup at the cursor
+  ui/fleet_dialog.gd       Course confirmation popup
   ui/tech_node.gd          Technology card population
 shaders/
   star_surface.gdshader    Emissive star surface
@@ -189,22 +272,30 @@ shaders/
 ```
 
 `StarData` is a `Resource` independent of the view, ready to carry ownership
-and colony state as the turn-based layer is built. It also owns the system's
+and additional turn-based state. It also owns the system's
 `PlanetData` list, `FleetData` list, local `ResourceStockpile`, shipyard planet
-reference, and `surveyed` flag. `FleetData` stores a fleet's name, current
-system, light-year position, ship composition, speed, and any active route
-(origin, destination, distance, turns elapsed, and turns total) while formal ship
-models are still provisional.
+reference, and `surveyed` flag. It aggregates each planet's structures and their
+net local-resource and Research Data flows.
+`PlanetData` owns its `StructureData` list. Each structure declares whether it is
+on the surface or in orbit and carries base production, upkeep, and Research Data
+values. `StarData` exposes helpers for colony construction permission, shipyard
+presence, system resource flow, and Research Data flow.
+`FleetData` stores a fleet's name, current system, light-year position, ship
+composition, speed, and any active route (origin, destination, distance, turns
+elapsed, and turns total) while formal ship models are still provisional.
 `ResourceStockpile` holds one system's raw-resource balances, resource metadata,
 and the add/spend/transfer helpers used by the system panel, shipyard, and future
-production costs. Research Data is stored separately on `StellarView` because it
-is galaxy-wide, along with the global hidden-resource reveal state.
+production costs. `StellarView` applies structure output and upkeep on
+`turn_advanced`; the System View reads the same data for its sidebar. Research
+Data is stored separately on `StellarView` because it is galaxy-wide, along with
+the global hidden-resource reveal state.
 
 ## Verification
 
 The headless galaxy check validates Newhome, the 100 ly bounds, class mix,
-minimum separation, the distance matrix, and the planet rules (Newhome's fixed
-four, 2–6 planets per procedural system, designations, and orbit order):
+minimum separation, the distance matrix, the reduced star visual scale, and the
+planet rules (Newhome's fixed four, 2–6 planets per procedural system,
+designations, and orbit order):
 
 ```bash
 godot --headless --path . --script res://tests/verify_galaxy.gd
@@ -225,20 +316,39 @@ availability, and the overlay close paths:
 godot --headless --path . --script res://tests/verify_system_view.gd
 ```
 
+The structure check validates the four starting Newhome structures and their
+surface/orbit locations, base production and upkeep, Colony construction
+permission, Shipyard availability, per-planet flow entries, per-turn system and
+galaxy-wide economy application, sidebar balances, larger overview text,
+left-of-sidebar system centering, green/red changes, planet click targets, the
+system structure list, the Planet Detail overlay sidebar, Planet Detail
+output/upkeep rows, and the construction popup (Build button flow, cost/time
+display, Colony and research-unlock gating, affordability shortfalls,
+duplicate/Shipyard rules, one project per system, queued builds with upfront
+spending, turn-by-turn progress on the Stellar View HUD, completion effects,
+and Esc layering):
+
+```bash
+godot --headless --path . --script res://tests/verify_structures.gd
+```
+
 The shipyard check validates Newhome III ownership, the FTL Probe hull and its
-empty customization panel, production with and without a selected fleet, Greek
-fleet naming and overflow, Fleet Command refresh, and the disabled shipyard
-state away from Newhome:
+empty customization panel, the 25 Titanium/10 Antimatter cost and deduction,
+insufficient-resource button gating and red cost readout, production with and
+without a selected fleet, Greek fleet naming and overflow, the Colony Ship
+unlock, its 500 Titanium/1 Antimatter cost and 5 ly/turn speed, Fleet Command
+refresh, and the disabled shipyard state away from Newhome:
 
 ```bash
 godot --headless --path . --script res://tests/verify_shipyard.gd
 ```
 
-The exploration check validates the fleet action dialog and its disabled
-management actions, destination selection and confirmation, travel-time math,
+The exploration check validates the fleet orders popup and its click-away,
+right-click, and Escape dismissal, the disabled management actions, destination
+selection and confirmation, travel-time math,
 the dashed course line and moving marker, marker removal on arrival, turn-by-turn
 movement, probe destruction, fleet deletion, fleet-name reuse, Fleet Command
-refresh, and the arrival survey notice:
+refresh, the explored-system name labels, and the arrival survey notice:
 
 ```bash
 godot --headless --path . --script res://tests/verify_exploration.gd
@@ -260,17 +370,37 @@ Data, and the shipyard's local Titanium readout:
 godot --headless --path . --script res://tests/verify_resources.gd
 ```
 
-The technology tree check validates the top-bar button, the default-available
-FTL Probes card, the Research Data readout, and the close paths:
+The technology tree check validates the top-bar button, tier rows and
+tier-and-category grouping, the ordering and cards of the Propulsion,
+Exploration, and Industrial sections across Tier 1 and Tier 2, the Research
+Data readout, and the close paths:
 
 ```bash
 godot --headless --path . --script res://tests/verify_tech_tree.gd
 ```
 
+The research check validates the confirmation dialog and its cost/time readout,
+affordability gating, Research Data spending, turn-by-turn progress, the HUD
+project and turns-remaining display, completion state, and the Antimatter
+Refinery and Colony Ship unlocks:
+
+```bash
+godot --headless --path . --script res://tests/verify_research.gd
+```
+
+The colonization check validates Colony Ship speed and voyage pricing, founding
+a Colony on the destination's first open planet, ship consumption and fleet
+disbanding, the founding notice, survey and Colony production afterwards, and
+keeping the ship when a Colony already exists:
+
+```bash
+godot --headless --path . --script res://tests/verify_colonization.gd
+```
+
 ## Not yet implemented
 
 Fleet management (rename, modify, and delete), cargo transport between systems,
-resource extraction from surveyed planets, research durations and spending, the
-full scanning/discovery system, resource costs for ship production,
-colonization, industry, combat, advanced hull customization, save/load, and the
-Combat View.
+resource extraction from surveyed planets, planetary richness scaling,
+structure input-shortage rules, the full scanning/discovery
+system, enemy-held systems, ship refueling, combat, advanced hull
+customization, save/load, and the Combat View.

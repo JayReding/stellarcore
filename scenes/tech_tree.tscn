@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://sfjmdk0yyhav"]
 
-[ext_resource type="Script" path="res://scripts/tech_tree.gd" id="1_tree"]
+[ext_resource type="Script" uid="uid://ntsxk1dgk3pg" path="res://scripts/tech_tree.gd" id="1_tree"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_normal"]
 content_margin_left = 14.0
@@ -18,22 +18,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
-content_margin_left = 14.0
-content_margin_top = 9.0
-content_margin_right = 14.0
-content_margin_bottom = 9.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
 content_margin_left = 14.0
 content_margin_top = 9.0
@@ -45,6 +29,22 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.3, 0.6, 0.9, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.12, 0.28, 0.46, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -69,21 +69,84 @@ shadow_color = Color(0, 0, 0, 0.32)
 shadow_size = 8
 shadow_offset = Vector2(0, 4)
 
-[node name="TechTree" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_confirm_normal"]
+content_margin_left = 20.0
+content_margin_top = 9.0
+content_margin_right = 20.0
+content_margin_bottom = 9.0
+bg_color = Color(0.06, 0.24, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.86, 0.7, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_confirm_hover"]
+content_margin_left = 20.0
+content_margin_top = 9.0
+content_margin_right = 20.0
+content_margin_bottom = 9.0
+bg_color = Color(0.09, 0.34, 0.28, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.58, 0.96, 0.82, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_confirm_pressed"]
+content_margin_left = 20.0
+content_margin_top = 9.0
+content_margin_right = 20.0
+content_margin_bottom = 9.0
+bg_color = Color(0.04, 0.16, 0.14, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.7, 0.58, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_confirm_disabled"]
+content_margin_left = 20.0
+content_margin_top = 9.0
+content_margin_right = 20.0
+content_margin_bottom = 9.0
+bg_color = Color(0.04, 0.06, 0.09, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.22, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="TechTree" type="CanvasLayer" unique_id=604771507]
 layer = 10
 visible = false
 script = ExtResource("1_tree")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=778318339]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="Background" type="ColorRect" parent="Root"]
+[node name="Background" type="ColorRect" parent="Root" unique_id=1321838458]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -93,7 +156,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.005, 0.011, 0.022, 1)
 
-[node name="UI" type="Control" parent="Root"]
+[node name="UI" type="Control" parent="Root" unique_id=1343618934]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -102,41 +165,38 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Eyebrow" type="Label" parent="Root/UI"]
+[node name="Eyebrow" type="Label" parent="Root/UI" unique_id=777300585]
 layout_mode = 1
 offset_left = 40.0
 offset_top = 26.0
 offset_right = 480.0
 offset_bottom = 46.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
 theme_override_font_sizes/font_size = 12
 text = "RESEARCH & DEVELOPMENT"
 
-[node name="NameLabel" type="Label" parent="Root/UI"]
+[node name="NameLabel" type="Label" parent="Root/UI" unique_id=1883698017]
 layout_mode = 1
 offset_left = 38.0
 offset_top = 44.0
 offset_right = 640.0
 offset_bottom = 92.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 34
 text = "Technologies"
 
-[node name="MetaLabel" type="Label" parent="Root/UI"]
+[node name="MetaLabel" type="Label" parent="Root/UI" unique_id=2073622086]
 unique_name_in_owner = true
 layout_mode = 1
 offset_left = 40.0
 offset_top = 94.0
 offset_right = 720.0
 offset_bottom = 114.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.6, 0.72, 0.85, 1)
 theme_override_font_sizes/font_size = 13
 text = "TECH TREE  •  1 TECHNOLOGY"
 
-[node name="BackButton" type="Button" parent="Root/UI"]
+[node name="BackButton" type="Button" parent="Root/UI" unique_id=2129665979]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 1
@@ -150,15 +210,15 @@ grow_horizontal = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
-theme_override_styles/hover = SubResource("StyleBox_back_hover")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
 text = "BACK TO STELLAR VIEW"
 
-[node name="FundsPanel" type="PanelContainer" parent="Root/UI"]
+[node name="FundsPanel" type="PanelContainer" parent="Root/UI" unique_id=860426366]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -171,30 +231,30 @@ grow_horizontal = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_funds")
 
-[node name="FundsContent" type="VBoxContainer" parent="Root/UI/FundsPanel"]
+[node name="FundsContent" type="VBoxContainer" parent="Root/UI/FundsPanel" unique_id=175466524]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="FundsCap" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+[node name="FundsCap" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=1814586883]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
 theme_override_font_sizes/font_size = 10
 text = "RESEARCH DATA"
 
-[node name="FundsLabel" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+[node name="FundsLabel" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=224323208]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 26
 text = "0 RD"
 
-[node name="FundsNote" type="Label" parent="Root/UI/FundsPanel/FundsContent"]
+[node name="FundsNote" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=2088356038]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
 theme_override_font_sizes/font_size = 10
 text = "Earned by surveying systems"
 
-[node name="Content" type="CenterContainer" parent="Root/UI"]
+[node name="Content" type="CenterContainer" parent="Root/UI" unique_id=1079899611]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -205,24 +265,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TreeColumn" type="VBoxContainer" parent="Root/UI/Content"]
+[node name="TreeColumn" type="VBoxContainer" parent="Root/UI/Content" unique_id=482583496]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="TierLabel" type="Label" parent="Root/UI/Content/TreeColumn"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.48, 0.7, 0.92, 1)
-theme_override_font_sizes/font_size = 11
-text = "TIER 1  •  PROPULSION"
-horizontal_alignment = 1
-
-[node name="TechList" type="HBoxContainer" parent="Root/UI/Content/TreeColumn"]
+[node name="TechList" type="VBoxContainer" parent="Root/UI/Content/TreeColumn" unique_id=1769840202]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 24
-alignment = 1
+theme_override_constants/separation = 26
 
-[node name="FundingNote" type="Label" parent="Root/UI"]
+[node name="FundingNote" type="Label" parent="Root/UI" unique_id=119145325]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -232,12 +284,11 @@ offset_top = -38.0
 offset_right = 500.0
 offset_bottom = -20.0
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.4, 0.54, 0.68, 1)
 theme_override_font_sizes/font_size = 10
 text = "RESEARCH DATA IS SPENT TO UNLOCK TECHNOLOGIES"
 
-[node name="Hint" type="Label" parent="Root/UI"]
+[node name="Hint" type="Label" parent="Root/UI" unique_id=1030128731]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -250,8 +301,158 @@ offset_right = 120.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.48, 0.62, 0.78, 1)
 theme_override_font_sizes/font_size = 12
 text = "ESC TO RETURN"
 horizontal_alignment = 1
+
+[node name="DialogBackdrop" type="ColorRect" parent="Root/UI"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.68)
+
+[node name="ResearchDialog" type="PanelContainer" parent="Root/UI"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -330.0
+offset_top = -210.0
+offset_right = 330.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_funds")
+
+[node name="DialogContent" type="VBoxContainer" parent="Root/UI/ResearchDialog"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DialogEyebrow" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "RESEARCH PROJECT"
+
+[node name="DialogTitle" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Technology"
+
+[node name="DialogMeta" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "TIER 1  •  PROPULSION"
+
+[node name="DialogDescription" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.63, 0.72, 0.83, 1)
+theme_override_font_sizes/font_size = 12
+text = "Technology description"
+autowrap_mode = 3
+
+[node name="DialogSeparator" type="HSeparator" parent="Root/UI/ResearchDialog/DialogContent"]
+layout_mode = 2
+modulate = Color(0.45, 0.6, 0.8, 0.35)
+
+[node name="DialogStats" type="GridContainer" parent="Root/UI/ResearchDialog/DialogContent"]
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="CostKey" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "RESEARCH COST"
+
+[node name="DialogCost" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "0 RD"
+horizontal_alignment = 2
+
+[node name="TimeKey" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "TIME"
+
+[node name="DialogTime" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "0 turns"
+horizontal_alignment = 2
+
+[node name="DialogWarning" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 11
+text = "Insufficient Research Data."
+autowrap_mode = 3
+
+[node name="DialogSpacer" type="Control" parent="Root/UI/ResearchDialog/DialogContent"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="DialogButtons" type="HBoxContainer" parent="Root/UI/ResearchDialog/DialogContent"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="DialogCancelButton" type="Button" parent="Root/UI/ResearchDialog/DialogContent/DialogButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+text = "Cancel"
+
+[node name="DialogConfirmButton" type="Button" parent="Root/UI/ResearchDialog/DialogContent/DialogButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.78, 0.98, 0.9, 1)
+theme_override_colors/font_hover_color = Color(0.9, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.68, 0.9, 0.82, 1)
+theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBox_confirm_normal")
+theme_override_styles/hover = SubResource("StyleBox_confirm_hover")
+theme_override_styles/pressed = SubResource("StyleBox_confirm_pressed")
+theme_override_styles/disabled = SubResource("StyleBox_confirm_disabled")
+text = "Begin Research"

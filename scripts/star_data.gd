@@ -3,8 +3,8 @@ extends Resource
 ## Persistent data for a single star system.
 ##
 ## This resource deliberately knows nothing about the view. The stellar view
-## renders it, but future turn-based systems (colonies, fleets, ownership)
-## can extend and serialize the same object.
+## renders it, but turn-based systems (structures, fleets, ownership) can extend
+## and serialize the same object.
 
 enum SpectralClass { O, B, A, F, G, K }
 
@@ -35,10 +35,135 @@ const CLASS_SIZE_FACTORS: Array[float] = [1.50, 1.32, 1.16, 1.03, 0.92, 0.80]
 @export var resources: ResourceStockpile = ResourceStockpile.new()
 ## Planet that hosts this system's shipyard, if any.
 @export var shipyard_planet: PlanetData = null
+## The single structure currently under construction in this system. Only one
+## construction project runs per star system at a time.
+@export var construction_type_id: String = ""
+@export var construction_planet: PlanetData = null
+@export var construction_turns_remaining: int = 0
+@export var construction_turns_total: int = 0
 
 
 func has_shipyard() -> bool:
+	if (
+		shipyard_planet == null
+		or not shipyard_planet.has_structure(StructureData.SHIPYARD)
+	):
+		refresh_shipyard_planet()
 	return shipyard_planet != null
+
+
+func refresh_shipyard_planet() -> void:
+	shipyard_planet = null
+	for planet in planets:
+		if planet != null and planet.has_structure(StructureData.SHIPYARD):
+			shipyard_planet = planet
+			return
+
+
+func all_structures() -> Array[StructureData]:
+	var result: Array[StructureData] = []
+	for planet in planets:
+		if planet != null:
+			result.append_array(planet.structures)
+	return result
+
+
+func has_structure(type_id: String) -> bool:
+	for planet in planets:
+		if planet != null and planet.has_structure(type_id):
+			return true
+	return false
+
+
+func has_colony() -> bool:
+	return has_structure(StructureData.COLONY)
+
+
+## Colonies unlock construction in their star system.
+func can_build_structures() -> bool:
+	return has_colony()
+
+
+## Whether a structure is currently under construction in this system.
+func is_constructing() -> bool:
+	return not construction_type_id.is_empty()
+
+
+## Queues a structure for construction on a planet. The caller spends the
+## construction cost up front.
+func start_construction(type_id: String, planet: PlanetData, turns: int) -> void:
+	construction_type_id = type_id
+	construction_planet = planet
+	construction_turns_total = maxi(turns, 1)
+	construction_turns_remaining = construction_turns_total
+
+
+## Advances construction by one turn. Returns the completed structure and its
+## planet when the project finishes, or an empty Dictionary while it runs.
+func advance_construction() -> Dictionary:
+	if not is_constructing():
+		return {}
+
+	construction_turns_remaining = maxi(0, construction_turns_remaining - 1)
+	if construction_turns_remaining > 0:
+		return {}
+
+	var completed := {
+		"type_id": construction_type_id,
+		"planet": construction_planet,
+	}
+	var planet := construction_planet
+	if planet != null and not planet.has_structure(construction_type_id):
+		planet.add_structure(construction_type_id)
+	construction_type_id = ""
+	construction_planet = null
+	construction_turns_remaining = 0
+	construction_turns_total = 0
+	refresh_shipyard_planet()
+	return completed
+
+
+## Human-readable name of the structure under construction, if any.
+func construction_display_name() -> String:
+	if not is_constructing():
+		return ""
+	return str(
+		StructureData.definition_for(construction_type_id).get("name", "Structure")
+	)
+
+
+## Planets that currently own at least one structure.
+func structures_by_planet() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for planet in planets:
+		if planet != null and not planet.structures.is_empty():
+			result.append({
+				"planet": planet,
+				"structures": planet.structures,
+			})
+	return result
+
+
+## Net local-resource production minus upkeep for the whole system.
+func resource_flow() -> Dictionary:
+	var flow: Dictionary = {}
+	for planet in planets:
+		if planet == null:
+			continue
+		var planet_flow := planet.local_resource_flow()
+		for resource_id in planet_flow:
+			flow[resource_id] = (
+				int(flow.get(resource_id, 0)) + int(planet_flow[resource_id])
+			)
+	return flow
+
+
+func research_flow() -> int:
+	var total := 0
+	for planet in planets:
+		if planet != null:
+			total += planet.research_per_turn()
+	return total
 
 
 static func class_letter_for(cls: int) -> String:

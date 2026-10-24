@@ -85,6 +85,20 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_bg"]
+bg_color = Color(0.025, 0.07, 0.12, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_fill"]
+bg_color = Color(0.38, 0.8, 0.66, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [node name="StellarView" type="Node3D" unique_id=906409263]
 script = ExtResource("1_view")
 
@@ -225,6 +239,74 @@ theme_override_colors/font_color = Color(0.52, 0.92, 0.78, 1)
 theme_override_font_sizes/font_size = 13
 text = "0 RD"
 horizontal_alignment = 2
+
+[node name="ActiveResearchRow" type="HBoxContainer" parent="UI/HUD/ResearchPanel/ResearchContent"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="ResearchProject" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ActiveResearchRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
+theme_override_font_sizes/font_size = 10
+text = "NO ACTIVE RESEARCH"
+autowrap_mode = 2
+
+[node name="ResearchTurns" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ActiveResearchRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
+theme_override_font_sizes/font_size = 10
+text = ""
+horizontal_alignment = 2
+
+[node name="ResearchProgress" type="ProgressBar" parent="UI/HUD/ResearchPanel/ResearchContent"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_research_progress_bg")
+theme_override_styles/fill = SubResource("StyleBox_research_progress_fill")
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
+[node name="ConstructionPanel" type="PanelContainer" parent="UI/HUD" unique_id=1717334520]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 224.0
+offset_right = 268.0
+offset_bottom = 224.0
+grow_horizontal = 1
+grow_vertical = 1
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_research")
+
+[node name="ConstructionContent" type="VBoxContainer" parent="UI/HUD/ConstructionPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ConstructionEyebrow" type="Label" parent="UI/HUD/ConstructionPanel/ConstructionContent"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
+theme_override_font_sizes/font_size = 9
+text = "CONSTRUCTION"
+
+[node name="ConstructionList" type="VBoxContainer" parent="UI/HUD/ConstructionPanel/ConstructionContent"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
 
 [node name="TurnLabel" type="Label" parent="UI/HUD" unique_id=1175682259]
 layout_mode = 1

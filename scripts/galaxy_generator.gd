@@ -5,6 +5,8 @@ extends RefCounted
 const MIN_SEPARATION_LY := 10.0
 const VERTICAL_SPREAD_LY := 4.0
 const BASE_VISUAL_RADIUS := 1.44
+## Stars render at 80% of their original radius to reduce visual clutter.
+const STAR_VISUAL_SCALE := 0.8
 
 ## Gameplay-weighted class mix. For 25 procedural stars these weights add up to
 ## exactly 25, guaranteeing at least one O and two B stars.
@@ -35,7 +37,11 @@ static func generate(count: int, seed_value: int) -> Galaxy:
 
 		var temp_range := StarData.temperature_range_for(cls)
 		data.temperature_k = rng.randf_range(temp_range.x, temp_range.y)
-		data.visual_radius = BASE_VISUAL_RADIUS * StarData.size_factor_for(cls)
+		data.visual_radius = (
+			BASE_VISUAL_RADIUS
+			* STAR_VISUAL_SCALE
+			* StarData.size_factor_for(cls)
+		)
 		data.pick_radius = maxf(3.3, data.visual_radius + 1.5)
 		data.planets = _generate_planets(data, rng)
 		data.resources = ResourceStockpile.new()
@@ -59,16 +65,26 @@ static func _build_home_star() -> StarData:
 	home.position_ly = Vector3.ZERO
 	home.temperature_k = 5778.0
 	home.visual_radius = (
-		BASE_VISUAL_RADIUS * StarData.size_factor_for(StarData.SpectralClass.G)
+		BASE_VISUAL_RADIUS
+		* STAR_VISUAL_SCALE
+		* StarData.size_factor_for(StarData.SpectralClass.G)
 	)
 	home.pick_radius = maxf(3.3, home.visual_radius + 1.5)
 	home.surveyed = true
 	home.planets = _build_home_planets()
 	# The player's starting resources are stockpiled at Newhome.
 	home.resources = ResourceStockpile.starting_home()
-	# Newhome III is the only shipyard in the current slice.
-	home.shipyard_planet = home.planets[2]
+	_build_home_structures(home)
 	return home
+
+
+static func _build_home_structures(home: StarData) -> void:
+	home.planets[1].add_structure(StructureData.ORE_PROCESSING)
+	home.planets[2].add_structure(StructureData.COLONY)
+	home.planets[2].add_structure(StructureData.SHIPYARD)
+	home.planets[3].add_structure(StructureData.HELIUM_3_STATION)
+	# The Shipyard structure on Newhome III is the only one in this slice.
+	home.refresh_shipyard_planet()
 
 
 static func _build_home_planets() -> Array[PlanetData]:

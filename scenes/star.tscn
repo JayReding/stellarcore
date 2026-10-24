@@ -55,6 +55,19 @@ font_size = 48
 horizontal_alignment = 1
 render_priority = 1
 
+[node name="SurveyLabel" type="Label3D" parent="."]
+visible = false
+pixel_size = 0.032
+billboard = 1
+no_depth_test = true
+modulate = Color(0.72, 0.88, 1, 0.95)
+outline_modulate = Color(0, 0, 0, 0.9)
+outline_size = 8
+text = "SYSTEM"
+font_size = 32
+horizontal_alignment = 1
+render_priority = 1
+
 [node name="PickBody" type="StaticBody3D" parent="."]
 collision_layer = 2
 collision_mask = 0

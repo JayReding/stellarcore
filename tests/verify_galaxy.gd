@@ -27,6 +27,17 @@ func _initialize() -> void:
 	_check(home.position_ly.is_equal_approx(Vector3.ZERO), "home star is at the center")
 	_check(home.surveyed, "Newhome is surveyed")
 	_check(home.planets.size() == 4, "Newhome has exactly four planets")
+	_check(
+		is_equal_approx(
+			home.visual_radius,
+			(
+				GalaxyGenerator.BASE_VISUAL_RADIUS
+				* GalaxyGenerator.STAR_VISUAL_SCALE
+				* home.size_factor()
+			)
+		),
+		"stars render at the reduced visual scale"
+	)
 
 	var home_classes := [
 		PlanetData.PlanetClass.ROCKY,
@@ -58,6 +69,17 @@ func _initialize() -> void:
 		if not star.is_home:
 			class_counts[star.spectral_class] += 1
 			_check(not star.surveyed, "%s starts unsurveyed" % star.id)
+			_check(
+				is_equal_approx(
+					star.visual_radius,
+					(
+						GalaxyGenerator.BASE_VISUAL_RADIUS
+						* GalaxyGenerator.STAR_VISUAL_SCALE
+						* star.size_factor()
+					)
+				),
+				"%s renders at the reduced visual scale" % star.id
+			)
 			_check(
 				star.planets.size() >= 2 and star.planets.size() <= 6,
 				"%s has between two and six planets" % star.id

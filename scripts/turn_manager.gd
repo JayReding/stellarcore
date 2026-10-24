@@ -1,7 +1,8 @@
 class_name TurnManager
 extends Node
 ## Tracks the current turn and resolves end-turn requests after a cancellable
-## real-time countdown. Future ship travel and research can react to turn_advanced.
+## real-time countdown. Fleet movement and structure production react to
+## turn_advanced.
 
 signal end_turn_started(seconds_left: float)
 signal end_turn_countdown_changed(seconds_left: float)
