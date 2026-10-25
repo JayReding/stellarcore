@@ -35,6 +35,9 @@ const CLASS_SIZE_FACTORS: Array[float] = [1.50, 1.32, 1.16, 1.03, 0.92, 0.80]
 @export var resources: ResourceStockpile = ResourceStockpile.new()
 ## Planet that hosts this system's shipyard, if any.
 @export var shipyard_planet: PlanetData = null
+## Ships waiting to be built, in order. Each entry maps a hull id to its
+## accumulated turns of work. One turn of work is applied per turn.
+@export var ship_queue: Array[Dictionary] = []
 ## The single structure currently under construction in this system. Only one
 ## construction project runs per star system at a time.
 @export var construction_type_id: String = ""
@@ -58,6 +61,25 @@ func refresh_shipyard_planet() -> void:
 		if planet != null and planet.has_structure(StructureData.SHIPYARD):
 			shipyard_planet = planet
 			return
+
+
+## Fleets currently stationed in the system. In-transit fleets belong to no
+## system's shipyard while they travel.
+func stationed_fleets() -> Array[FleetData]:
+	var result: Array[FleetData] = []
+	for fleet in fleets:
+		if fleet != null and not fleet.in_transit:
+			result.append(fleet)
+	return result
+
+
+## The fleet completed ships join by default: the newest stationed fleet, or
+## null when the yard must create one.
+func newest_stationed_fleet() -> FleetData:
+	var stationed := stationed_fleets()
+	if stationed.is_empty():
+		return null
+	return stationed[stationed.size() - 1]
 
 
 func all_structures() -> Array[StructureData]:

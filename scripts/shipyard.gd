@@ -1,10 +1,14 @@
 class_name ShipyardView
 extends CanvasLayer
 ## Full-screen shipyard. Hull selection is on the left, customization in the
-## center, and the system's fleets on the right. Production spends resources
-## from the system's local stockpile.
+## center, and the system's fleets on the right. Production is queued and
+## spends the system's local stockpile up front; one turn of work completes
+## each turn, oldest queued hull first.
 
 signal closed
+
+## Pixels the mouse must move before a ship-chip press becomes a drag.
+const DRAG_THRESHOLD := 8.0
 
 const HULLS := [
 	{
@@ -25,6 +29,7 @@ const HULLS := [
 			ResourceStockpile.TITANIUM: 25,
 			ResourceStockpile.ANTIMATTER: 10,
 		},
+		"build_time": 0.25,
 	},
 ]
 
@@ -39,15 +44,17 @@ const LOCKED_HULLS := [
 		"icon": "COL",
 		"description": (
 			"A slow sleeper ship that carries colonists to a new star system. "
-			+ "It is consumed on arrival to found a Colony on the system's "
-			+ "first open planet. Travels at 5 light years per turn and costs "
-			+ "1 Antimatter for now; loading fuel for longer voyages comes later."
+			+ "On arrival you choose which planet hosts the new Colony, and "
+			+ "the ship is consumed to found it. Travels at 5 light years per "
+			+ "turn and costs 1 Antimatter for now; loading fuel for longer "
+			+ "voyages comes later."
 		),
 		"customization": "None",
 		"cost": {
 			ResourceStockpile.TITANIUM: 500,
 			ResourceStockpile.ANTIMATTER: 1,
 		},
+		"build_time": 3.0,
 	},
 ]
 
@@ -64,6 +71,9 @@ const LOCKED_HULLS := [
 @onready var hull_type_value: Label = %HullTypeValue
 @onready var hull_role_value: Label = %HullRoleValue
 @onready var hull_customization_value: Label = %HullCustomizationValue
+@onready var hull_time_value: Label = %HullTimeValue
+@onready var queue_list: VBoxContainer = %QueueList
+@onready var queue_note: Label = %QueueNote
 @onready var cost_value: HBoxContainer = %CostValue
 @onready var no_options_label: Label = %NoOptionsLabel
 @onready var no_options_note: Label = %NoOptionsNote
@@ -72,6 +82,7 @@ const LOCKED_HULLS := [
 @onready var fleet_spacer: Control = %FleetSpacer
 @onready var fleet_count_label: Label = %FleetCountLabel
 @onready var no_fleets_label: Label = %NoFleetsLabel
+@onready var new_fleet_button: Button = %NewFleetButton
 @onready var feedback_label: Label = %FeedbackLabel
 @onready var resource_note: Label = %ResourceNote
 @onready var produce_button: Button = %ProduceButton
@@ -80,9 +91,13 @@ var _system_data: StarData
 var _galaxy: Galaxy
 var _resources: ResourceStockpile
 var _selected_hull: Dictionary = HULLS[0]
-var _selected_fleet: FleetData
 var _feedback := ""
 var _unlocked_ships: Array[String] = []
+## Manual drag state: a ship chip is being moved between fleet rows.
+var _drag_payload: Dictionary = {}
+var _drag_preview: PanelContainer
+var _drag_active := false
+var _drag_press_position := Vector2.ZERO
 var _tween: Tween
 
 
@@ -96,9 +111,35 @@ static func available_hulls(unlocked_ships: Array[String] = []) -> Array:
 	return hulls
 
 
+## Hull definition by type id, or an empty Dictionary when unknown.
+static func hull_by_id(hull_id: String) -> Dictionary:
+	for hull in HULLS:
+		if str(hull.get("id", "")) == hull_id:
+			return hull
+	for hull in LOCKED_HULLS:
+		if str(hull.get("id", "")) == hull_id:
+			return hull
+	return {}
+
+
+## Human-readable build time. Sub-turn hulls report their per-turn rate.
+static func build_time_text(build_time: float) -> String:
+	if build_time <= 0.0:
+		return "Instant"
+	var amount := str(build_time)
+	if is_equal_approx(build_time, floor(build_time)):
+		amount = str(int(build_time))
+	if build_time < 1.0:
+		var per_turn := maxi(int(round(1.0 / build_time)), 1)
+		return "%s turns (%d per turn)" % [amount, per_turn]
+	var suffix := "turn" if is_equal_approx(build_time, 1.0) else "turns"
+	return "%s %s" % [amount, suffix]
+
+
 func _ready() -> void:
 	back_button.pressed.connect(close)
 	produce_button.pressed.connect(_on_produce_pressed)
+	new_fleet_button.pressed.connect(_on_new_fleet_pressed)
 	_populate_hulls()
 	_show_hull(_selected_hull)
 	_populate_fleets()
@@ -119,13 +160,14 @@ func open(
 
 	_resources = resources if resources != null else data.resources
 	_system_data = data
-	_selected_fleet = null
 	_unlocked_ships = unlocked_ships.duplicate()
-	_selected_hull = _available_hulls()[0]
+	_ensure_selected_hull()
 	_feedback = ""
+	_cancel_drag()
 	_populate_hulls()
 	_show_hull(_selected_hull)
 	_populate_fleets()
+	_populate_queue()
 	_update_header()
 	_update_resource_note()
 	_update_production_status()
@@ -143,6 +185,7 @@ func close() -> void:
 		return
 
 	_kill_tween()
+	_cancel_drag()
 	visible = false
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	closed.emit()
@@ -219,6 +262,7 @@ func _show_hull(hull: Dictionary) -> void:
 	hull_type_value.text = str(hull.get("name", "Hull"))
 	hull_role_value.text = str(hull.get("role", ""))
 	hull_customization_value.text = str(hull.get("customization", "None"))
+	hull_time_value.text = _build_time_text(float(hull.get("build_time", 1.0)))
 	no_options_label.text = "NO CUSTOMIZATION OPTIONS"
 	no_options_note.text = (
 		"This hull type has no modules or variants to configure."
@@ -257,75 +301,248 @@ func _stationed_fleets() -> Array[FleetData]:
 	return fleets
 
 
-func _create_fleet_row(fleet: FleetData) -> Button:
-	var selected := fleet == _selected_fleet
-	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 56)
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.focus_mode = Control.FOCUS_NONE
-	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	button.tooltip_text = "Select or deselect %s" % fleet.name
-	button.add_theme_stylebox_override("normal", _fleet_row_style(selected))
-	button.add_theme_stylebox_override(
-		"hover", _fleet_row_style(selected, true)
-	)
-	button.add_theme_stylebox_override(
-		"pressed", _fleet_row_style(selected, false, true)
-	)
-	button.pressed.connect(_on_fleet_pressed.bind(fleet))
+func _create_fleet_row(fleet: FleetData) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(0, 56)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.tooltip_text = "%s — %s\nDrag a ship onto another fleet to move it" % [
+		fleet.name, fleet.ship_summary()
+	]
+	panel.add_theme_stylebox_override("panel", _fleet_row_style())
+	panel.set_meta("fleet_target", fleet)
 
-	var row := HBoxContainer.new()
-	button.add_child(row)
-	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	row.offset_left = 10.0
-	row.offset_top = 6.0
-	row.offset_right = -10.0
-	row.offset_bottom = -6.0
-	row.add_theme_constant_override("separation", 8)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var content := VBoxContainer.new()
+	panel.add_child(content)
+	content.add_theme_constant_override("separation", 4)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var info := VBoxContainer.new()
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	info.add_theme_constant_override("separation", 1)
-	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(info)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 8)
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(header)
 
 	var name_label := Label.new()
 	name_label.text = fleet.name
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override("font_color", Color(0.84, 0.92, 1))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	info.add_child(name_label)
+	header.add_child(name_label)
 
-	var summary_label := Label.new()
-	summary_label.text = fleet.ship_summary()
-	summary_label.add_theme_font_size_override("font_size", 11)
-	summary_label.add_theme_color_override("font_color", Color(0.55, 0.68, 0.82))
-	summary_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	info.add_child(summary_label)
+	var count_label := Label.new()
+	var ship_total := fleet.ships.size()
+	count_label.text = "%d %s" % [
+		ship_total, "ship" if ship_total == 1 else "ships"
+	]
+	count_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	count_label.add_theme_font_size_override("font_size", 11)
+	count_label.add_theme_color_override("font_color", Color(0.55, 0.68, 0.82))
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(count_label)
 
-	if selected:
-		var selected_label := Label.new()
-		selected_label.text = "SELECTED"
-		selected_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		selected_label.add_theme_font_size_override("font_size", 9)
-		selected_label.add_theme_color_override(
-			"font_color", Color(0.48, 0.8, 1)
+	var chips := HBoxContainer.new()
+	chips.name = "ShipChips"
+	chips.add_theme_constant_override("separation", 6)
+	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(chips)
+
+	if fleet.ships.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "No ships — drag ships here."
+		empty_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		empty_label.add_theme_font_size_override("font_size", 11)
+		empty_label.add_theme_color_override(
+			"font_color", Color(0.45, 0.57, 0.7)
 		)
-		selected_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(selected_label)
-
-	return button
-
-
-func _on_fleet_pressed(fleet: FleetData) -> void:
-	if _selected_fleet == fleet:
-		_selected_fleet = null
+		empty_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		chips.add_child(empty_label)
 	else:
-		_selected_fleet = fleet
-	_feedback = ""
+		for i in fleet.ships.size():
+			chips.add_child(_make_ship_chip(fleet, i))
+
+	return panel
+
+
+func _make_ship_chip(fleet: FleetData, ship_index: int) -> PanelContainer:
+	var chip := PanelContainer.new()
+	chip.custom_minimum_size = Vector2(0, 26)
+	chip.mouse_filter = Control.MOUSE_FILTER_STOP
+	chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	chip.tooltip_text = "Drag %s to another fleet" % str(
+		fleet.ships[ship_index]
+	)
+	chip.add_theme_stylebox_override("panel", _chip_style())
+	chip.set_meta("ship_chip", true)
+
+	var label := Label.new()
+	label.text = str(fleet.ships[ship_index])
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_color_override("font_color", Color(0.84, 0.92, 1))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.add_child(label)
+
+	chip.gui_input.connect(_on_ship_chip_input.bind(fleet, ship_index))
+	return chip
+
+
+func _on_ship_chip_input(
+	event: InputEvent, fleet: FleetData, ship_index: int
+) -> void:
+	if fleet == null or _system_data == null:
+		return
+	if not (event is InputEventMouseButton):
+		return
+	if event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if event.pressed:
+		if ship_index < 0 or ship_index >= fleet.ships.size():
+			return
+		_drag_payload = {
+			"fleet": fleet,
+			"ship_name": str(fleet.ships[ship_index]),
+		}
+		_drag_press_position = event.position
+		_drag_active = false
+	else:
+		_cancel_drag()
+
+
+func _input(event: InputEvent) -> void:
+	if not visible or _drag_payload.is_empty():
+		return
+	if event is InputEventMouseMotion:
+		if not _drag_active:
+			var motion := event as InputEventMouseMotion
+			if (
+				motion.position - _drag_press_position
+			).length() < DRAG_THRESHOLD:
+				return
+			_begin_drag_preview()
+		_update_drag_preview(event.position)
+	elif event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
+			_finish_ship_drag()
+	elif (
+		event is InputEventKey
+		and event.pressed
+		and not event.echo
+		and event.is_action_pressed("ui_cancel")
+	):
+		_cancel_drag()
+
+
+func _begin_drag_preview() -> void:
+	_drag_active = true
+	_drag_preview = PanelContainer.new()
+	_drag_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_drag_preview.add_theme_stylebox_override("panel", _chip_style(true))
+	var label := Label.new()
+	label.text = str(_drag_payload.get("ship_name", "Ship"))
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", Color(0.97, 1, 1))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_drag_preview.add_child(label)
+	_drag_preview.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	root.add_child(_drag_preview)
+
+
+func _update_drag_preview(screen_position: Vector2) -> void:
+	if _drag_preview == null or not is_instance_valid(_drag_preview):
+		return
+	_drag_preview.position = screen_position + Vector2(14, 10)
+
+
+func _finish_ship_drag() -> void:
+	var payload := _drag_payload.duplicate()
+	var was_active := _drag_active
+	_cancel_drag()
+	if not was_active:
+		return
+
+	var target := _drop_target_under_mouse()
+	if target == null:
+		return
+	var source: FleetData = payload.get("fleet")
+	var ship_name := str(payload.get("ship_name", ""))
+	if source == null or source == target or ship_name.is_empty():
+		return
+	var ship_index := source.ships.find(ship_name)
+	if ship_index >= 0:
+		_move_ship(source, target, ship_index)
+
+
+func _drop_target_under_mouse() -> FleetData:
+	var hovered := get_viewport().gui_get_hovered_control()
+	return fleet_drop_target_for(hovered)
+
+
+## Walks up from a control to the fleet row it belongs to, if any.
+func fleet_drop_target_for(control: Control) -> FleetData:
+	var node: Node = control
+	while node != null:
+		if node.has_meta("fleet_target"):
+			return node.get_meta("fleet_target") as FleetData
+		node = node.get_parent()
+	return null
+
+
+func _cancel_drag() -> void:
+	_drag_payload = {}
+	_drag_active = false
+	_drag_press_position = Vector2.ZERO
+	if _drag_preview != null and is_instance_valid(_drag_preview):
+		_drag_preview.queue_free()
+	_drag_preview = null
+
+
+## Moves one ship between stationed fleets. Emptying a fleet removes it and
+## frees its name for future production.
+func _move_ship(
+	source: FleetData, target: FleetData, ship_index: int
+) -> bool:
+	if _system_data == null or source == null or target == null:
+		return false
+	if source == target:
+		return false
+	if not _system_data.fleets.has(source):
+		return false
+	if not _system_data.fleets.has(target):
+		return false
+	if source.in_transit or target.in_transit:
+		return false
+	if ship_index < 0 or ship_index >= source.ships.size():
+		return false
+
+	var ship_name := str(source.ships[ship_index])
+	source.ships.remove_at(ship_index)
+	target.add_ship(ship_name)
+
+	var note := ""
+	if source.ships.is_empty():
+		_system_data.fleets.erase(source)
+		note = " %s disbanded." % source.name
+	_feedback = "Moved 1 %s to %s.%s" % [ship_name, target.name, note]
 	_populate_fleets()
+	_update_header()
+	_update_production_status()
+	return true
+
+
+func _on_new_fleet_pressed() -> void:
+	if _system_data == null:
+		return
+	_cancel_drag()
+	var fleet := FleetData.new()
+	fleet.name = _next_fleet_name()
+	fleet.dock_at(_system_data)
+	_system_data.fleets.append(fleet)
+	_feedback = "Created %s — drag ships into it." % fleet.name
+	_populate_fleets()
+	_update_header()
 	_update_production_status()
 
 
@@ -365,20 +582,209 @@ func _on_produce_pressed() -> void:
 	if _resources != null:
 		_resources.spend(_selected_hull_cost())
 
-	var hull_name := str(_selected_hull.get("name", "FTL Probe"))
-	var fleet: FleetData = _selected_fleet
-	if fleet == null or fleet.in_transit or not _system_data.fleets.has(fleet):
-		fleet = FleetData.new()
-		fleet.name = _next_fleet_name()
-		fleet.dock_at(_system_data)
-		_system_data.fleets.append(fleet)
-		_selected_fleet = null
-
-	fleet.add_ship(hull_name)
-	_feedback = "Produced 1 %s in %s." % [hull_name, fleet.name]
-	_populate_fleets()
-	_update_header()
+	var hull_id := str(_selected_hull.get("id", ""))
+	var hull_name := str(_selected_hull.get("name", "ship"))
+	if _system_data.resources == null:
+		_system_data.resources = ResourceStockpile.new()
+	_system_data.ship_queue.append({"hull_id": hull_id, "progress": 0.0})
+	_feedback = "Queued 1 %s (position %d)." % [
+		hull_name, _system_data.ship_queue.size()
+	]
+	_populate_queue()
 	_update_production_status()
+
+
+func _populate_queue() -> void:
+	for child in queue_list.get_children():
+		queue_list.remove_child(child)
+		child.queue_free()
+	if _system_data == null:
+		return
+
+	var queue: Array = _system_data.ship_queue
+	for i in queue.size():
+		var item: Dictionary = queue[i]
+		var definition := hull_by_id(str(item.get("hull_id", "")))
+		if definition.is_empty():
+			continue
+		var row := _make_queue_row(item, definition, i)
+		row.name = "Queue_%d" % i
+		queue_list.add_child(row)
+
+
+func _make_queue_row(
+	item: Dictionary, definition: Dictionary, index: int
+) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	info.add_theme_constant_override("separation", 1)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(info)
+
+	var name_label := Label.new()
+	name_label.text = str(definition.get("name", "Ship"))
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.97))
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(name_label)
+
+	var status_label := Label.new()
+	status_label.name = "QueueStatus"
+	status_label.text = _queue_status_text(item, definition)
+	status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	status_label.add_theme_font_size_override("font_size", 11)
+	status_label.add_theme_color_override(
+		"font_color", Color(0.52, 0.65, 0.8)
+	)
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(status_label)
+
+	var cancel_button := Button.new()
+	cancel_button.text = "Cancel"
+	cancel_button.focus_mode = Control.FOCUS_NONE
+	cancel_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	cancel_button.tooltip_text = "Cancel this build and refund unused resources"
+	cancel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cancel_button.add_theme_font_size_override("font_size", 11)
+	cancel_button.add_theme_color_override("font_color", Color(0.84, 0.93, 1))
+	cancel_button.add_theme_color_override(
+		"font_hover_color", Color(0.97, 1, 1, 1)
+	)
+	cancel_button.add_theme_stylebox_override("normal", _cancel_style())
+	cancel_button.add_theme_stylebox_override("hover", _cancel_style(true))
+	cancel_button.add_theme_stylebox_override("pressed", _cancel_style())
+	cancel_button.pressed.connect(_on_cancel_queued.bind(index))
+	row.add_child(cancel_button)
+
+	return row
+
+
+## Which turn of its build a queued item is on.
+func _queue_status_text(item: Dictionary, definition: Dictionary) -> String:
+	var build_time := maxf(float(definition.get("build_time", 1.0)), 0.0)
+	var total := maxi(ceili(build_time), 1)
+	var progress := float(item.get("progress", 0.0))
+	var elapsed := mini(int(floor(progress)) + 1, total)
+	return "Turn %d of %d" % [elapsed, total]
+
+
+func _on_cancel_queued(index: int) -> void:
+	if _system_data == null:
+		return
+	if index < 0 or index >= _system_data.ship_queue.size():
+		return
+
+	var item: Dictionary = _system_data.ship_queue[index]
+	var definition := hull_by_id(str(item.get("hull_id", "")))
+	_system_data.ship_queue.remove_at(index)
+
+	var refunded := "nothing"
+	if not definition.is_empty():
+		var refund := _refund_for_cancel(item, definition)
+		if _resources == null:
+			_resources = _system_data.resources
+		if _resources != null:
+			for resource_id in refund:
+				_resources.add_amount(
+					str(resource_id), int(refund[resource_id])
+				)
+		refunded = _refund_summary_text(refund)
+
+	_feedback = "Cancelled 1 %s — refunded %s." % [
+		str(definition.get("name", "ship")), refunded
+	]
+	_populate_queue()
+	_update_production_status()
+
+
+## Pro-rated refund for cancelled construction. Antimatter is always added
+## last, so it is refunded in full no matter the progress.
+func _refund_for_cancel(
+	item: Dictionary, definition: Dictionary
+) -> Dictionary:
+	var refund := {}
+	var cost: Dictionary = definition.get("cost", {})
+	var build_time := float(definition.get("build_time", 1.0))
+	var fraction := 1.0
+	if build_time > 0.0:
+		fraction = clampf(
+			(build_time - float(item.get("progress", 0.0))) / build_time,
+			0.0,
+			1.0
+		)
+	for resource_id in cost:
+		var id := str(resource_id)
+		if id == ResourceStockpile.ANTIMATTER:
+			refund[id] = int(cost[resource_id])
+		else:
+			refund[id] = int(
+				floor(float(cost[resource_id]) * fraction)
+			)
+	return refund
+
+
+func _refund_summary_text(refund: Dictionary) -> String:
+	var parts: Array[String] = []
+	for resource_id in refund:
+		var amount := int(refund[resource_id])
+		if amount <= 0:
+			continue
+		parts.append("%d %s" % [
+			amount, ResourceStockpile.display_name(str(resource_id))
+		])
+	if parts.is_empty():
+		return "nothing"
+	return " and ".join(parts)
+
+
+func _cancel_style(hover := false) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.content_margin_left = 12.0
+	style.content_margin_top = 6.0
+	style.content_margin_right = 12.0
+	style.content_margin_bottom = 6.0
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_bottom_left = 4
+	style.bg_color = Color(0.05, 0.11, 0.19, 0.95)
+	style.border_color = Color(0.22, 0.46, 0.74, 0.7)
+	if hover:
+		style.bg_color = Color(0.09, 0.2, 0.34, 0.98)
+		style.border_color = Color(0.38, 0.68, 1.0, 0.9)
+	return style
+
+
+func _chip_style(highlight := false) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.content_margin_left = 8.0
+	style.content_margin_top = 3.0
+	style.content_margin_right = 8.0
+	style.content_margin_bottom = 3.0
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_bottom_left = 4
+	style.bg_color = Color(0.06, 0.14, 0.24, 0.95)
+	style.border_color = Color(0.24, 0.5, 0.8, 0.75)
+	if highlight:
+		style.bg_color = Color(0.1, 0.24, 0.4, 1.0)
+		style.border_color = Color(0.5, 0.8, 1.0, 1.0)
+	return style
 
 
 func _next_fleet_name() -> String:
@@ -415,6 +821,7 @@ func refresh() -> void:
 	_populate_hulls()
 	_show_hull(_selected_hull)
 	_populate_fleets()
+	_populate_queue()
 	_update_header()
 	_update_resource_note()
 	_update_production_status()
@@ -487,6 +894,10 @@ func _add_cost_label(text: String, color: Color, resource_id: String) -> void:
 	cost_value.add_child(label)
 
 
+func _build_time_text(build_time: float) -> String:
+	return build_time_text(build_time)
+
+
 func _missing_resources_text() -> String:
 	var missing := _missing_resources()
 	var parts: Array[String] = []
@@ -524,13 +935,7 @@ func _update_production_status() -> void:
 
 	var status := _feedback
 	if status.is_empty():
-		if _selected_fleet == null:
-			status = "No fleet selected — Produce Ship will create a new fleet."
-		else:
-			status = "Selected %s — Produce Ship will add one %s." % [
-				_selected_fleet.name,
-				str(_selected_hull.get("name", "ship")),
-			]
+		status = "Ships join the newest fleet in the system."
 	if not affordable:
 		var warning := "Insufficient resources — %s." % _missing_resources_text()
 		status = warning if status.is_empty() else "%s %s" % [status, warning]
@@ -574,9 +979,7 @@ func _hull_button_style(
 	return style
 
 
-func _fleet_row_style(
-	selected: bool, hover := false, pressed := false
-) -> StyleBoxFlat:
+func _fleet_row_style(hover := false, pressed := false) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.border_width_left = 1
 	style.border_width_top = 1
@@ -586,20 +989,11 @@ func _fleet_row_style(
 	style.corner_radius_top_right = 6
 	style.corner_radius_bottom_right = 6
 	style.corner_radius_bottom_left = 6
-
-	if selected:
-		style.bg_color = Color(0.06, 0.16, 0.27, 0.95)
-		style.border_color = Color(0.4, 0.7, 1.0, 0.85)
-	else:
-		style.bg_color = Color(0.025, 0.05, 0.085, 0.85)
-		style.border_color = Color(0.17, 0.31, 0.48, 0.65)
+	style.bg_color = Color(0.025, 0.05, 0.085, 0.85)
+	style.border_color = Color(0.17, 0.31, 0.48, 0.65)
 
 	if hover:
-		style.bg_color = (
-			Color(0.09, 0.22, 0.36, 1.0)
-			if selected
-			else Color(0.05, 0.12, 0.2, 0.95)
-		)
+		style.bg_color = Color(0.05, 0.12, 0.2, 0.95)
 		style.border_color = Color(0.36, 0.64, 0.96, 0.9)
 	if pressed:
 		style.bg_color = Color(0.04, 0.1, 0.17, 1.0)

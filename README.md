@@ -40,11 +40,14 @@ godot --path .
 | Confirm Destination | Send the fleet and close the dialog |
 | `Esc` while choosing a destination | Cancel destination selection |
 | Technologies button | Open the technology tree |
+| Scroll in the technology tree | Pan around the category grid |
 | Click a planet (surveyed) | Open that system in the full-screen System View |
 | Click a planet (System View) | Inspect that planet's structures and resource flow |
 | Shipyard button (Newhome) | Open the Newhome III shipyard |
-| Produce Ship | Build one FTL Probe; creates a fleet if none is selected |
-| Click a fleet (Shipyard) | Select it to reinforce it, or deselect it to create a new fleet |
+| Produce Ship | Queue one of the selected hull (cost is spent up front) |
+| Cancel (shipyard queue) | Cancel a queued build and refund unused resources |
+| Drag a ship chip | Move it onto another fleet in the shipyard |
+| + New Fleet | Create an empty fleet to drag ships into |
 | End Turn | Start or cancel the five-second countdown to advance the turn |
 | `Esc` (Stellar View) | Deselect, cancel destination selection, or close the fleet orders popup |
 | `Esc` (System View, Technologies, or Shipyard) | Return to Stellar View |
@@ -170,8 +173,10 @@ godot --path .
   the number of turns is `ceil(distance / speed)` and the fleet moves on each
   turn advance.
 - A sent fleet gets a moving map marker and a dashed course line from the marker
-  to its destination, shortening as the fleet travels. The marker shows only
-  the fleet name, keeping the map uncluttered, and is removed when the fleet
+  to its destination, shortening as the fleet travels. Each cluster of
+  coincident markers gets one small stacked name label at its side, listing
+  its in-transit fleets one per line so multiple departures never collide; the
+  stack travels with its markers. A marker disappears as soon as its fleet
   arrives.
 - The arriving FTL Probe is consumed after it surveys the system. If it was the
   fleet's only ship, the fleet is deleted and its name becomes available for
@@ -186,15 +191,24 @@ godot --path .
   interface: hull types on the left, customization in the center, and the
   system's fleets on the right.
 - The only default hull type is the **FTL Probe**, a reconnaissance craft with
-  no customization options. It costs **25 Titanium** and **10 Antimatter**.
-  Researching **Colony Ships** unlocks a second hull, the **Colony Ship**
-  (**500 Titanium** and **1 Antimatter**), which appears in the shipyard hull
+  no customization options. It costs **25 Titanium** and **10 Antimatter** and
+  takes **0.25 turns** to build (four per turn). Researching **Colony Ships**
+  unlocks a second hull, the **Colony Ship** (**500 Titanium** and
+  **1 Antimatter**, **3 turns** to build), which appears in the shipyard hull
   list once unlocked. The 1 Antimatter is a placeholder until the ship
-  refueling mechanic lands.
-  **Produce Ship** at the bottom center builds one probe and spends the cost from
-  the system's local stockpile. If no fleet is selected, a new fleet is created;
-  otherwise the probe joins the selected fleet. Selecting a fleet again clears
-  the selection.
+  refueling mechanic lands, and future technologies may influence build times.
+- **Produce Ship** at the bottom center queues one of the selected hull and
+  spends its cost up front from the system's local stockpile. Each turn applies
+  one turn of work to the queue, oldest hull first, so queued probes finish
+  four at a time. Completed ships join the newest stationed fleet, or a new
+  fleet when none is stationed.
+- Queued builds show their progress (**Turn 1 of 3** style) with a **Cancel**
+  button. Cancelling refunds unused resources pro-rata, except Antimatter,
+  which is always fully refunded as fuel is loaded last.
+- Fleet rows list each ship as a draggable chip. Dragging a ship onto another
+  fleet moves it there; a fleet emptied this way is removed and its name
+  becomes available again. The **+ New Fleet** button creates an empty fleet
+  to drag ships into.
 - Fleets are named after their production system plus a Greek letter, beginning
   with **Newhome Alpha**, **Newhome Beta**, and continuing through **Newhome
   Omega**. Names are allocated from the galaxy's active fleets, so a deleted
@@ -205,12 +219,17 @@ godot --path .
   greyed out when the local stockpile cannot cover the full cost, and the status
   line explains what is missing.
 - A **Technologies** button in the top bar opens a full-screen technology tree.
-  Technologies are grouped into **tier rows** with labelled **category sections**
-  inside them, sorted by tier and then by category. Tier 1 contains **Propulsion**
-  (**FTL Probes**), **Exploration** (**Colony Ships**, 100 RD, 5 turns), and
-  **Industrial** (**Ore Processing**); Tier 2 contains **Industrial**
-  (**Antimatter Refining**, 50 RD, 3 turns). Default technologies
-  appear on rounded-square cards marked "AVAILABLE BY DEFAULT".
+  The tree is a scrolling grid: one column per category (**Propulsion**,
+  **Exploration**, **Industrial**, **Military**, **Advanced Technology**) with
+  tier labels running down the side, and new technologies appear under their
+  category column as the tree grows. Tier 1 contains **Propulsion**
+  (**FTL Probes**), **Exploration** (**Colony Ships**, 100 RD, 5 turns),
+  **Industrial** (**Ore Processing**), and **Military** (**Destroyer Hull
+  Plan**, 50 RD, 3 turns): a small, light military platform using standard
+  missiles for long range combat. Tier 2 contains **Industrial**
+  (**Antimatter Refining**, 50 RD, 3 turns). Each card shows its icon, name,
+  larger description, and cost and time together on one yellow line; researched
+  technologies hide that line and simply read **AVAILABLE** in green.
 - Clicking a researchable technology while no project is active opens a
   confirmation dialog that restates the technology, its Research Data cost, and
   its research time. **Begin Research** spends the Research Data up front; it is
@@ -219,8 +238,9 @@ godot --path .
   turns remaining, and a progress bar. Research advances one turn at a time with
   **End Turn**. Completing a technology marks its card **UNLOCKED** and applies
   its unlocked ships or structures. **Antimatter Refining** unlocks the
-  **Antimatter Refinery** orbital structure, and **Colony Ships** unlocks the
-  **Colony Ship** hull in the shipyard.
+  **Antimatter Refinery** orbital structure, **Colony Ships** unlocks the
+  **Colony Ship** hull in the shipyard, and **Destroyer Hull Plan** unlocks
+  nothing yet — it is the first step toward combat hulls.
 - A Colony Ship that reaches a system without a Colony queues a decision and
   opens a **Found a Colony** popup listing the system's planets. Picking one
   founds the Colony there and consumes the ship (disbanding an emptied fleet);
@@ -357,12 +377,16 @@ and Esc layering):
 godot --headless --path . --script res://tests/verify_structures.gd
 ```
 
-The shipyard check validates Newhome III ownership, the FTL Probe hull and its
-empty customization panel, the 25 Titanium/10 Antimatter cost and deduction,
-insufficient-resource button gating and red cost readout, production with and
-without a selected fleet, Greek fleet naming and overflow, the Colony Ship
-unlock, its 500 Titanium/1 Antimatter cost and 5 ly/turn speed, Fleet Command
-refresh, and the disabled shipyard state away from Newhome:
+The shipyard check validates Newhome III ownership, the FTL Probe hull, its
+build time and empty customization panel, the 25 Titanium/10 Antimatter cost
+and upfront deduction, queued multi-turn builds with per-turn progress,
+batched sub-turn completions, cancellation with pro-rated Titanium and full
+Antimatter refunds, insufficient-resource button gating and red cost readout,
+the newest-fleet default for completions, the New Fleet button, drag-and-drop
+ship moves between fleets, empty-fleet removal with name reuse, Greek fleet
+naming and overflow, the Colony Ship unlock, its 500 Titanium/1 Antimatter
+cost, 3-turn build time, and 5 ly/turn speed, Fleet Command refresh, and the
+disabled shipyard state away from Newhome:
 
 ```bash
 godot --headless --path . --script res://tests/verify_shipyard.gd
@@ -371,7 +395,8 @@ godot --headless --path . --script res://tests/verify_shipyard.gd
 The exploration check validates the fleet orders popup and its click-away,
 right-click, and Escape dismissal, the disabled management actions, destination
 selection and confirmation, travel-time math,
-the dashed course line and moving marker, marker removal on arrival, turn-by-turn
+the dashed course line and moving marker, the stacked per-star departure labels,
+marker removal on arrival, turn-by-turn
 movement, probe destruction, fleet deletion, fleet-name reuse, Fleet Command
 refresh, the explored-system name labels, and the arrival survey notice:
 
@@ -395,10 +420,11 @@ Data, and the shipyard's local Titanium readout:
 godot --headless --path . --script res://tests/verify_resources.gd
 ```
 
-The technology tree check validates the top-bar button, tier rows and
-tier-and-category grouping, the ordering and cards of the Propulsion,
-Exploration, and Industrial sections across Tier 1 and Tier 2, the Research
-Data readout, and the close paths:
+The technology tree check validates the top-bar button, the category-column
+grid with tier gutters, the placement and cards of the Propulsion, Exploration,
+Industrial, and Military sections across Tier 1 and Tier 2 (including the new
+Destroyer Hull Plan), card contents and yellow cost/time readout, the green
+AVAILABLE state, the Research Data readout, scrolling, and the close paths:
 
 ```bash
 godot --headless --path . --script res://tests/verify_tech_tree.gd
@@ -425,7 +451,7 @@ godot --headless --path . --script res://tests/verify_colonization.gd
 
 ## Not yet implemented
 
-Fleet management (rename, modify, and delete), cargo transport between systems,
+Fleet management dialog actions (rename, modify, delete), cargo transport between systems,
 resource extraction from surveyed planets, planetary richness scaling,
 structure input-shortage rules, the full scanning/discovery
 system, enemy-held systems, ship refueling, combat, advanced hull

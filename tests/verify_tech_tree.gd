@@ -1,5 +1,6 @@
 extends SceneTree
-## Verifies the Technologies button and technology tree overlay.
+## Verifies the Technologies button, the category-column tech tree grid with
+## tier rows, card contents, and the research readout and close paths.
 ## Run with:
 ##   godot --headless --path . --script res://tests/verify_tech_tree.gd
 
@@ -27,133 +28,145 @@ func _run() -> void:
 	_check(tech_tree.visible, "Technology tree opens")
 	_check(scene._is_overlay_open(), "Stellar View recognizes the open overlay")
 
+	var grid := tech_tree.tech_grid
+	_check(grid != null, "The tree renders a category grid")
+	_check(grid.columns == 6, "The grid has a tier gutter plus five categories")
+
+	var headers: Array[String] = []
+	for child in grid.get_children():
+		if child.name.begins_with("CategoryHeader_"):
+			headers.append((child as Label).text)
 	_check(
-		tech_tree.tech_list.get_child_count() == 2,
-		"Technologies are grouped into two tier rows"
+		headers == [
+			"PROPULSION", "EXPLORATION", "INDUSTRIAL", "MILITARY",
+			"ADVANCED TECHNOLOGY",
+		],
+		"Category columns follow the configured order"
 	)
-	var tier_one := _tier_section(tech_tree, 1)
-	var tier_two := _tier_section(tech_tree, 2)
-	_check(tier_one != null, "A Tier 1 row exists")
-	_check(tier_two != null, "A Tier 2 row exists")
+
+	_check(_tier_label(grid, 1) == "TIER 1", "Tier rows start at Tier 1")
+	_check(_tier_label(grid, 2) == "TIER 2", "The tree grows a second tier row")
+
+	var ftl := _tech_node(grid, 1, "Propulsion", "FTL Probes")
+	_check(ftl != null, "Tier 1 Propulsion holds FTL Probes")
+	if ftl != null:
+		_check(ftl.icon_label.text == "FTL", "Card shows the tech icon")
+		_check(
+			ftl.description_label.text.contains("reconnaissance"),
+			"Card shows the tech description"
+		)
+		_check(
+			not ftl.cost_label.visible and not ftl.time_label.visible,
+			"Available techs hide cost and time"
+		)
+		_check(
+			ftl.status_label.text == "AVAILABLE",
+			"Available techs say AVAILABLE"
+		)
+		_check(
+			_color_is_green(ftl.status_label),
+			"AVAILABLE is shown in green"
+		)
+
+	var ore := _tech_node(grid, 1, "Industrial", "Ore Processing")
+	_check(ore != null, "Tier 1 Industrial holds Ore Processing")
+	if ore != null:
+		_check(not ore.cost_label.visible, "Default techs hide their cost")
+
+	var colony := _tech_node(grid, 1, "Exploration", "Colony Ships")
+	_check(colony != null, "Tier 1 Exploration holds Colony Ships")
+	if colony != null:
+		_check(
+			colony.cost_label.text == "100 RD",
+			"Researchable techs state their Research Data cost"
+		)
+		_check(
+			_color_is_yellow(colony.cost_label),
+			"Research cost is shown in yellow"
+		)
+		_check(
+			colony.time_label.visible and colony.time_label.text == "5 TURNS",
+			"Researchable techs state their research time"
+		)
+		_check(
+			_color_is_yellow(colony.time_label),
+			"Research time is shown in yellow"
+		)
+
+	var refining := _tech_node(grid, 2, "Industrial", "Antimatter Refining")
+	_check(refining != null, "Tier 2 Industrial holds Antimatter Refining")
+
+	var destroyer := _tech_node(grid, 1, "Military", "Destroyer Hull Plan")
+	_check(destroyer != null, "Tier 1 Military holds Destroyer Hull Plan")
+	if destroyer != null:
+		_check(
+			destroyer.icon_label.text == "DES",
+			"Destroyer card shows its icon"
+		)
+		_check(
+			destroyer.name_label.text == "Destroyer Hull Plan",
+			"Destroyer card shows its name"
+		)
+		_check(
+			destroyer.description_label.text
+			== "Small and light military platform. Uses standard missiles "
+			+ "for long range combat.",
+			"Destroyer card shows its description"
+		)
+		_check(
+			destroyer.cost_label.visible and destroyer.cost_label.text == "50 RD",
+			"Destroyer research costs 50 Research Data"
+		)
+		_check(
+			destroyer.time_label.visible and destroyer.time_label.text == "3 TURNS",
+			"Destroyer research takes 3 turns"
+		)
+
 	_check(
-		tech_tree.tech_list.get_child(0) == tier_one,
-		"Tier 1 is sorted before Tier 2"
+		_count_cards(grid, 2, "AdvancedTechnology") == 0,
+		"Advanced Technology starts empty"
 	)
-	if tier_one != null:
-		_check(_tier_header(tier_one) == "TIER 1", "The first row is labelled TIER 1")
-		var tier_one_categories := tier_one.get_node(
-			"CategoryRow"
-		) as HBoxContainer
-		_check(
-			tier_one_categories != null
-			and tier_one_categories.get_child_count() == 3,
-			"Tier 1 contains three category sections"
-		)
-		var propulsion := _category_section(tier_one, "Propulsion")
-		var exploration := _category_section(tier_one, "Exploration")
-		var industrial := _category_section(tier_one, "Industrial")
-		_check(propulsion != null, "A Propulsion category section exists")
-		_check(exploration != null, "An Exploration category section exists")
-		_check(industrial != null, "An Industrial category section exists")
-		_check(
-			propulsion != null
-			and exploration != null
-			and tier_one_categories != null
-			and tier_one_categories.get_child(0) == propulsion
-			and tier_one_categories.get_child(1) == exploration,
-			"Propulsion is sorted before Exploration before Industrial"
-		)
-		if propulsion != null:
-			_check(
-				_category_header(propulsion) == "PROPULSION",
-				"The Propulsion section is labelled"
-			)
-			var ftl_node := _first_tech_node(propulsion)
-			_check(ftl_node != null, "The Propulsion section renders a card")
-			if ftl_node != null:
-				_check(
-					ftl_node.name_label.text == "FTL Probes",
-					"FTL Probes is displayed"
-				)
-				_check(
-					ftl_node.category_label.text == "PROPULSION",
-					"The FTL Probe card reports Propulsion"
-				)
-				_check(
-					ftl_node.cost_label.text == "NO RESEARCH REQUIRED",
-					"Default technology has no research cost"
-				)
-				_check(
-					ftl_node.status_label.text == "AVAILABLE BY DEFAULT",
-					"Default technology is available"
-				)
-		if exploration != null:
-			_check(
-				_category_header(exploration) == "EXPLORATION",
-				"The Exploration section is labelled"
-			)
-			var colony_node := _first_tech_node(exploration)
-			_check(colony_node != null, "The Exploration section renders a card")
-			if colony_node != null:
-				_check(
-					colony_node.name_label.text == "Colony Ships",
-					"Colony Ships is displayed under Exploration"
-				)
-				_check(
-					colony_node.category_label.text == "EXPLORATION",
-					"The Colony Ships card reports Exploration"
-				)
-				_check(
-					colony_node.cost_label.text == "REQUIRES 100 RD",
-					"Colony Ships costs 100 Research Data"
-				)
-		if industrial != null:
-			_check(
-				_category_header(industrial) == "INDUSTRIAL",
-				"The Industrial section is labelled"
-			)
-			var ore_node := _first_tech_node(industrial)
-			_check(ore_node != null, "The Industrial section renders a card")
-			if ore_node != null:
-				_check(
-					ore_node.name_label.text == "Ore Processing",
-					"Ore Processing is displayed under Industrial"
-				)
-				_check(
-					ore_node.category_label.text == "INDUSTRIAL",
-					"The Ore Processing card reports Industrial"
-				)
-	if tier_two != null:
-		_check(_tier_header(tier_two) == "TIER 2", "The second row is labelled TIER 2")
-		var tier_two_industrial := _category_section(tier_two, "Industrial")
-		_check(
-			tier_two_industrial != null,
-			"Tier 2 contains an Industrial category section"
-		)
-		if tier_two_industrial != null:
-			var refining := _first_tech_node(tier_two_industrial)
-			_check(refining != null, "Tier 2 Industrial renders a card")
-			if refining != null:
-				_check(
-					refining.name_label.text == "Antimatter Refining",
-					"Antimatter Refining is displayed in Tier 2 Industrial"
-				)
 	_check(
-		tech_tree.meta_label.text.contains("4 TECHNOLOGIES"),
+		tech_tree.meta_label.text.contains("5 TECHNOLOGIES"),
 		"Technology count is displayed"
 	)
 	_check(
-		tech_tree.meta_label.text.contains("3 CATEGORIES"),
+		tech_tree.meta_label.text.contains("5 CATEGORIES"),
 		"Category count is displayed"
 	)
 	_check(
 		tech_tree.meta_label.text.contains("2 TIERS"),
 		"Tier count is displayed"
 	)
+
+	var card_height := -1.0
+	var cards_match := true
+	await process_frame
+	await process_frame
+	for child in tech_tree.tech_grid.find_children("*", "TechNode", true, false):
+		var card := child as TechNode
+		if card == null:
+			continue
+		if card_height < 0.0:
+			card_height = card.size.y
+		elif not is_equal_approx(card.size.y, card_height):
+			cards_match = false
+	_check(cards_match and card_height > 0.0, "Every tech card has the same height")
 	_check(
 		tech_tree.funds_label.text == "0 RD",
 		"Galaxy-wide Research Data is displayed"
 	)
+
+	root.size = Vector2i(1100, 700)
+	await process_frame
+	await process_frame
+	_check(
+		tech_tree.tech_scroll.get_h_scroll_bar().max_value > 0.0,
+		"The tree scrolls horizontally when the grid overflows"
+	)
+	root.size = Vector2i(1920, 1080)
+	await process_frame
+	await process_frame
 
 	tech_tree.back_button.pressed.emit()
 	_check(not tech_tree.visible, "Back button closes the technology tree")
@@ -171,38 +184,53 @@ func _run() -> void:
 	_finish()
 
 
-func _tier_section(tech_tree: TechTree, tier: int) -> VBoxContainer:
-	return tech_tree.tech_list.get_node_or_null("Tier_%d" % tier) as VBoxContainer
+func _tier_label(grid: GridContainer, tier: int) -> String:
+	var label := grid.get_node_or_null("TierLabel_%d" % tier) as Label
+	return label.text if label != null else ""
 
 
-func _tier_header(tier_section: VBoxContainer) -> String:
-	var header := tier_section.get_node_or_null("TierHeader") as Label
-	return header.text if header != null else ""
-
-
-func _category_section(
-	tier_section: VBoxContainer, category: String
-) -> VBoxContainer:
-	var category_row := tier_section.get_node_or_null(
-		"CategoryRow"
-	) as HBoxContainer
-	if category_row == null:
-		return null
-	return category_row.get_node_or_null(
-		"Category_%s" % category.replace(" ", "")
+func _tech_cell(grid: GridContainer, tier: int, category: String) -> VBoxContainer:
+	return grid.get_node_or_null(
+		"TechCell_%d_%s" % [tier, category.replace(" ", "")]
 	) as VBoxContainer
 
 
-func _category_header(section: VBoxContainer) -> String:
-	var header := section.get_node_or_null("CategoryHeader") as Label
-	return header.text if header != null else ""
-
-
-func _first_tech_node(section: VBoxContainer) -> TechNode:
-	var cards := section.get_node_or_null("TechCards") as HBoxContainer
-	if cards == null or cards.get_child_count() == 0:
+func _tech_node(
+	grid: GridContainer, tier: int, category: String, tech_name: String
+) -> TechNode:
+	var cell := _tech_cell(grid, tier, category)
+	if cell == null:
 		return null
-	return cards.get_child(0) as TechNode
+	for child in cell.get_children():
+		var node := child as TechNode
+		if node != null and node.name_label.text == tech_name:
+			return node
+	return null
+
+
+func _count_cards(grid: GridContainer, tier: int, category: String) -> int:
+	var cell := _tech_cell(grid, tier, category)
+	if cell == null:
+		return -1
+	var count := 0
+	for child in cell.get_children():
+		if child is TechNode:
+			count += 1
+	return count
+
+
+func _color_is_green(label: Label) -> bool:
+	if label == null:
+		return false
+	var color := label.get_theme_color("font_color")
+	return color.g > color.r and color.g > color.b
+
+
+func _color_is_yellow(label: Label) -> bool:
+	if label == null:
+		return false
+	var color := label.get_theme_color("font_color")
+	return color.r > 0.9 and color.g > 0.7 and color.b < 0.5
 
 
 func _check(condition: bool, message: String) -> void:

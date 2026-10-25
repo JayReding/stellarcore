@@ -74,6 +74,14 @@ var _colony_dialog: ColonyDialog
 var _pending_colonies: Array[Dictionary] = []
 var _destination_fleet: FleetData
 var _fleet_markers: Array[FleetMarker] = []
+## One stacked name label per cluster of coincident in-transit fleets. Each
+## label lists the fleets at its position top to bottom and is re-anchored to
+## the moving markers on every rebuild, so shared departures never collide.
+var _fleet_labels: Array[Label3D] = []
+## World-space offset of a label stack from its fleet markers.
+const FLEET_LABEL_OFFSET := Vector3(3.2, 1.6, 0.0)
+## Fleets within this many light years share one label stack.
+const FLEET_LABEL_CELL_LY := 0.5
 var _course_mesh: ImmediateMesh
 var _course_material: StandardMaterial3D
 var _course_instance: MeshInstance3D
@@ -703,6 +711,7 @@ func _on_turn_advanced(turn: int) -> void:
 	if _tech_tree != null:
 		_tech_tree.advance_research()
 	_advance_construction()
+	_advance_ship_construction()
 	_advance_fleets()
 	_apply_structure_economy()
 
@@ -734,6 +743,104 @@ func _advance_construction() -> void:
 
 	if not completions.is_empty():
 		_set_status(completions[-1], STATUS_SUCCESS_COLOR)
+
+
+## Applies one turn of shipyard work to every queued hull, oldest first.
+## Completed ships join the system's newest stationed fleet, or a new fleet
+## when none is stationed. Build times live on the hull definitions so future
+## research can influence them.
+func _advance_ship_construction() -> void:
+	if _galaxy == null:
+		return
+
+	var finished: Array[Dictionary] = []
+	var affected: Array[StarData] = []
+	for star in _galaxy.stars:
+		if star == null or star.ship_queue.is_empty():
+			continue
+		var work := 1.0
+		var guard := 0
+		while work > 0.0001 and not star.ship_queue.is_empty() and guard < 64:
+			guard += 1
+			var item: Dictionary = star.ship_queue[0]
+			var hull_id := str(item.get("hull_id", ""))
+			var definition := ShipyardView.hull_by_id(hull_id)
+			if definition.is_empty():
+				star.ship_queue.pop_front()
+				continue
+			var build_time := maxf(float(definition.get("build_time", 1.0)), 0.0)
+			var progress := float(item.get("progress", 0.0))
+			if build_time <= 0.0:
+				star.ship_queue.pop_front()
+				_complete_ship_build(star, definition)
+				finished.append({
+					"system_name": star.display_name,
+					"ship_name": str(definition.get("name", "Ship")),
+				})
+				continue
+			var remaining := build_time - progress
+			if work + 0.0001 >= remaining:
+				work -= remaining
+				star.ship_queue.pop_front()
+				_complete_ship_build(star, definition)
+				finished.append({
+					"system_name": star.display_name,
+					"ship_name": str(definition.get("name", "Ship")),
+				})
+			else:
+				item["progress"] = progress + work
+				work = 0.0
+		if not affected.has(star):
+			affected.append(star)
+
+	if finished.is_empty():
+		return
+
+	_rebuild_fleet_markers()
+	if _selected_star != null and affected.has(_selected_star.data):
+		_show_star_panel(_selected_star)
+	_set_status(_ship_completion_text(finished), STATUS_SUCCESS_COLOR)
+
+
+func _complete_ship_build(star: StarData, definition: Dictionary) -> void:
+	var fleet := star.newest_stationed_fleet()
+	if fleet == null:
+		fleet = FleetData.new()
+		if _galaxy != null:
+			fleet.name = _galaxy.next_fleet_name(star.display_name)
+		else:
+			fleet.name = FleetData.default_name(star.display_name, 0)
+		fleet.dock_at(star)
+		star.fleets.append(fleet)
+	fleet.add_ship(str(definition.get("name", "Ship")))
+
+
+func _ship_completion_text(finished: Array[Dictionary]) -> String:
+	var by_system: Dictionary = {}
+	var order: Array[String] = []
+	for entry in finished:
+		var key := str(entry.get("system_name", ""))
+		if not by_system.has(key):
+			by_system[key] = {}
+			order.append(key)
+		var counts: Dictionary = by_system[key]
+		var ship_name := str(entry.get("ship_name", ""))
+		counts[ship_name] = int(counts.get(ship_name, 0)) + 1
+
+	var parts: Array[String] = []
+	for key in order:
+		var counts: Dictionary = by_system[key]
+		var ships: Array[String] = []
+		for ship_name in counts:
+			var count := int(counts[ship_name])
+			var noun: String = (
+				ship_name if count == 1 else "%ss" % ship_name
+			)
+			ships.append("%d %s" % [count, noun])
+		parts.append("Shipyard completed %s (%s)." % [
+			", ".join(ships), key
+		])
+	return " ".join(parts)
 
 
 ## Applies every system's net local-resource flow and adds galaxy-wide Research
@@ -1094,16 +1201,41 @@ func _rebuild_fleet_markers() -> void:
 		if is_instance_valid(marker):
 			marker.queue_free()
 	_fleet_markers.clear()
+	for label in _fleet_labels:
+		if is_instance_valid(label):
+			label.queue_free()
+	_fleet_labels.clear()
 
 	if _galaxy == null:
 		return
 
+	var groups: Dictionary = {}
 	for star in _galaxy.stars:
 		for fleet in star.fleets:
-			if fleet.in_transit:
-				_add_fleet_marker(
-					fleet, GalaxyScale.to_world(fleet.position_ly)
-				)
+			if not fleet.in_transit:
+				continue
+			_add_fleet_marker(
+				fleet, GalaxyScale.to_world(fleet.position_ly)
+			)
+			var cell := Vector3i(
+				(fleet.position_ly / FLEET_LABEL_CELL_LY).floor()
+			)
+			if not groups.has(cell):
+				groups[cell] = {
+					"position": fleet.position_ly,
+					"fleets": [],
+				}
+			(groups[cell]["fleets"] as Array).append(fleet)
+
+	var stack_index := 0
+	for cell in groups:
+		var entry: Dictionary = groups[cell]
+		_add_fleet_label(
+			stack_index,
+			entry["position"],
+			entry["fleets"]
+		)
+		stack_index += 1
 
 
 func _add_fleet_marker(fleet: FleetData, world_position: Vector3) -> void:
@@ -1111,6 +1243,33 @@ func _add_fleet_marker(fleet: FleetData, world_position: Vector3) -> void:
 	fleets_root.add_child(marker)
 	marker.setup(fleet, world_position)
 	_fleet_markers.append(marker)
+
+
+## One left-anchored label per cluster of coincident markers, with a line per
+## fleet so names stack vertically instead of colliding. Rebuilt every turn,
+## so each stack rides along with its markers.
+func _add_fleet_label(
+	stack_index: int, position_ly: Vector3, departing: Array
+) -> void:
+	var names: Array[String] = []
+	for fleet in departing:
+		names.append((fleet as FleetData).name)
+
+	var label := Label3D.new()
+	label.name = "FleetLabels_%d" % stack_index
+	label.text = "\n".join(names)
+	label.position = GalaxyScale.to_world(position_ly) + FLEET_LABEL_OFFSET
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.font_size = 22
+	label.pixel_size = 0.04
+	label.outline_size = 8
+	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.92)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.modulate = Color(1.0, 0.88, 0.62, 1.0)
+	label.render_priority = 2
+	fleets_root.add_child(label)
+	_fleet_labels.append(label)
 
 
 func _is_overlay_open() -> bool:

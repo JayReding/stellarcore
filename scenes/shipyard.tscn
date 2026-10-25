@@ -439,6 +439,21 @@ theme_override_font_sizes/font_size = 12
 text = "None"
 horizontal_alignment = 2
 
+[node name="HullTimeKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "Build time"
+
+[node name="HullTimeValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
+theme_override_font_sizes/font_size = 12
+text = "1 turn"
+horizontal_alignment = 2
+
 [node name="CostKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
@@ -480,6 +495,25 @@ autowrap_mode = 3
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="QueueEyebrow" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "CONSTRUCTION QUEUE"
+
+[node name="QueueList" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="QueueNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
+theme_override_font_sizes/font_size = 10
+text = "Ships are built in order, one turn of work per turn. Cancelling refunds unused resources; Antimatter is always fully refunded."
+autowrap_mode = 3
+
 [node name="ResourceNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -516,6 +550,20 @@ theme_override_colors/font_color = Color(0.55, 0.68, 0.82, 1)
 theme_override_font_sizes/font_size = 10
 text = "0"
 
+[node name="NewFleetButton" type="Button" parent="Root/UI/Content/FleetColumn/FleetContent/FleetHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+text = "+ NEW FLEET"
+
 [node name="FleetScroll" type="ScrollContainer" parent="Root/UI/Content/FleetColumn/FleetContent"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -545,7 +593,7 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
 theme_override_font_sizes/font_size = 10
-text = "Select a fleet to reinforce it.\nClick it again to clear the selection."
+text = "Drag a ship onto another fleet to move it.\nA fleet that loses its last ship is removed."
 autowrap_mode = 3
 
 [node name="FeedbackLabel" type="Label" parent="Root/UI"]
@@ -565,7 +613,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
 theme_override_font_sizes/font_size = 12
-text = "No fleet selected — Produce Ship will create a new fleet."
+text = "Produce Ship queues the selected hull. Completed ships join the newest fleet."
 horizontal_alignment = 1
 autowrap_mode = 3
 

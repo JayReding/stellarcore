@@ -79,13 +79,30 @@ const TECHNOLOGIES := [
 			"ships": [],
 		},
 	},
+	{
+		"id": "destroyer_hull_plan",
+		"name": "Destroyer Hull Plan",
+		"tier": 1,
+		"category": "Military",
+		"cost": 50,
+		"time": 3,
+		"available_by_default": false,
+		"icon": "DES",
+		"description": "Small and light military platform. Uses standard "
+		+ "missiles for long range combat.",
+		"unlocks": {
+			"structures": [],
+			"ships": [],
+		},
+	},
 ]
 
 @onready var root: Control = $Root
 @onready var back_button: Button = %BackButton
 @onready var meta_label: Label = %MetaLabel
 @onready var funds_label: Label = %FundsLabel
-@onready var tech_list: VBoxContainer = %TechList
+@onready var tech_scroll: ScrollContainer = %TreeScroll
+@onready var tech_grid: GridContainer = %TechGrid
 @onready var dialog_backdrop: ColorRect = %DialogBackdrop
 @onready var research_dialog: PanelContainer = %ResearchDialog
 @onready var dialog_title: Label = %DialogTitle
@@ -166,152 +183,92 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _populate() -> void:
-	for child in tech_list.get_children():
-		tech_list.remove_child(child)
+	for child in tech_grid.get_children():
+		tech_grid.remove_child(child)
 		child.queue_free()
 	_tech_nodes.clear()
 
-	var groups := _technology_groups()
-	var tier_rows := _tier_rows(groups)
-	for tier_row in tier_rows:
-		var row_section := _make_tier_section(int(tier_row["tier"]))
-		tech_list.add_child(row_section)
-		var category_row := row_section.get_node("CategoryRow") as HBoxContainer
-		for group in tier_row["groups"]:
-			var section := _make_category_section(group)
-			category_row.add_child(section)
-			_populate_category_section(section, group)
+	var max_tier := 1
+	for technology in TECHNOLOGIES:
+		max_tier = maxi(max_tier, int(technology.get("tier", 1)))
 
-	var categories: Dictionary = {}
-	for group in groups:
-		categories[str(group["category"])] = true
+	tech_grid.columns = CATEGORY_ORDER.size() + 1
+
+	var corner := Control.new()
+	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tech_grid.add_child(corner)
+	for category in CATEGORY_ORDER:
+		tech_grid.add_child(_make_category_header(str(category)))
+
+	for tier in range(1, max_tier + 1):
+		tech_grid.add_child(_make_tier_cell(tier))
+		for category in CATEGORY_ORDER:
+			var cell := _make_tech_cell(tier, str(category))
+			tech_grid.add_child(cell)
+			_populate_tech_cell(cell, tier, str(category))
 
 	var noun := "TECHNOLOGY" if TECHNOLOGIES.size() == 1 else "TECHNOLOGIES"
-	var category_noun := "CATEGORY" if categories.size() == 1 else "CATEGORIES"
-	var tier_noun := "TIER" if tier_rows.size() == 1 else "TIERS"
-	meta_label.text = "TECH TREE  •  %d %s  •  %d %s  •  %d %s" % [
+	meta_label.text = "TECH TREE  •  %d %s  •  %d CATEGORIES  •  %d %s" % [
 		TECHNOLOGIES.size(), noun,
-		categories.size(), category_noun,
-		tier_rows.size(), tier_noun,
+		CATEGORY_ORDER.size(),
+		max_tier, "TIER" if max_tier == 1 else "TIERS",
 	]
 	refresh_tech_cards()
-
-
-## Groups technologies by tier and then category, preserving the configured
-## category order. Each group becomes one labelled card section.
-func _technology_groups() -> Array[Dictionary]:
-	var sorted: Array[Dictionary] = []
-	for technology in TECHNOLOGIES:
-		sorted.append(technology)
-	sorted.sort_custom(_sort_technologies)
-
-	var groups: Array[Dictionary] = []
-	for technology in sorted:
-		var tier := int(technology.get("tier", 1))
-		var category := str(technology.get("category", "Uncategorized"))
-		if (
-			groups.is_empty()
-			or int(groups[-1]["tier"]) != tier
-			or str(groups[-1]["category"]) != category
-		):
-			groups.append({
-				"tier": tier,
-				"category": category,
-				"technologies": [],
-			})
-		groups[-1]["technologies"].append(technology)
-	return groups
-
-
-## Collapses the ordered category groups into one display row per tier.
-func _tier_rows(groups: Array[Dictionary]) -> Array[Dictionary]:
-	var rows: Array[Dictionary] = []
-	for group in groups:
-		var tier := int(group["tier"])
-		if rows.is_empty() or int(rows[-1]["tier"]) != tier:
-			rows.append({"tier": tier, "groups": []})
-		rows[-1]["groups"].append(group)
-	return rows
-
-
-func _sort_technologies(a: Dictionary, b: Dictionary) -> bool:
-	var tier_a := int(a.get("tier", 1))
-	var tier_b := int(b.get("tier", 1))
-	if tier_a != tier_b:
-		return tier_a < tier_b
-
-	var order_a := _category_order_index(str(a.get("category", "")))
-	var order_b := _category_order_index(str(b.get("category", "")))
-	if order_a != order_b:
-		return order_a < order_b
-	return str(a.get("name", "")) < str(b.get("name", ""))
-
-
-func _category_order_index(category: String) -> int:
-	var index := CATEGORY_ORDER.find(category)
-	return index if index >= 0 else CATEGORY_ORDER.size()
 
 
 func _category_color(category: String) -> Color:
 	return CATEGORY_COLORS.get(category, Color(0.48, 0.7, 0.92))
 
 
-func _make_tier_section(tier: int) -> VBoxContainer:
-	var section := VBoxContainer.new()
-	section.name = "Tier_%d" % tier
-	section.add_theme_constant_override("separation", 10)
-
+## One centered header per category column, in the configured category order.
+func _make_category_header(category: String) -> Label:
 	var header := Label.new()
-	header.name = "TierHeader"
-	header.text = "TIER %d" % tier
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override("font_size", 15)
-	header.add_theme_color_override("font_color", Color(0.48, 0.7, 0.92))
-	section.add_child(header)
-
-	var category_row := HBoxContainer.new()
-	category_row.name = "CategoryRow"
-	category_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	category_row.add_theme_constant_override("separation", 48)
-	section.add_child(category_row)
-	return section
-
-
-func _make_category_section(group: Dictionary) -> VBoxContainer:
-	var category := str(group["category"])
-
-	var section := VBoxContainer.new()
-	section.name = "Category_%s" % category.replace(" ", "")
-	section.add_theme_constant_override("separation", 10)
-	section.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-
-	var header := Label.new()
-	header.name = "CategoryHeader"
+	header.name = "CategoryHeader_%s" % category.replace(" ", "")
 	header.text = category.to_upper()
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override("font_size", 13)
+	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_theme_font_size_override("font_size", 14)
 	header.add_theme_color_override("font_color", _category_color(category))
-	section.add_child(header)
-
-	var card_row := HBoxContainer.new()
-	card_row.name = "TechCards"
-	card_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	card_row.add_theme_constant_override("separation", 24)
-	section.add_child(card_row)
-	return section
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return header
 
 
-func _populate_category_section(
-	section: VBoxContainer, group: Dictionary
-) -> void:
-	var card_row := section.get_node_or_null("TechCards") as HBoxContainer
-	if card_row == null:
-		return
-	for technology in group["technologies"]:
+## Tier gutter label marking the start of each technology row.
+func _make_tier_cell(tier: int) -> Label:
+	var label := Label.new()
+	label.name = "TierLabel_%d" % tier
+	label.text = "TIER %d" % tier
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_color_override("font_color", Color(0.48, 0.7, 0.92))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return label
+
+
+## One cell per tier/category pair holding that slot's cards top to bottom.
+## Cards are added after the cell joins the tree so their _ready hooks run.
+func _make_tech_cell(tier: int, category: String) -> VBoxContainer:
+	var cell := VBoxContainer.new()
+	cell.name = "TechCell_%d_%s" % [tier, category.replace(" ", "")]
+	cell.custom_minimum_size = Vector2(208, 0)
+	cell.add_theme_constant_override("separation", 16)
+	cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return cell
+
+
+func _populate_tech_cell(cell: VBoxContainer, tier: int, category: String) -> void:
+	for technology in TECHNOLOGIES:
+		if (
+			int(technology.get("tier", 1)) != tier
+			or str(technology.get("category", "")) != category
+		):
+			continue
 		var node := TECH_NODE_SCENE.instantiate() as TechNode
 		if node == null:
 			continue
-		card_row.add_child(node)
+		cell.add_child(node)
 		node.setup(technology)
 		node.research_requested.connect(_on_research_requested)
 		_tech_nodes.append(node)

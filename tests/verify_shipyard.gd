@@ -67,6 +67,10 @@ func _run() -> void:
 			_check(hull_button.text == "FTL Probe", "The hull type is FTL Probe")
 	_check(shipyard.hull_name_label.text == "FTL Probe", "Center shows FTL Probe")
 	_check(
+		shipyard.hull_time_value.text == "0.25 turns (4 per turn)",
+		"The FTL Probe builds four to a turn"
+	)
+	_check(
 		shipyard.hull_customization_value.text == "None",
 		"FTL Probe has no customization"
 	)
@@ -117,58 +121,165 @@ func _run() -> void:
 	_check(not shipyard.fleet_scroll.visible, "Empty fleet list hides its scroll area")
 	_check(shipyard.fleet_count_label.text == "0", "Fleet count starts at zero")
 	_check(home.fleets.is_empty(), "Newhome starts with no fleet data")
+	_check(shipyard.queue_list.get_child_count() == 0, "Shipyard starts with no queue")
 	_check(
-		shipyard.feedback_label.text.contains("No fleet selected"),
-		"Production hint explains the new-fleet default"
+		shipyard.feedback_label.text.contains("newest fleet"),
+		"Production hint explains the newest-fleet default"
 	)
 
+	# Producing queues the hull and spends its cost up front.
 	shipyard.produce_button.pressed.emit()
-	_check(home.resources.titanium == 175, "Production spends 25 Titanium")
-	_check(home.resources.antimatter == 40, "Production spends 10 Antimatter")
-	_check(home.fleets.size() == 1, "Producing without a selection creates a fleet")
+	_check(home.resources.titanium == 175, "Queuing spends 25 Titanium")
+	_check(home.resources.antimatter == 40, "Queuing spends 10 Antimatter")
+	_check(home.fleets.is_empty(), "Queuing creates no fleet yet")
+	_check(home.ship_queue.size() == 1, "Queuing adds one build to the queue")
+	_check(
+		shipyard.queue_list.get_child_count() == 1,
+		"Queue list shows the queued build"
+	)
+	_check(
+		shipyard.feedback_label.text.contains("Queued 1 FTL Probe"),
+		"Queue feedback names the hull"
+	)
+
+	# A quarter-turn hull completes on the next turn into a new fleet.
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(home.ship_queue.is_empty(), "The finished build leaves the queue")
+	_check(home.fleets.size() == 1, "Completion creates a fleet when none exists")
 	if home.fleets.size() == 1:
 		var first := home.fleets[0]
 		_check(first.name == "Newhome Alpha", "First fleet is Newhome Alpha")
 		_check(first.system_name == "Newhome", "Fleet records its home system")
 		_check(first.ships == ["FTL Probe"], "Fleet contains one FTL Probe")
 		_check(first.ship_summary() == "1 FTL Probe", "Fleet summary shows its ship")
-	_check(shipyard.fleet_list.get_child_count() == 1, "Fleet list refreshes after production")
-	_check(not shipyard.no_fleets_label.visible, "Empty state hides after production")
+		_check(
+			is_equal_approx(first.speed_ly_per_turn(), 10.0),
+			"The probe fleet travels 10 light years per turn"
+		)
+	_check(shipyard.fleet_list.get_child_count() == 1, "Fleet list refreshes after completion")
+	_check(not shipyard.no_fleets_label.visible, "Empty state hides after completion")
 	_check(shipyard.meta_label.text.contains("1 FLEET"), "Header updates its fleet count")
 	_check(
-		shipyard.feedback_label.text.contains("Newhome Alpha"),
-		"Production feedback names the new fleet"
+		scene.status_label.text.contains("1 FTL Probe"),
+		"Completion is announced on the status line"
 	)
 
+	# Four quarter-turn hulls finish in a single turn of work.
 	shipyard.produce_button.pressed.emit()
-	_check(home.fleets.size() == 2, "No selection creates another fleet")
-	if home.fleets.size() == 2:
-		_check(home.fleets[1].name == "Newhome Beta", "Second fleet is Newhome Beta")
-		_check(shipyard.fleet_list.get_child_count() == 2, "Both fleets are listed")
+	shipyard.produce_button.pressed.emit()
+	shipyard.produce_button.pressed.emit()
+	shipyard.produce_button.pressed.emit()
+	_check(home.resources.titanium == 110, "Four probes cost 100 Titanium up front")
+	_check(home.resources.antimatter == 1, "Four probes cost 40 Antimatter up front")
+	_check(home.ship_queue.size() == 4, "Four probes queue up")
+	_check(
+		shipyard.produce_button.disabled,
+		"Missing Antimatter greys out production"
+	)
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(home.ship_queue.is_empty(), "One turn of work finishes four probes")
+	_check(
+		home.fleets[0].ships.size() == 5,
+		"Completed probes join the newest fleet"
+	)
+	_check(
+		scene.status_label.text.contains("4 FTL Probes"),
+		"The status line batches the four completions"
+	)
 
-	if home.fleets.size() >= 1:
-		shipyard._on_fleet_pressed(home.fleets[0])
+	# The New Fleet button creates an empty fleet to drag ships into.
+	shipyard.new_fleet_button.pressed.emit()
+	await process_frame
+	_check(home.fleets.size() == 2, "New Fleet adds a second fleet")
+	var alpha := home.fleets[0]
+	var beta := home.fleets[1]
+	_check(alpha.name == "Newhome Alpha", "The probe fleet is still first")
+	_check(beta.name == "Newhome Beta", "The new fleet is Newhome Beta")
+	_check(beta.ships.is_empty(), "A new fleet starts empty")
+	_check(
+		shipyard.fleet_count_label.text == "2",
+		"Fleet count includes the empty fleet"
+	)
+
+	# Dragging a ship between fleets moves it; emptying a fleet removes it.
+	_check(
+		shipyard._move_ship(alpha, beta, 0),
+		"Ships can move between stationed fleets"
+	)
+	_check(alpha.ships.size() == 4, "The source fleet loses the ship")
+	_check(beta.ships == ["FTL Probe"], "The target fleet gains the ship")
+	_check(
+		shipyard.feedback_label.text.contains("Moved 1 FTL Probe to Newhome Beta"),
+		"Moving reports the transfer"
+	)
+	var beta_row := _fleet_row_panel(shipyard, beta)
+	_check(beta_row != null, "Fleet rows expose drop targets")
+	_check(
+		shipyard.fleet_drop_target_for(beta_row) == beta,
+		"Drop targets resolve to their fleet"
+	)
+	_check(
+		shipyard.fleet_drop_target_for(shipyard.hull_list.get_child(0)) == null,
+		"Non-fleet controls are not drop targets"
+	)
+	_check(
+		not shipyard._move_ship(beta, beta, 0),
+		"Dropping onto the same fleet does nothing"
+	)
+	_check(
+		not shipyard._move_ship(beta, alpha, 99),
+		"Out-of-range ship moves are rejected"
+	)
+	for i in 4:
+		shipyard._move_ship(alpha, beta, 0)
+	_check(alpha not in home.fleets, "An emptied fleet is removed")
+	_check(beta.ships.size() == 5, "All probes end up in one fleet")
+	_check(
+		scene._galaxy.next_fleet_name("Newhome") == "Newhome Alpha",
+		"The removed fleet's name is available again"
+	)
+
+	# Clicking a chip without dragging changes nothing.
+	var chip := _first_ship_chip(shipyard, beta)
+	_check(chip != null, "Ships render as draggable chips")
+	if chip != null:
+		var press := InputEventMouseButton.new()
+		press.button_index = MOUSE_BUTTON_LEFT
+		press.pressed = true
+		chip.gui_input.emit(press)
+		var release := InputEventMouseButton.new()
+		release.button_index = MOUSE_BUTTON_LEFT
+		release.pressed = false
+		chip.gui_input.emit(release)
+		_check(beta.ships.size() == 5, "Clicking a chip moves no ships")
 		_check(
-			shipyard.feedback_label.text.contains("Selected Newhome Alpha"),
-			"Selecting a fleet changes the production hint"
-		)
-		shipyard.produce_button.pressed.emit()
-		_check(home.fleets.size() == 2, "A selection produces into the existing fleet")
-		_check(home.fleets[0].ships.size() == 2, "Selected fleet receives the ship")
-		_check(
-			home.fleets[0].ship_summary() == "2 FTL Probes",
-			"Selected fleet summary updates"
+			shipyard._drag_payload.is_empty(),
+			"A click without dragging leaves no drag behind"
 		)
 
-		shipyard._on_fleet_pressed(home.fleets[0])
-		_check(
-			shipyard.feedback_label.text.contains("No fleet selected"),
-			"Clicking a selected fleet clears the selection"
-		)
-		shipyard.produce_button.pressed.emit()
-		_check(home.fleets.size() == 3, "Clearing selection creates a new fleet")
-		if home.fleets.size() == 3:
-			_check(home.fleets[2].name == "Newhome Gamma", "Third fleet is Newhome Gamma")
+	# A second new fleet reuses the disbanded name and becomes the completion
+	# target for later builds.
+	shipyard.new_fleet_button.pressed.emit()
+	await process_frame
+	_check(home.fleets.size() == 2, "A second new fleet is created")
+	var second := home.fleets[1]
+	_check(
+		second.name == "Newhome Alpha",
+		"The disbanded fleet's name is available again"
+	)
+	_check(second.ships.is_empty(), "The second new fleet starts empty")
+	_check(
+		shipyard._move_ship(beta, second, 0),
+		"Ships move into the second fleet"
+	)
+	_check(beta.ships.size() == 4, "Beta keeps four probes")
+	_check(second.ships == ["FTL Probe"], "The second fleet receives one probe")
+	_check(
+		shipyard.fleet_drop_target_for(_fleet_row_panel(shipyard, second)) == second,
+		"Drop targets resolve for the second fleet"
+	)
 
 	_check(FleetData.default_name("Newhome", 0) == "Newhome Alpha", "Greek naming starts at Alpha")
 	_check(FleetData.default_name("Newhome", 23) == "Newhome Omega", "Greek naming ends at Omega")
@@ -189,23 +300,24 @@ func _run() -> void:
 	_check(not shipyard.visible, "Back button closes the shipyard")
 	_check(not scene._is_overlay_open(), "Stellar View sees the closed shipyard")
 	_check(
-		panel.fleet_list.get_child_count() == 3,
+		panel.fleet_list.get_child_count() == 2,
 		"Fleet Command refreshes after the shipyard closes"
 	)
 	_check(not panel.no_fleets_label.visible, "Fleet Command hides its empty state")
 	_check(
-		panel.fleet_list.get_child(0).tooltip_text.contains("Newhome Alpha"),
-		"Fleet Command lists Newhome Alpha"
+		panel.fleet_list.get_child(0).tooltip_text.contains("Newhome Beta"),
+		"Fleet Command lists Newhome Beta first"
 	)
 
 	panel.shipyard_button.pressed.emit()
 	_check(shipyard.visible, "Shipyard reopens with its fleet data")
-	_check(shipyard.fleet_count_label.text == "3", "Existing fleets are restored")
+	_check(shipyard.fleet_count_label.text == "2", "Existing fleets are restored")
+	_check(home.ship_queue.is_empty(), "The queue stays empty across reopen")
 
-	# Five probes cost 125 Titanium and all 50 starting Antimatter.
+	# Queuing is still blocked while Antimatter is missing.
 	shipyard.produce_button.pressed.emit()
-	_check(home.resources.titanium == 75, "Five probes leave 75 Titanium")
-	_check(home.resources.antimatter == 0, "Five probes exhaust Antimatter")
+	_check(home.resources.titanium == 145, "Blocked queuing spends no Titanium")
+	_check(home.resources.antimatter == 2, "Blocked queuing spends no Antimatter")
 	_check(
 		shipyard.produce_button.disabled,
 		"The produce button greys out when resources are missing"
@@ -228,11 +340,9 @@ func _run() -> void:
 		titanium_cost != null and not _color_is_red(titanium_cost),
 		"Affordable Titanium stays out of red"
 	)
-	var fleets_before := home.fleets.size()
-	shipyard.produce_button.pressed.emit()
 	_check(
-		home.fleets.size() == fleets_before,
-		"Insufficient resources block production"
+		home.ship_queue.is_empty(),
+		"Blocked production adds nothing to the queue"
 	)
 
 	# Researching Colony Ships unlocks the hull in the shipyard.
@@ -253,6 +363,10 @@ func _run() -> void:
 	_check(
 		shipyard.hull_role_value.text == "Colonization",
 		"Colony Ship reports its role"
+	)
+	_check(
+		shipyard.hull_time_value.text == "3 turns",
+		"The Colony Ship takes 3 turns to build"
 	)
 	var colony_titanium := _cost_label(shipyard, "Titanium")
 	var colony_antimatter := _cost_label(shipyard, "Antimatter")
@@ -280,21 +394,90 @@ func _run() -> void:
 		"Funded Colony Ship production is enabled"
 	)
 	shipyard.produce_button.pressed.emit()
-	_check(home.resources.titanium == 100, "Colony Ship spends 500 Titanium")
-	_check(home.resources.antimatter == 4, "Colony Ship spends 1 Antimatter")
-	_check(home.fleets.size() == 5, "Colony Ship production creates a fleet")
-	if home.fleets.size() == 5:
-		var colony_fleet := home.fleets[4]
-		_check(colony_fleet.name == "Newhome Epsilon", "Fifth fleet is Newhome Epsilon")
-		_check(colony_fleet.ships == ["Colony Ship"], "Fleet contains one Colony Ship")
-		_check(
-			colony_fleet.ship_summary() == "1 Colony Ship",
-			"Fleet summary shows the Colony Ship"
-		)
-		_check(
-			is_equal_approx(colony_fleet.speed_ly_per_turn(), 5.0),
-			"A Colony Ship travels 5 light years per turn"
-		)
+	_check(home.resources.titanium == 100, "Queuing spends 500 Titanium up front")
+	_check(home.resources.antimatter == 4, "Queuing spends 1 Antimatter up front")
+	_check(home.ship_queue.size() == 1, "Queuing adds the Colony Ship")
+	_check(
+		_queue_status_text(shipyard, 0) == "Turn 1 of 3",
+		"A fresh multi-turn build starts on turn one"
+	)
+
+	# The queue survives closing and reopening the shipyard.
+	shipyard.back_button.pressed.emit()
+	await process_frame
+	panel.shipyard_button.pressed.emit()
+	await process_frame
+	_check(
+		shipyard.queue_list.get_child_count() == 1,
+		"The queued build persists across reopen"
+	)
+
+	# Cancelling refunds unused Titanium in full measure and Antimatter always.
+	scene.turn_manager.advance_turn()
+	await process_frame
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(
+		_queue_status_text(shipyard, 0) == "Turn 3 of 3",
+		"Two turns leave one turn of work"
+	)
+	_queue_cancel_button(shipyard, 0).pressed.emit()
+	await process_frame
+	_check(home.ship_queue.is_empty(), "Cancelling clears the queue")
+	_check(
+		home.resources.titanium == 336,
+		"Cancelling refunds one third of the Titanium"
+	)
+	_check(home.resources.antimatter == 7, "Antimatter is always fully refunded")
+	_check(
+		shipyard.feedback_label.text.contains("166 Titanium"),
+		"Cancellation reports the Titanium refund"
+	)
+	_check(
+		shipyard.feedback_label.text.contains("1 Antimatter"),
+		"Cancellation reports the Antimatter refund"
+	)
+
+	# Cancelling an unstarted build refunds everything.
+	home.resources.titanium = 600
+	home.resources.antimatter = 50
+	shipyard._on_hull_pressed(ShipyardView.available_hulls(scene.unlocked_ships)[0])
+	shipyard.produce_button.pressed.emit()
+	_queue_cancel_button(shipyard, 0).pressed.emit()
+	await process_frame
+	_check(home.resources.titanium == 600, "Fresh builds refund all Titanium")
+	_check(home.resources.antimatter == 50, "Fresh builds refund all Antimatter")
+
+	# A finished Colony Ship joins the newest stationed fleet.
+	home.resources.titanium = 600
+	home.resources.antimatter = 50
+	shipyard._on_hull_pressed(ShipyardView.available_hulls(scene.unlocked_ships)[1])
+	shipyard.produce_button.pressed.emit()
+	scene.turn_manager.advance_turn()
+	await process_frame
+	scene.turn_manager.advance_turn()
+	await process_frame
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(home.ship_queue.is_empty(), "Three turns finish the Colony Ship")
+	_check(
+		home.fleets.size() == 2,
+		"Completion joins the newest stationed fleet"
+	)
+	_check(second.name == "Newhome Alpha", "The newest fleet keeps its recycled name")
+	_check(
+		second.ships == ["FTL Probe", "Colony Ship"],
+		"The Colony Ship joins the second fleet alongside its probe"
+	)
+	_check(
+		second.ship_summary() == "1 FTL Probe, 1 Colony Ship",
+		"Fleet summary shows both ships"
+	)
+	_check(
+		is_equal_approx(second.speed_ly_per_turn(), 5.0),
+		"A Colony Ship slows its fleet to 5 light years per turn"
+	)
+	_check(home.resources.titanium == 205, "Three turns net +60 Titanium overall")
 
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
@@ -313,6 +496,52 @@ func _run() -> void:
 	_check(not shipyard.visible, "Systems without a shipyard cannot open the view")
 
 	_finish()
+
+
+func _fleet_row_panel(
+	shipyard: ShipyardView, fleet: FleetData
+) -> PanelContainer:
+	for child in shipyard.fleet_list.get_children():
+		var panel := child as PanelContainer
+		if panel != null and panel.has_meta("fleet_target"):
+			if panel.get_meta("fleet_target") == fleet:
+				return panel
+	return null
+
+
+func _first_ship_chip(
+	shipyard: ShipyardView, fleet: FleetData
+) -> PanelContainer:
+	var row := _fleet_row_panel(shipyard, fleet)
+	if row == null:
+		return null
+	var chips := row.find_child("ShipChips", true, false) as HBoxContainer
+	if chips == null:
+		return null
+	for child in chips.get_children():
+		var chip := child as PanelContainer
+		if chip != null and chip.has_meta("ship_chip"):
+			return chip
+	return null
+
+
+func _queue_status_text(shipyard: ShipyardView, index: int) -> String:
+	if index < 0 or index >= shipyard.queue_list.get_child_count():
+		return ""
+	var row := shipyard.queue_list.get_child(index)
+	var label := row.find_child("QueueStatus", true, false) as Label
+	return label.text if label != null else ""
+
+
+func _queue_cancel_button(shipyard: ShipyardView, index: int) -> Button:
+	if index < 0 or index >= shipyard.queue_list.get_child_count():
+		return null
+	var row := shipyard.queue_list.get_child(index)
+	for child in row.get_children():
+		var button := child as Button
+		if button != null:
+			return button
+	return null
 
 
 func _cost_label(shipyard: ShipyardView, needle: String) -> Label:

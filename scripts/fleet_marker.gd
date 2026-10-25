@@ -1,7 +1,9 @@
 class_name FleetMarker
 extends Node3D
-## Clickable map marker for a fleet in transit. The marker shows the fleet name
-## and is removed when the fleet arrives.
+## Clickable map marker for a fleet in transit. The diamond icon rides with
+## the fleet and is removed when the fleet arrives. Fleet names are drawn as a
+## separate per-star stack (see StellarView) so multiple departures never
+## collide with each other.
 
 const PICK_RADIUS := 2.15
 const ICON_TEXTURE_SIZE := 64
@@ -12,7 +14,6 @@ static var _icon_texture: ImageTexture
 var fleet: FleetData
 
 var _sprite: Sprite3D
-var _label: Label3D
 
 
 func setup(fleet_data: FleetData, world_position: Vector3) -> void:
@@ -33,18 +34,6 @@ func _build_visuals() -> void:
 	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	add_child(_sprite)
 
-	_label = Label3D.new()
-	_label.position = Vector3(0.0, 2.2, 0.0)
-	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_label.no_depth_test = true
-	_label.font_size = 30
-	_label.pixel_size = 0.045
-	_label.outline_size = 10
-	_label.outline_modulate = Color(0.0, 0.0, 0.0, 0.92)
-	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label.render_priority = 2
-	add_child(_label)
-
 	var pick_body := StaticBody3D.new()
 	pick_body.name = "PickBody"
 	pick_body.collision_layer = 4
@@ -62,8 +51,6 @@ func _refresh() -> void:
 		return
 
 	_sprite.modulate = Color(1.0, 0.82, 0.46, 1.0)
-	_label.modulate = Color(1.0, 0.88, 0.62, 1.0)
-	_label.text = fleet.name
 
 
 static func _get_icon_texture() -> ImageTexture:

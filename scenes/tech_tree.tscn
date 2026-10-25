@@ -254,25 +254,27 @@ theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
 theme_override_font_sizes/font_size = 10
 text = "Earned by surveying systems"
 
-[node name="Content" type="CenterContainer" parent="Root/UI" unique_id=1079899611]
+[node name="TreeScroll" type="ScrollContainer" parent="Root/UI" unique_id=1079899611]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 40.0
 offset_top = 180.0
+offset_right = -40.0
 offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 
-[node name="TreeColumn" type="VBoxContainer" parent="Root/UI/Content" unique_id=482583496]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="TechList" type="VBoxContainer" parent="Root/UI/Content/TreeColumn" unique_id=1769840202]
+[node name="TechGrid" type="GridContainer" parent="Root/UI/TreeScroll"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 26
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 6
 
 [node name="FundingNote" type="Label" parent="Root/UI" unique_id=119145325]
 layout_mode = 1

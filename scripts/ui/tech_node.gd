@@ -1,15 +1,24 @@
 class_name TechNode
 extends PanelContainer
 ## Rounded-square card for one technology in the tech tree.
+##
+## The card shows an icon, the name, the description, the Research Data cost
+## and the research time in turns (both yellow). A researched technology hides
+## the cost and time and shows AVAILABLE in green instead.
 
 signal research_requested(technology: Dictionary)
 
-@onready var tier_label: Label = %TierLabel
-@onready var category_label: Label = %CategoryLabel
+const COLOR_COST := Color(1.0, 0.82, 0.35)
+const COLOR_AVAILABLE := Color(0.46, 0.84, 0.65)
+const COLOR_AWAITING := Color(0.8, 0.6, 0.3)
+const COLOR_BLOCKED := Color(0.5, 0.58, 0.68)
+
 @onready var icon_label: Label = %IconLabel
 @onready var name_label: Label = %NameLabel
 @onready var description_label: Label = %DescriptionLabel
+@onready var cost_row: HBoxContainer = %CostRow
 @onready var cost_label: Label = %CostLabel
+@onready var time_label: Label = %TimeLabel
 @onready var status_label: Label = %StatusLabel
 
 var technology: Dictionary = {}
@@ -27,22 +36,13 @@ func setup(technology_data: Dictionary) -> void:
 	technology = technology_data
 	var display_name := str(technology.get("name", "Technology"))
 	var description := str(technology.get("description", ""))
-	var cost := int(technology.get("cost", 0))
 
-	tier_label.text = "TIER %d" % int(technology.get("tier", 1))
-	category_label.text = str(technology.get("category", "")).to_upper()
 	icon_label.text = str(technology.get("icon", "T"))
 	name_label.text = display_name
 	description_label.text = description
 
 	if bool(technology.get("available_by_default", false)):
-		_set_state(
-			"NO RESEARCH REQUIRED",
-			"AVAILABLE BY DEFAULT",
-			Color(0.52, 0.9, 0.76),
-			Color(0.46, 0.84, 0.65),
-			false
-		)
+		_show_available()
 		tooltip_text = "%s\n%s\nAvailable by default." % [
 			display_name, description
 		]
@@ -51,7 +51,7 @@ func setup(technology_data: Dictionary) -> void:
 		tooltip_text = "%s\n%s\nResearch cost: %d RD\nResearch time: %d turns" % [
 			display_name,
 			description,
-			cost,
+			int(technology.get("cost", 0)),
 			int(technology.get("time", 0)),
 		]
 
@@ -63,23 +63,16 @@ func set_research_state(state: String, turns_remaining := 0) -> void:
 	var description := str(technology.get("description", ""))
 	match state:
 		"completed":
-			_set_state(
-				"RESEARCH COMPLETE",
-				"UNLOCKED",
-				Color(0.52, 0.9, 0.76),
-				Color(0.46, 0.84, 0.65),
-				false
-			)
+			_show_available()
 			tooltip_text = "%s\n%s\nResearch complete." % [
 				display_name, description
 			]
 		"active":
-			_set_state(
-				"IN PROGRESS",
+			_show_cost_and_time()
+			_set_status(
 				"%d TURN%s LEFT" % [
 					turns_remaining, "" if turns_remaining == 1 else "S"
 				],
-				Color(1, 0.78, 0.38),
 				Color(0.9, 0.7, 0.35),
 				false
 			)
@@ -87,13 +80,8 @@ func set_research_state(state: String, turns_remaining := 0) -> void:
 				display_name, description, turns_remaining
 			]
 		"blocked":
-			_set_state(
-				"REQUIRES %d RD" % int(technology.get("cost", 0)),
-				"AWAITING CURRENT RESEARCH",
-				Color(0.62, 0.68, 0.76),
-				Color(0.5, 0.58, 0.68),
-				false
-			)
+			_show_cost_and_time()
+			_set_status("AWAITING CURRENT RESEARCH", COLOR_BLOCKED, false)
 			tooltip_text = "%s\n%s\nAnother research project is in progress." % [
 				display_name, description
 			]
@@ -108,25 +96,32 @@ func set_research_state(state: String, turns_remaining := 0) -> void:
 
 
 func _show_available_state() -> void:
-	_set_state(
-		"REQUIRES %d RD" % int(technology.get("cost", 0)),
-		"AWAITING FUNDING",
-		Color(1, 0.78, 0.38),
-		Color(0.8, 0.6, 0.3),
-		true
-	)
+	_show_cost_and_time()
+	cost_label.text = "%d RD" % int(technology.get("cost", 0))
+	cost_label.add_theme_color_override("font_color", COLOR_COST)
+	var turns := int(technology.get("time", 0))
+	time_label.text = "%d TURN%s" % [turns, "" if turns == 1 else "S"]
+	time_label.add_theme_color_override("font_color", COLOR_COST)
+	_set_status("", COLOR_AWAITING, true)
+	status_label.visible = false
 
 
-func _set_state(
-	cost_text: String,
-	status_text: String,
-	cost_color: Color,
-	status_color: Color,
-	clickable: bool
-) -> void:
-	cost_label.text = cost_text
-	cost_label.add_theme_color_override("font_color", cost_color)
+func _show_available() -> void:
+	cost_row.visible = false
+	cost_label.visible = false
+	time_label.visible = false
+	_set_status("AVAILABLE", COLOR_AVAILABLE, false)
+
+
+func _show_cost_and_time() -> void:
+	cost_row.visible = true
+	cost_label.visible = true
+	time_label.visible = true
+
+
+func _set_status(status_text: String, status_color: Color, clickable: bool) -> void:
 	status_label.text = status_text
+	status_label.visible = true
 	status_label.add_theme_color_override("font_color", status_color)
 	_clickable = clickable
 	mouse_default_cursor_shape = (

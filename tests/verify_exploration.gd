@@ -248,8 +248,8 @@ func _run() -> void:
 		var marker: FleetMarker = scene._fleet_markers[0]
 		_check(marker.fleet == fleet, "The transit marker belongs to the fleet")
 		_check(
-			marker._label.text == fleet.name,
-			"The transit marker shows only the fleet name"
+			_fleet_label_lines(scene) == [fleet.name],
+			"The stacked label shows only the fleet name"
 		)
 		_check(
 			marker.get_node_or_null("PickBody") != null,
@@ -270,6 +270,37 @@ func _run() -> void:
 		)
 		scene._fleet_menu.close()
 		await process_frame
+		_check(not scene._fleet_menu.visible, "The orders popup closes")
+
+	# A second departure stacks its name under the first instead of colliding.
+	var second := FleetData.new()
+	second.name = "Newhome Beta"
+	second.add_ship("FTL Probe")
+	second.dock_at(home)
+	home.fleets.append(second)
+	second.begin_travel(destination)
+	scene._rebuild_fleet_markers()
+	await process_frame
+	_check(
+		scene._fleet_labels.size() == 1,
+		"Departures from one star share a single label stack"
+	)
+	_check(
+		_fleet_label_lines(scene) == ["Newhome Alpha", "Newhome Beta"],
+		"Fleet names stack vertically in departure order"
+	)
+	if scene._fleet_labels.size() == 1:
+		_check(
+			(scene._fleet_labels[0] as Label3D).font_size == 22,
+			"Stacked fleet labels use the smaller type size"
+		)
+	home.fleets.erase(second)
+	scene._rebuild_fleet_markers()
+	await process_frame
+	_check(
+		_fleet_label_lines(scene) == ["Newhome Alpha"],
+		"Removing a departure restores the single name"
+	)
 	_check(
 		panel.fleet_list.get_child_count() == 0,
 		"In-transit fleets leave Fleet Command"
@@ -379,7 +410,10 @@ func _run() -> void:
 	_check(shipyard != null and shipyard.visible, "The shipyard opens after the loss")
 	if shipyard != null:
 		shipyard.produce_button.pressed.emit()
-		_check(home.fleets.size() == 1, "A replacement fleet can be produced")
+		_check(home.fleets.is_empty(), "Production queues instead of appearing")
+		scene.turn_manager.advance_turn()
+		await process_frame
+		_check(home.fleets.size() == 1, "A replacement fleet is produced next turn")
 		if home.fleets.size() == 1:
 			_check(
 				home.fleets[0].name == "Newhome Alpha",
@@ -388,7 +422,51 @@ func _run() -> void:
 		shipyard.close()
 		await process_frame
 
+	# A lone label rides its marker instead of staying at the origin star.
+	var rider := FleetData.new()
+	rider.name = "Newhome Beta"
+	rider.add_ship("FTL Probe")
+	rider.dock_at(home)
+	home.fleets.append(rider)
+	rider.begin_travel(destination)
+	scene.turn_manager.advance_turn()
+	await process_frame
+	var rider_marker: FleetMarker = null
+	for marker in scene._fleet_markers:
+		if (marker as FleetMarker).fleet == rider:
+			rider_marker = marker
+	_check(rider_marker != null, "The departing fleet gets a marker")
+	if rider_marker != null and scene._fleet_labels.size() == 1:
+		var stack := scene._fleet_labels[0] as Label3D
+		_check(
+			stack != null and stack.text.contains("Newhome Beta"),
+			"The stack follows the departure"
+		)
+		_check(
+			stack.position.distance_to(
+				rider_marker.global_position + Vector3(3.2, 1.6, 0.0)
+			) < 0.6,
+			"The stack rides at the marker's side"
+		)
+		_check(
+			stack.position.distance_to(
+				GalaxyScale.to_world(home.position_ly)
+			) > 2.0,
+			"The stack leaves the origin star behind"
+		)
+	home.fleets.erase(rider)
+	scene._rebuild_fleet_markers()
+	await process_frame
+
 	_finish()
+
+
+func _fleet_label_lines(scene: Node) -> Array:
+	for child in scene._fleet_labels:
+		var label := child as Label3D
+		if label != null:
+			return Array(label.text.split("\n"))
+	return []
 
 
 func _check(condition: bool, message: String) -> void:

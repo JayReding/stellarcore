@@ -110,7 +110,9 @@ func _run() -> void:
 		"The HUD research bar starts empty"
 	)
 	_check(
-		antimatter.cost_label.text == "IN PROGRESS"
+		antimatter.cost_label.visible
+		and antimatter.cost_label.text == "50 RD"
+		and antimatter.time_label.visible
 		and antimatter.status_label.text == "3 TURNS LEFT",
 		"The technology card reports active research"
 	)
@@ -180,8 +182,9 @@ func _run() -> void:
 		"The status line announces the completed research"
 	)
 	_check(
-		antimatter.cost_label.text == "RESEARCH COMPLETE"
-		and antimatter.status_label.text == "UNLOCKED",
+		not antimatter.cost_label.visible
+		and not antimatter.time_label.visible
+		and antimatter.status_label.text == "AVAILABLE",
 		"The technology card reports completion"
 	)
 
@@ -193,7 +196,8 @@ func _run() -> void:
 	antimatter = _tech_node(tree, 2, "Industrial", "Antimatter Refining")
 	_check(
 		antimatter != null
-		and antimatter.cost_label.text == "RESEARCH COMPLETE",
+		and not antimatter.cost_label.visible
+		and antimatter.status_label.text == "AVAILABLE",
 		"Completed research state persists when the tree reopens"
 	)
 	if antimatter != null:
@@ -253,23 +257,12 @@ func _run() -> void:
 func _tech_node(
 	tree: TechTree, tier: int, category: String, tech_name: String
 ) -> TechNode:
-	var tier_node := tree.tech_list.get_node_or_null("Tier_%d" % tier) as VBoxContainer
-	if tier_node == null:
-		return null
-	var category_row := tier_node.get_node_or_null(
-		"CategoryRow"
-	) as HBoxContainer
-	if category_row == null:
-		return null
-	var section := category_row.get_node_or_null(
-		"Category_%s" % category.replace(" ", "")
+	var cell := tree.tech_grid.get_node_or_null(
+		"TechCell_%d_%s" % [tier, category.replace(" ", "")]
 	) as VBoxContainer
-	if section == null:
+	if cell == null:
 		return null
-	var cards := section.get_node_or_null("TechCards") as HBoxContainer
-	if cards == null:
-		return null
-	for child in cards.get_children():
+	for child in cell.get_children():
 		var node := child as TechNode
 		if node != null and node.name_label.text == tech_name:
 			return node

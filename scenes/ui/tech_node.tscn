@@ -34,7 +34,7 @@ corner_radius_bottom_right = 34
 corner_radius_bottom_left = 34
 
 [node name="TechNode" type="PanelContainer"]
-custom_minimum_size = Vector2(240, 240)
+custom_minimum_size = Vector2(200, 200)
 theme_override_styles/panel = SubResource("StyleBox_tile")
 script = ExtResource("1_node")
 
@@ -42,35 +42,11 @@ script = ExtResource("1_node")
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="TopRow" type="HBoxContainer" parent="Content"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="TierLabel" type="Label" parent="Content/TopRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.44, 0.68, 0.94, 1)
-theme_override_font_sizes/font_size = 9
-text = "TIER 1"
-
-[node name="Spacer" type="Control" parent="Content/TopRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-
-[node name="CategoryLabel" type="Label" parent="Content/TopRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.58, 0.74, 1)
-theme_override_font_sizes/font_size = 9
-text = "PROPULSION"
-horizontal_alignment = 2
-
 [node name="IconCenter" type="CenterContainer" parent="Content"]
 layout_mode = 2
 
 [node name="IconWell" type="PanelContainer" parent="Content/IconCenter"]
-custom_minimum_size = Vector2(68, 68)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_icon")
 
@@ -78,7 +54,7 @@ theme_override_styles/panel = SubResource("StyleBox_icon")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "FTL"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -87,16 +63,16 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "FTL Probes"
 horizontal_alignment = 1
 
 [node name="DescriptionLabel" type="Label" parent="Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(198, 30)
+custom_minimum_size = Vector2(168, 30)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.68, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "Faster-than-light probes for deep-space reconnaissance."
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -106,18 +82,37 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="CostLabel" type="Label" parent="Content"]
+[node name="CostRow" type="HBoxContainer" parent="Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.52, 0.9, 0.76, 1)
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="CostLabel" type="Label" parent="Content/CostRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.35, 1)
 theme_override_font_sizes/font_size = 12
-text = "NO RESEARCH REQUIRED"
-horizontal_alignment = 1
+text = "50 RD"
+
+[node name="CostSeparator" type="Label" parent="Content/CostRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 12
+text = "•"
+
+[node name="TimeLabel" type="Label" parent="Content/CostRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "3 TURNS"
 
 [node name="StatusLabel" type="Label" parent="Content"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.84, 0.65, 1)
+theme_override_colors/font_color = Color(0.8, 0.6, 0.3, 1)
 theme_override_font_sizes/font_size = 10
-text = "AVAILABLE BY DEFAULT"
+text = "AWAITING FUNDING"
 horizontal_alignment = 1
