@@ -1,5 +1,7 @@
 extends SceneTree
-## Verifies Colony Ship travel speed and automatic colonization on arrival.
+## Verifies Colony Ship travel speed and player-chosen colonization on arrival:
+## the arrival opens a planet picker, founding consumes the ship, dismissing
+## postpones the choice, and settled systems keep later ships.
 ## Run with:
 ##   godot --headless --path . --script res://tests/verify_colonization.gd
 
@@ -40,11 +42,12 @@ func _run() -> void:
 		"A Colony Ship travels 5 light years per turn"
 	)
 
-	# Head for the nearest unsurveyed system that has planets to colonize.
+	# Head for the nearest unsurveyed multi-planet system so the player has a
+	# real choice of colony site.
 	var destination: StarData
 	var destination_distance := INF
 	for star in scene._galaxy.stars:
-		if star.surveyed or star.planets.is_empty() or star == home:
+		if star.surveyed or star.planets.size() < 2 or star == home:
 			continue
 		var distance := home.position_ly.distance_to(star.position_ly)
 		if distance < destination_distance:
@@ -119,14 +122,93 @@ func _run() -> void:
 		turns_taken += 1
 	_check(not fleet.in_transit, "The Colony Ship completes its course")
 	_check(destination.surveyed, "Arrival surveys the destination")
-	_check(destination.has_colony(), "Arrival founds a Colony")
+	_check(not destination.has_colony(), "Arrival does not found a Colony itself")
 	_check(
-		destination.planets[0].has_structure(StructureData.COLONY),
-		"The Colony lands on the system's first open planet"
+		_colony_count(destination) == 0,
+		"No Colony exists before the player chooses"
+	)
+	_check(
+		fleet.ships == ["Colony Ship"],
+		"The Colony Ship stays aboard until a planet is chosen"
+	)
+	_check(
+		destination.fleets.has(fleet),
+		"The arriving fleet docks with its colonists"
+	)
+	_check(
+		scene.status_label.text.contains("colonists await a landing site"),
+		"The arrival notice asks for a landing site"
+	)
+	var colony_dialog: ColonyDialog = scene._colony_dialog
+	_check(
+		colony_dialog != null and colony_dialog.visible,
+		"Arrival opens the colony planet picker"
+	)
+	if colony_dialog == null:
+		_finish()
+		return
+	_check(
+		colony_dialog.colony_planet_list.get_child_count()
+		== destination.planets.size(),
+		"The picker lists every planet in the system"
+	)
+	_check(
+		_has_planet_option(colony_dialog, destination.planets[1].designation),
+		"The picker offers the second planet"
+	)
+	_check(
+		scene.research_data == research_before + 25 + 5 * turns_taken,
+		"Arrival grants the survey bonus and home output only"
+	)
+
+
+	# Dismissing the picker postpones the choice; selecting the fleet brings
+	# it back.
+	colony_dialog.close_button.pressed.emit()
+	await process_frame
+	_check(not colony_dialog.visible, "The picker can be dismissed")
+	_check(
+		_colony_count(destination) == 0,
+		"Dismissing founds no Colony"
+	)
+	_check(
+		fleet.ships == ["Colony Ship"],
+		"The postponed Colony Ship survives"
+	)
+	_check(
+		destination.fleets.has(fleet),
+		"The postponed fleet stays docked"
+	)
+	_check(
+		scene.status_label.text.contains("postponed"),
+		"Dismissing explains how to choose later"
+	)
+	scene._on_fleet_selected(fleet)
+	await process_frame
+	_check(
+		colony_dialog.visible,
+		"Selecting the fleet reopens the picker"
+	)
+
+	# Founding on the chosen planet consumes the ship and its fleet.
+	var choice := _planet_option(colony_dialog, destination.planets[1].designation)
+	_check(choice != null, "The chosen planet has a button")
+	if choice == null:
+		_finish()
+		return
+	choice.pressed.emit()
+	await process_frame
+	_check(
+		destination.planets[1].has_structure(StructureData.COLONY),
+		"The Colony lands on the chosen planet"
+	)
+	_check(
+		not destination.planets[0].has_structure(StructureData.COLONY),
+		"Unchosen planets stay untouched"
 	)
 	_check(
 		_colony_count(destination) == 1,
-		"Arrival founds exactly one Colony"
+		"Founding creates exactly one Colony"
 	)
 	_check(fleet.ships.is_empty(), "The Colony Ship is consumed by founding")
 	_check(
@@ -135,21 +217,19 @@ func _run() -> void:
 	)
 	_check(
 		not destination.fleets.has(fleet),
-		"An empty arriving fleet is deleted"
+		"An empty founding fleet is deleted"
 	)
 	_check(
-		scene.status_label.text.contains("arrived at"),
-		"The status line announces the arrival"
+		not colony_dialog.visible,
+		"The picker closes once the Colony is founded"
 	)
 	_check(
 		scene.status_label.text.contains(
-			"colony founded on %s" % destination.planets[0].designation
+			"Colony founded on %s (%s)." % [
+				destination.planets[1].designation, destination.display_name
+			]
 		),
-		"The arrival notice reports the founded colony"
-	)
-	_check(
-		scene.research_data == research_before + 25 + 5 * turns_taken + 5,
-		"Arrival grants the survey bonus, home output, and arrival-turn Colony output"
+		"The status line reports the founded colony"
 	)
 
 	# The new Colony produces like any other from the next turn.
@@ -164,26 +244,34 @@ func _run() -> void:
 		"The new Colony produces Helium 3"
 	)
 	_check(
-		scene.research_data == research_before + 25 + 5 * turns_taken + 15,
+		scene.research_data == research_before + 25 + 5 * turns_taken + 10,
 		"Both colonies produce Research Data"
 	)
 
-	# A system that already has a Colony keeps the ship.
+	# A system that already has a Colony keeps the ship with no popup.
 	var second := FleetData.new()
-	second.name = "Newhome Alpha"
+	second.name = "Newhome Beta"
 	second.add_ship("Colony Ship")
 	second.dock_at(home)
 	home.fleets.append(second)
+	var research_before_second: int = scene.research_data
 	second.begin_travel(destination)
+	var second_turns := 0
 	for i in 60:
 		if not second.in_transit:
 			break
 		scene.turn_manager.advance_turn()
 		await process_frame
+		second_turns += 1
 	_check(not second.in_transit, "The second Colony Ship arrives")
 	_check(
+		scene.research_data
+		== research_before_second + 10 * second_turns,
+		"Both colonies produce during the second voyage"
+	)
+	_check(
 		_colony_count(destination) == 1,
-		"No second Colony is founded where one exists"
+		"No further Colony is founded where a colony exists"
 	)
 	_check(
 		second.ships == ["Colony Ship"],
@@ -194,8 +282,12 @@ func _run() -> void:
 		"The surviving fleet docks at the destination"
 	)
 	_check(
-		not scene.status_label.text.contains("colony founded"),
-		"The arrival notice reports no colony when one exists"
+		not colony_dialog.visible,
+		"No picker opens where a colony already exists"
+	)
+	_check(
+		not scene.status_label.text.contains("landing site"),
+		"The arrival notice requests no choice when one is unneeded"
 	)
 
 	_finish()
@@ -210,6 +302,18 @@ func _colony_count(data: StarData) -> int:
 			if structure != null and structure.type_id == StructureData.COLONY:
 				total += 1
 	return total
+
+
+func _planet_option(dialog: ColonyDialog, designation: String) -> Button:
+	for child in dialog.colony_planet_list.get_children():
+		var button := child as Button
+		if button != null and button.text.contains(designation):
+			return button
+	return null
+
+
+func _has_planet_option(dialog: ColonyDialog, designation: String) -> bool:
+	return _planet_option(dialog, designation) != null
 
 
 func _check(condition: bool, message: String) -> void:

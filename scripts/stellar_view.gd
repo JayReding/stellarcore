@@ -8,6 +8,7 @@ const TECH_TREE_SCENE: PackedScene = preload("res://scenes/tech_tree.tscn")
 const SHIPYARD_SCENE: PackedScene = preload("res://scenes/shipyard.tscn")
 const FLEET_DIALOG_SCENE: PackedScene = preload("res://scenes/ui/fleet_dialog.tscn")
 const FLEET_MENU_SCENE: PackedScene = preload("res://scenes/ui/fleet_menu.tscn")
+const COLONY_DIALOG_SCENE: PackedScene = preload("res://scenes/ui/colony_dialog.tscn")
 const STAR_COLLISION_LAYER := 2
 const FLEET_COLLISION_LAYER := 4
 const DRAG_THRESHOLD := 5.0
@@ -23,6 +24,9 @@ const COURSE_HALF_WIDTH := 0.12
 const STATUS_INFO_COLOR := Color(0.68, 0.84, 1.0, 1.0)
 const STATUS_PROMPT_COLOR := Color(0.95, 0.78, 0.45, 1.0)
 const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
+## Gameplay music runs below the title theme (-10 dB): half volume (-16 dB)
+## reduced by another twenty percent, roughly -18 dB.
+const GAMEPLAY_MUSIC_VOLUME_DB := -18.0
 
 @export var star_count := 25
 ## Set to a non-zero value to reproduce a specific galaxy.
@@ -46,6 +50,7 @@ const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
 @onready var end_turn_button: Button = $UI/HUD/EndTurnButton
 @onready var turn_countdown_label: Label = $UI/HUD/TurnCountdownLabel
 @onready var status_label: Label = $UI/HUD/StatusLabel
+@onready var music_player: AudioStreamPlayer = %GameplayMusic
 
 ## Research Data is the only galaxy-wide resource.
 var research_data: int = 0
@@ -63,6 +68,10 @@ var _tech_tree: TechTree
 var _shipyard: ShipyardView
 var _fleet_dialog: FleetDialog
 var _fleet_menu: FleetMenu
+var _colony_dialog: ColonyDialog
+## Colony-founding decisions waiting on the player, in arrival order. Each
+## entry maps a fleet to the colony-less system it arrived in.
+var _pending_colonies: Array[Dictionary] = []
 var _destination_fleet: FleetData
 var _fleet_markers: Array[FleetMarker] = []
 var _course_mesh: ImmediateMesh
@@ -84,6 +93,7 @@ func _ready() -> void:
 		seed_value = randi() % 900000 + 100000
 
 	unlocked_structures = StructureData.base_structure_ids()
+	_start_music()
 	_build_reference_grid()
 	_build_fleet_course_layer()
 	_spawn_galaxy(seed_value)
@@ -112,6 +122,16 @@ func _ready() -> void:
 		"Stellar Core | seed %d | %d systems | %d ly across"
 		% [seed_value, _galaxy.stars.size(), int(GalaxyScale.DIAMETER_LY)]
 	)
+
+
+func _start_music() -> void:
+	if music_player.stream == null:
+		return
+	var mp3 := music_player.stream as AudioStreamMP3
+	if mp3 != null:
+		mp3.loop = true
+	music_player.volume_db = GAMEPLAY_MUSIC_VOLUME_DB
+	music_player.play()
 
 
 func refresh_resources() -> void:
@@ -521,6 +541,12 @@ func _on_shipyard_closed() -> void:
 func _on_fleet_selected(fleet: FleetData) -> void:
 	if fleet == null:
 		return
+	if _has_valid_colony_decision(fleet):
+		_ensure_colony_dialog()
+		if _colony_dialog == null:
+			return
+		_colony_dialog.open_dialog(fleet, _colony_star_for_fleet(fleet))
+		return
 	_ensure_fleet_menu()
 	if _fleet_menu == null:
 		return
@@ -535,6 +561,17 @@ func _ensure_fleet_menu() -> void:
 		return
 	add_child(_fleet_menu)
 	_fleet_menu.destination_requested.connect(_on_destination_requested)
+
+
+func _ensure_colony_dialog() -> void:
+	if _colony_dialog != null:
+		return
+	_colony_dialog = COLONY_DIALOG_SCENE.instantiate() as ColonyDialog
+	if _colony_dialog == null:
+		return
+	add_child(_colony_dialog)
+	_colony_dialog.colony_chosen.connect(_on_colony_chosen)
+	_colony_dialog.cancelled.connect(_on_colony_cancelled)
 
 
 func _ensure_fleet_dialog() -> void:
@@ -764,14 +801,14 @@ func _advance_fleets() -> void:
 			any_moved = true
 			if arrived:
 				var probe_destroyed := fleet.ships.has("FTL Probe")
-				var colony_planet := _complete_fleet_arrival(
+				var colony_queued := _complete_fleet_arrival(
 					star, fleet, destination
 				)
 				var fleet_destroyed := not destination.fleets.has(fleet)
 				arrivals.append(
 					_arrival_notice(
 						fleet, destination, probe_destroyed, fleet_destroyed,
-						colony_planet
+						colony_queued
 					)
 				)
 				if _fleet_dialog != null:
@@ -791,15 +828,17 @@ func _advance_fleets() -> void:
 	if not arrivals.is_empty():
 		_set_status(arrivals[-1], STATUS_SUCCESS_COLOR)
 
+	_advance_colony_queue()
+
 
 func _complete_fleet_arrival(
 	origin: StarData, fleet: FleetData, destination: StarData
-) -> String:
+) -> bool:
 	if origin != null:
 		origin.fleets.erase(fleet)
 
 	fleet.remove_one_ship("FTL Probe")
-	var colony_planet := _found_colony(fleet, destination)
+	var colony_queued := _queue_colony_decision(fleet, destination)
 	if fleet.ships.is_empty():
 		fleet.clear_route()
 		fleet.in_transit = false
@@ -812,28 +851,129 @@ func _complete_fleet_arrival(
 		destination.surveyed = true
 		add_research_data(25)
 		_refresh_star_survey_label(destination)
-	return colony_planet
+	return colony_queued
 
 
-## A Colony Ship that reaches a colony-less system is consumed to found a
-## Colony on the system's first open planet. Enemy-held systems will refuse
-## colonies once hostile fleets exist.
-func _found_colony(fleet: FleetData, destination: StarData) -> String:
+## Queues a colony-founding decision when a Colony Ship arrives in a
+## colony-less system. The ship stays aboard until the player picks a planet.
+## Enemy-held systems will refuse colonies once hostile fleets exist.
+func _queue_colony_decision(fleet: FleetData, destination: StarData) -> bool:
 	if fleet == null or destination == null:
-		return ""
+		return false
 	if destination.has_colony() or not fleet.ships.has("Colony Ship"):
-		return ""
+		return false
+	for existing in _pending_colonies:
+		if (
+			existing.get("fleet") == fleet
+			and existing.get("star") == destination
+		):
+			return false
+	_pending_colonies.append({"fleet": fleet, "star": destination})
+	return true
 
-	var target: PlanetData = null
-	for planet in destination.planets:
-		if planet != null and not planet.has_structure(StructureData.COLONY):
-			target = planet
-			break
-	if target == null or not fleet.remove_one_ship("Colony Ship"):
-		return ""
 
-	target.add_structure(StructureData.COLONY)
-	return target.designation
+## A pending decision is valid while the fleet is still docked in the system
+## with its Colony Ship and the system is still colony-less.
+func _validate_colony_decision(decision: Dictionary) -> bool:
+	var fleet: FleetData = decision.get("fleet")
+	var star: StarData = decision.get("star")
+	if fleet == null or star == null:
+		return false
+	if fleet.in_transit or fleet.system_id != star.id:
+		return false
+	if not fleet.ships.has("Colony Ship"):
+		return false
+	return not star.has_colony()
+
+
+func _colony_decision_for_fleet(fleet: FleetData) -> Dictionary:
+	for i in range(_pending_colonies.size() - 1, -1, -1):
+		var decision: Dictionary = _pending_colonies[i]
+		if decision.get("fleet") != fleet:
+			continue
+		if _validate_colony_decision(decision):
+			return decision
+		_pending_colonies.remove_at(i)
+	return {}
+
+
+func _has_valid_colony_decision(fleet: FleetData) -> bool:
+	return not _colony_decision_for_fleet(fleet).is_empty()
+
+
+func _colony_star_for_fleet(fleet: FleetData) -> StarData:
+	return _colony_decision_for_fleet(fleet).get("star")
+
+
+## Opens the first valid queued decision, dropping stale ones. Called after
+## arrivals and after each resolution so one popup is visible at a time.
+func _advance_colony_queue() -> void:
+	if _colony_dialog != null and _colony_dialog.visible:
+		return
+	while not _pending_colonies.is_empty():
+		var decision: Dictionary = _pending_colonies[0]
+		if _validate_colony_decision(decision):
+			_ensure_colony_dialog()
+			if _colony_dialog == null:
+				return
+			_colony_dialog.open_dialog(
+				decision.get("fleet"), decision.get("star")
+			)
+			return
+		_pending_colonies.pop_front()
+
+
+func _on_colony_chosen(
+	fleet: FleetData, star: StarData, planet: PlanetData
+) -> void:
+	for i in range(_pending_colonies.size() - 1, -1, -1):
+		if _pending_colonies[i].get("fleet") == fleet:
+			_pending_colonies.remove_at(i)
+
+	if (
+		fleet == null
+		or star == null
+		or planet == null
+		or fleet.in_transit
+		or fleet.system_id != star.id
+		or not fleet.ships.has("Colony Ship")
+		or star.has_colony()
+		or not star.planets.has(planet)
+		or planet.has_structure(StructureData.COLONY)
+	):
+		_set_status(
+			"The colony can no longer be founded there.",
+			STATUS_INFO_COLOR
+		)
+		_advance_colony_queue()
+		return
+
+	planet.add_structure(StructureData.COLONY)
+	fleet.remove_one_ship("Colony Ship")
+	var disbanded := fleet.ships.is_empty()
+	if disbanded:
+		star.fleets.erase(fleet)
+		fleet.clear_route()
+		fleet.in_transit = false
+
+	var message := "Colony founded on %s (%s)." % [
+		planet.designation, star.display_name
+	]
+	if disbanded:
+		message += " The fleet was disbanded."
+	_set_status(message, STATUS_SUCCESS_COLOR)
+	refresh_resources()
+	_rebuild_fleet_markers()
+	if _selected_star != null and _selected_star.data == star:
+		_show_star_panel(_selected_star)
+	_advance_colony_queue()
+
+
+func _on_colony_cancelled() -> void:
+	_set_status(
+		"Colony founding postponed — select the fleet to choose a planet.",
+		STATUS_INFO_COLOR
+	)
 
 
 func _arrival_notice(
@@ -841,7 +981,7 @@ func _arrival_notice(
 	destination: StarData,
 	probe_destroyed: bool,
 	fleet_destroyed: bool,
-	colony_planet: String = ""
+	colony_pending := false
 ) -> String:
 	var status := "%s arrived at %s" % [
 		fleet.name, destination.display_name
@@ -850,8 +990,8 @@ func _arrival_notice(
 		status += " — an FTL Probe was destroyed"
 		if fleet_destroyed:
 			status += " and the fleet was disbanded"
-	if not colony_planet.is_empty():
-		status += "; colony founded on %s" % colony_planet
+	if colony_pending:
+		status += "; colonists await a landing site"
 
 	var count := destination.planets.size()
 	if count == 0:
@@ -916,7 +1056,7 @@ func _rebuild_fleet_courses() -> void:
 				_course_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _course_material)
 				surface_started = true
 			_add_course_dashes(
-				GalaxyScale.to_world(fleet.route_origin_ly),
+				GalaxyScale.to_world(fleet.position_ly),
 				GalaxyScale.to_world(fleet.route_destination_ly)
 			)
 
@@ -980,6 +1120,7 @@ func _is_overlay_open() -> bool:
 		or (_shipyard != null and _shipyard.visible)
 		or (_fleet_dialog != null and _fleet_dialog.visible)
 		or (_fleet_menu != null and _fleet_menu.visible)
+		or (_colony_dialog != null and _colony_dialog.visible)
 	)
 
 

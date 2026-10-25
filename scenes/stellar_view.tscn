@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bmlqbsmt0qbaf" path="res://scripts/camera_rig.gd" id="2_rig"]
 [ext_resource type="PackedScene" uid="uid://cfogiilbflrhn" path="res://scenes/ui/star_info_panel.tscn" id="3_panel"]
 [ext_resource type="Script" uid="uid://c68jx0c8umr53" path="res://scripts/turn_manager.gd" id="4_turn"]
+[ext_resource type="AudioStream" path="res://assets/music/Mesmerizing Galaxy Loop.mp3" id="5_music"]
 
 [sub_resource type="Environment" id="Environment_space"]
 background_mode = 1
@@ -122,6 +123,10 @@ far = 2000.0
 
 [node name="TurnManager" type="Node" parent="." unique_id=1802781097]
 script = ExtResource("4_turn")
+
+[node name="GameplayMusic" type="AudioStreamPlayer" parent="." unique_id=1717334521]
+unique_name_in_owner = true
+stream = ExtResource("5_music")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1528362885]
 

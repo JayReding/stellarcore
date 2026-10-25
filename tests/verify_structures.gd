@@ -48,7 +48,7 @@ func _run() -> void:
 	)
 	_check(
 		home.planets[3].has_structure(StructureData.HELIUM_3_STATION),
-		"Newhome IV hosts a Helium 3 Station"
+		"Newhome IV hosts a Helium3 Station"
 	)
 	_check(
 		home.planets[0].structures.is_empty(),
@@ -68,7 +68,7 @@ func _run() -> void:
 	_check(ore_station != null, "Ore Processing Station is present on Newhome II")
 	_check(
 		helium_station != null,
-		"Helium 3 Station is present on Newhome IV"
+		"Helium3 Station is present on Newhome IV"
 	)
 	if (
 		colony == null
@@ -87,16 +87,16 @@ func _run() -> void:
 	)
 	_check(
 		helium_station.location_label() == "Orbit",
-		"The Helium 3 Station is orbital"
+		"The Helium3 Station is orbital"
 	)
 
 	_check(
-		int(colony.production_per_turn().get(ResourceStockpile.TITANIUM, 0)) == 5,
-		"The Colony produces 5 Titanium"
+		int(colony.production_per_turn().get(ResourceStockpile.TITANIUM, 0)) == 10,
+		"The Colony produces 10 Titanium"
 	)
 	_check(
-		int(colony.production_per_turn().get(ResourceStockpile.HELIUM_3, 0)) == 1,
-		"The Colony produces 1 Helium 3"
+		int(colony.production_per_turn().get(ResourceStockpile.HELIUM_3, 0)) == 2,
+		"The Colony produces 2 Helium 3"
 	)
 	_check(colony.research_per_turn() == 5, "The Colony produces 5 Research Data")
 	_check(
@@ -104,16 +104,16 @@ func _run() -> void:
 		"The Shipyard consumes 2 Helium 3"
 	)
 	_check(
-		int(ore_station.production_per_turn().get(ResourceStockpile.TITANIUM, 0)) == 5,
-		"The Ore Processing Station produces 5 Titanium"
+		int(ore_station.production_per_turn().get(ResourceStockpile.TITANIUM, 0)) == 25,
+		"The Ore Processing Station produces 25 Titanium"
 	)
 	_check(
 		int(ore_station.upkeep_per_turn().get(ResourceStockpile.HELIUM_3, 0)) == 2,
 		"The Ore Processing Station consumes 2 Helium 3"
 	)
 	_check(
-		int(helium_station.production_per_turn().get(ResourceStockpile.HELIUM_3, 0)) == 5,
-		"The Helium 3 Station produces 5 Helium 3"
+		int(helium_station.production_per_turn().get(ResourceStockpile.HELIUM_3, 0)) == 20,
+		"The Helium3 Station produces 20 Helium 3"
 	)
 
 	_check(home.has_shipyard(), "The Shipyard structure enables ship production")
@@ -130,12 +130,12 @@ func _run() -> void:
 
 	var flow := home.resource_flow()
 	_check(
-		int(flow.get(ResourceStockpile.TITANIUM, 0)) == 10,
-		"Newhome's net Titanium production is +10 per turn"
+		int(flow.get(ResourceStockpile.TITANIUM, 0)) == 35,
+		"Newhome's net Titanium production is +35 per turn"
 	)
 	_check(
-		int(flow.get(ResourceStockpile.HELIUM_3, 0)) == 2,
-		"Newhome's net Helium 3 production is +2 per turn"
+		int(flow.get(ResourceStockpile.HELIUM_3, 0)) == 18,
+		"Newhome's net Helium 3 production is +18 per turn"
 	)
 	_check(
 		int(flow.get(ResourceStockpile.ANTIMATTER, 0)) == 1,
@@ -148,12 +148,12 @@ func _run() -> void:
 	var home_iii_entries := home.planets[2].flow_entries()
 	_check(home_iii_entries.size() == 4, "Newhome III reports four flow entries")
 	_check(
-		_entry_total(home_iii_entries, ResourceStockpile.TITANIUM) == 5,
-		"Newhome III contributes 5 Titanium"
+		_entry_total(home_iii_entries, ResourceStockpile.TITANIUM) == 10,
+		"Newhome III contributes 10 Titanium"
 	)
 	_check(
-		_entry_total(home_iii_entries, ResourceStockpile.HELIUM_3) == -1,
-		"Newhome III uses 1 more Helium 3 than it produces"
+		_entry_total(home_iii_entries, ResourceStockpile.HELIUM_3) == 0,
+		"Newhome III breaks even on Helium 3"
 	)
 	_check(
 		_entry_total(home_iii_entries, ResourceStockpile.RESEARCH_DATA) == 5,
@@ -161,8 +161,8 @@ func _run() -> void:
 	)
 	var home_ii_entries := home.planets[1].flow_entries()
 	_check(
-		_entry_total(home_ii_entries, ResourceStockpile.TITANIUM) == 5,
-		"Newhome II contributes 5 Titanium"
+		_entry_total(home_ii_entries, ResourceStockpile.TITANIUM) == 25,
+		"Newhome II contributes 25 Titanium"
 	)
 	_check(
 		_entry_total(home_ii_entries, ResourceStockpile.HELIUM_3) == -2,
@@ -170,8 +170,8 @@ func _run() -> void:
 	)
 	var home_iv_entries := home.planets[3].flow_entries()
 	_check(
-		_entry_total(home_iv_entries, ResourceStockpile.HELIUM_3) == 5,
-		"Newhome IV contributes 5 Helium 3"
+		_entry_total(home_iv_entries, ResourceStockpile.HELIUM_3) == 20,
+		"Newhome IV contributes 20 Helium 3"
 	)
 
 	_check(home.resources.titanium == 200, "Turn 1 begins with 200 Titanium")
@@ -230,7 +230,7 @@ func _run() -> void:
 		"Sidebar shows 200 Titanium"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+10",
+		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+35",
 		"Sidebar shows +10 Titanium per turn"
 	)
 	_check(
@@ -238,7 +238,7 @@ func _run() -> void:
 		"Sidebar shows 200 Helium 3"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "+2",
+		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "+18",
 		"Sidebar shows +2 Helium 3 per turn"
 	)
 	_check(
@@ -300,8 +300,8 @@ func _run() -> void:
 		"Structure list includes the Ore Processing Station"
 	)
 	_check(
-		_has_button_tooltip(system_view.structure_list, "Helium 3 Station:"),
-		"Structure list includes the Helium 3 Station"
+		_has_button_tooltip(system_view.structure_list, "Helium3 Station:"),
+		"Structure list includes the Helium3 Station"
 	)
 
 	_check(
@@ -373,13 +373,13 @@ func _run() -> void:
 	)
 	_check(
 		_has_flow(
-			system_view.planet_flow_list, "+5", "Titanium", "Colony"
+			system_view.planet_flow_list, "+10", "Titanium", "Colony"
 		),
 		"Newhome III detail shows Colony Titanium output"
 	)
 	_check(
 		_has_flow(
-			system_view.planet_flow_list, "+1", "Helium 3", "Colony"
+			system_view.planet_flow_list, "+2", "Helium 3", "Colony"
 		),
 		"Newhome III detail shows Colony Helium 3 output"
 	)
@@ -419,25 +419,25 @@ func _run() -> void:
 	await process_frame
 	_check(
 		_count_named_children(system_view.planet_structure_list, "PlanetStructure_") == 1,
-		"Newhome IV lists its Helium 3 Station"
+		"Newhome IV lists its Helium3 Station"
 	)
 	_check(
 		_has_flow(
-			system_view.planet_flow_list, "+5", "Helium 3", "Helium 3 Station"
+			system_view.planet_flow_list, "+20", "Helium 3", "Helium3 Station"
 		),
 		"Newhome IV detail shows Helium 3 output"
 	)
 	_check(
 		_has_flow(
-			system_view.planet_flow_list, "+1", "Antimatter", "Helium 3 Station"
+			system_view.planet_flow_list, "+1", "Antimatter", "Helium3 Station"
 		),
 		"Newhome IV detail shows Antimatter output"
 	)
 
 	scene.turn_manager.advance_turn()
 	await process_frame
-	_check(home.resources.titanium == 210, "Turn 2 adds 10 Titanium")
-	_check(home.resources.helium_3 == 202, "Turn 2 adds 2 Helium 3")
+	_check(home.resources.titanium == 235, "Turn 2 adds 35 Titanium")
+	_check(home.resources.helium_3 == 218, "Turn 2 adds 18 Helium 3")
 	_check(home.resources.antimatter == 51, "Turn 2 adds 1 Antimatter")
 	_check(home.resources.composites == 0, "Composites remain zero")
 	_check(home.resources.meta_matter == 0, "Meta-Matter remains zero")
@@ -447,11 +447,11 @@ func _run() -> void:
 		"Production does not add resources to other systems"
 	)
 	_check(
-		_amount_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "210",
+		_amount_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "235",
 		"The open sidebar refreshes Titanium after production"
 	)
 	_check(
-		_amount_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "202",
+		_amount_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "218",
 		"The open sidebar refreshes Helium 3 after production"
 	)
 	_check(
@@ -461,18 +461,18 @@ func _run() -> void:
 		"The open sidebar refreshes Research Data after production"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+10",
+		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+35",
 		"The sidebar keeps showing per-turn Titanium change"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "+2",
+		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "+18",
 		"The sidebar keeps showing per-turn Helium 3 change"
 	)
 
 	scene.turn_manager.advance_turn()
 	await process_frame
-	_check(home.resources.titanium == 220, "Turn 3 adds another 10 Titanium")
-	_check(home.resources.helium_3 == 204, "Turn 3 adds another 2 Helium 3")
+	_check(home.resources.titanium == 270, "Turn 3 adds another 35 Titanium")
+	_check(home.resources.helium_3 == 236, "Turn 3 adds another 18 Helium 3")
 	_check(scene.research_data == 10, "Turn 3 adds another 5 Research Data")
 
 	# A system without structures still shows the galaxy-wide Research Data
@@ -708,7 +708,7 @@ func _run() -> void:
 		),
 		"The Stellar View counts construction down"
 	)
-	_check(home.resources.titanium == 30, "Turn 4 adds 10 Titanium while building")
+	_check(home.resources.titanium == 55, "Turn 4 adds 35 Titanium while building")
 	scene.turn_manager.advance_turn()
 	await process_frame
 	_check(
@@ -746,10 +746,12 @@ func _run() -> void:
 		"The sidebar summary counts the new structure"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+15",
+		_change_text(system_view.system_resource_list, ResourceStockpile.TITANIUM) == "+60",
 		"The finished station contributes Titanium the turn it completes"
 	)
-	_check(home.resources.titanium == 55, "Turn 6 nets +15 Titanium with the station")
+	_check(home.resources.titanium == 150, "Turn 6 nets +60 Titanium with the station")
+	_check(home.resources.helium_3 == 288, "Turn 6 nets +16 Helium 3 with the station")
+	_check(home.resources.antimatter == 55, "Turn 6 adds 1 Antimatter")
 	_check(scene.research_data == 25, "Turn 6 adds another 5 Research Data")
 	ore_button = system_view.construct_list.get_node_or_null(
 		"Construct_%s" % StructureData.ORE_PROCESSING
@@ -796,14 +798,16 @@ func _run() -> void:
 		"The sidebar summary counts the refinery"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "-3",
+		_change_text(system_view.system_resource_list, ResourceStockpile.HELIUM_3) == "+11",
 		"The sidebar flow includes the refinery's Helium 3 upkeep"
 	)
 	_check(
-		_change_text(system_view.system_resource_list, ResourceStockpile.ANTIMATTER) == "+3",
+		_change_text(system_view.system_resource_list, ResourceStockpile.ANTIMATTER) == "+6",
 		"The sidebar flow includes the refinery's Antimatter output"
 	)
-	_check(home.resources.titanium == 95, "Turn 9 nets +15 Titanium with both stations")
+	_check(home.resources.titanium == 230, "Turn 9 nets +60 Titanium with both stations")
+	_check(home.resources.helium_3 == 331, "Turn 9 nets +11 Helium 3 with the refinery")
+	_check(home.resources.antimatter == 63, "Turn 9 adds 6 Antimatter with the refinery")
 	_check(scene.research_data == 40, "Turn 9 adds another 5 Research Data")
 	_check(
 		system_view.construct_popup.visible,

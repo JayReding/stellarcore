@@ -55,7 +55,8 @@ godot --path .
   menu: **New Game** starts a fresh game, **Quit to Desktop** exits,
   **Credits** opens a credits panel, and **Load Saved Game** and **Options**
   are greyed out until later slices. The looping `Mirage.mp3` title theme
-  plays until a new game starts.
+  plays until a new game starts, when the looping `Mesmerizing Galaxy Loop.mp3`
+  gameplay track takes over at a lower volume.
 
 - A 100-light-year-diameter play area. Star positions and all travel distances are
   stored in light years, with stars within ±4 ly of the galactic plane.
@@ -99,15 +100,15 @@ godot --path .
   (High-Mineral), **Newhome III** (Earth-like), and **Newhome IV** (Gas Giant).
 - Structures are attached to planets and are either **surface** or **orbital**.
   Newhome starts with four:
-  - **Newhome II** (orbit): **Ore Processing Station**, producing 5 Titanium and
+  - **Newhome II** (orbit): **Ore Processing Station**, producing 25 Titanium and
     consuming 2 Helium 3 per turn.
-  - **Newhome III** (surface): **Colony**, producing 5 Titanium, 1 Helium 3, and
+  - **Newhome III** (surface): **Colony**, producing 10 Titanium, 2 Helium 3, and
     5 Research Data per turn. A Colony permits construction in its system.
   - **Newhome III** (orbit): **Shipyard**, consuming 2 Helium 3 per turn and
     enabling ship production.
-  - **Newhome IV** (orbit): **Helium 3 Station**, producing 5 Helium 3 and 1
+  - **Newhome IV** (orbit): **Helium3 Station**, producing 20 Helium 3 and 1
     Antimatter per turn.
-- Those base figures give Newhome a net **+10 Titanium**, **+2 Helium 3**,
+- Those base figures give Newhome a net **+35 Titanium**, **+18 Helium 3**,
   **+1 Antimatter**, and **+5 Research Data** per turn. Production is
   intentionally flat for now;
   planetary richness will scale it later.
@@ -168,9 +169,10 @@ godot --path .
   **10 light years per turn** while the **Colony Ship** manages only **5**, so
   the number of turns is `ceil(distance / speed)` and the fleet moves on each
   turn advance.
-- A sent fleet gets a moving map marker and a dashed course line from its origin
-  to its destination. The marker shows only the fleet name, keeping the map
-  uncluttered, and is removed when the fleet arrives.
+- A sent fleet gets a moving map marker and a dashed course line from the marker
+  to its destination, shortening as the fleet travels. The marker shows only
+  the fleet name, keeping the map uncluttered, and is removed when the fleet
+  arrives.
 - The arriving FTL Probe is consumed after it surveys the system. If it was the
   fleet's only ship, the fleet is deleted and its name becomes available for
   future production.
@@ -219,10 +221,13 @@ godot --path .
   its unlocked ships or structures. **Antimatter Refining** unlocks the
   **Antimatter Refinery** orbital structure, and **Colony Ships** unlocks the
   **Colony Ship** hull in the shipyard.
-- A Colony Ship that reaches a system without a Colony is consumed on arrival
-  to found one on the system's first open planet, and the arrival notice says
-  where. Systems that already have a Colony keep the ship. Enemy-held systems
-  will refuse colonies once hostile fleets exist.
+- A Colony Ship that reaches a system without a Colony queues a decision and
+  opens a **Found a Colony** popup listing the system's planets. Picking one
+  founds the Colony there and consumes the ship (disbanding an emptied fleet);
+  closing the popup postpones the choice, which returns when the fleet is
+  selected again — the ship stays aboard until a planet is chosen. Settled
+  systems never queue a decision and keep the ship. Enemy-held systems will
+  refuse colonies once hostile fleets exist.
 - Procedural planets in the System View with star-driven light and dark sides.
   Each class has its own deterministic, cached surface texture:
   - **Rocky**: brown and gray terrain with craters.
@@ -305,7 +310,8 @@ the global hidden-resource reveal state.
 
 The headless title screen check validates the background art, the looping
 title theme, the five menu entries in order, the disabled Load/Options
-entries, the Credits popup, and the New Game transition into the Stellar View:
+entries, the Credits popup, the New Game transition into the Stellar View,
+and the handoff to the looping lower-volume gameplay track:
 
 ```bash
 godot --headless --path . --script res://tests/verify_title_screen.gd
@@ -407,10 +413,11 @@ Refinery and Colony Ship unlocks:
 godot --headless --path . --script res://tests/verify_research.gd
 ```
 
-The colonization check validates Colony Ship speed and voyage pricing, founding
-a Colony on the destination's first open planet, ship consumption and fleet
-disbanding, the founding notice, survey and Colony production afterwards, and
-keeping the ship when a Colony already exists:
+The colonization check validates Colony Ship speed and voyage pricing, the
+planet-picker popup with one row per planet, founding on the chosen planet,
+ship consumption and fleet disbanding, postponing and reopening the choice,
+survey and Colony production afterwards, and keeping the ship when a Colony
+already exists:
 
 ```bash
 godot --headless --path . --script res://tests/verify_colonization.gd

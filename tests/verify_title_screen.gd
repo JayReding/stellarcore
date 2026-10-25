@@ -81,6 +81,21 @@ func _run() -> void:
 		stellar_view != null and stellar_view.visible,
 		"New Game starts the Stellar View"
 	)
+	_check(
+		stellar_view.music_player.stream != null
+		and stellar_view.music_player.stream.resource_path.contains("Mesmerizing"),
+		"Gameplay starts its own music track"
+	)
+	_check(stellar_view.music_player.playing, "Gameplay music starts playing")
+	var gameplay_track := stellar_view.music_player.stream as AudioStreamMP3
+	_check(
+		gameplay_track != null and gameplay_track.loop,
+		"Gameplay music loops"
+	)
+	_check(
+		is_equal_approx(stellar_view.music_player.volume_db, -18.0),
+		"Gameplay music runs below the title volume"
+	)
 
 	_finish()
 
