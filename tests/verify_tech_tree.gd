@@ -1,6 +1,6 @@
 extends SceneTree
-## Verifies the Technologies button, the category-column tech tree grid with
-## tier rows, card contents, and the research readout and close paths.
+## Verifies the clickable Research Data panel, the category-column tech tree
+## grid with tier rows, card contents, and the research readout and close paths.
 ## Run with:
 ##   godot --headless --path . --script res://tests/verify_tech_tree.gd
 
@@ -17,12 +17,15 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	var button: Button = scene.get_node("UI/HUD/TechnologiesButton")
-	_check(button != null, "Technologies button exists")
-	_check(button.visible, "Technologies button is visible")
-	_check(button.text == "Technologies", "Technologies button has the right label")
+	var panel := scene.get_node("UI/HUD/ResearchPanel") as PanelContainer
+	_check(panel != null, "Research Data panel exists")
+	_check(panel.visible, "Research Data panel is visible")
+	_check(
+		panel.tooltip_text == "Open the technology tree",
+		"Research panel advertises the tech tree"
+	)
 
-	button.pressed.emit()
+	_click_research_panel(scene)
 	var tech_tree: TechTree = scene._tech_tree
 	_check(tech_tree != null, "Technology tree is created on demand")
 	_check(tech_tree.visible, "Technology tree opens")
@@ -172,7 +175,20 @@ func _run() -> void:
 	_check(not tech_tree.visible, "Back button closes the technology tree")
 	_check(not scene._is_overlay_open(), "Stellar View recognizes the closed overlay")
 
-	button.pressed.emit()
+	# Dragging out of the panel is a map gesture, not a tree request.
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = panel.get_global_rect().get_center()
+	panel.gui_input.emit(press)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = panel.get_global_rect().get_center() + Vector2(200, 0)
+	panel.gui_input.emit(release)
+	_check(not tech_tree.visible, "Dragging off the panel keeps the tree closed")
+
+	_click_research_panel(scene)
 	_check(tech_tree.visible, "Technology tree reopens")
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
@@ -182,6 +198,20 @@ func _run() -> void:
 	_check(not tech_tree.visible, "Escape closes the technology tree")
 
 	_finish()
+
+
+func _click_research_panel(scene: Node) -> void:
+	var panel := scene.get_node("UI/HUD/ResearchPanel") as Control
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = panel.get_global_rect().get_center()
+	panel.gui_input.emit(press)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = panel.get_global_rect().get_center()
+	panel.gui_input.emit(release)
 
 
 func _tier_label(grid: GridContainer, tier: int) -> String:

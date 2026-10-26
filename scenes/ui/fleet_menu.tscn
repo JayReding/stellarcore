@@ -147,6 +147,24 @@ theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
 text = "Set Fleet Destination"
 alignment = 0
 
+[node name="CancelOrdersButton" type="Button" parent="Root/Panel/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_action_normal")
+theme_override_styles/hover = SubResource("StyleBox_action_hover")
+theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
+text = "Cancel Fleet Orders"
+alignment = 0
+
 [node name="RenameButton" type="Button" parent="Root/Panel/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)

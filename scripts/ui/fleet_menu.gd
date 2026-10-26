@@ -5,6 +5,7 @@ extends CanvasLayer
 ## for the current slice. Clicking anywhere outside the menu dismisses it.
 
 signal destination_requested(fleet: FleetData)
+signal orders_cancelled(fleet: FleetData)
 signal closed
 
 @onready var root: Control = %Root
@@ -12,6 +13,7 @@ signal closed
 @onready var fleet_name_label: Label = %FleetNameLabel
 @onready var fleet_meta_label: Label = %FleetMetaLabel
 @onready var set_destination_button: Button = %SetDestinationButton
+@onready var cancel_orders_button: Button = %CancelOrdersButton
 @onready var rename_button: Button = %RenameButton
 @onready var modify_button: Button = %ModifyButton
 @onready var delete_button: Button = %DeleteButton
@@ -22,6 +24,7 @@ var _fleet: FleetData
 
 func _ready() -> void:
 	set_destination_button.pressed.connect(_on_set_destination_pressed)
+	cancel_orders_button.pressed.connect(_on_cancel_orders_pressed)
 	root.gui_input.connect(_on_root_input)
 	visible = false
 
@@ -38,11 +41,16 @@ func open_menu(fleet: FleetData, screen_position: Vector2) -> void:
 	]
 	if fleet.in_transit:
 		parts.append("%d turns remaining" % fleet.turns_remaining())
+	elif fleet.has_orders():
+		parts.append("Ordered for %s" % fleet.ordered_destination_name)
+		parts.append("%.0f ly / turn" % fleet.speed_ly_per_turn())
 	else:
 		parts.append("%.0f ly / turn" % fleet.speed_ly_per_turn())
 	fleet_meta_label.text = "  •  ".join(parts)
 
 	var speed := fleet.speed_ly_per_turn()
+	var ordered := fleet.has_orders()
+	set_destination_button.visible = not ordered
 	set_destination_button.disabled = fleet.in_transit or speed <= 0.0
 	if fleet.in_transit:
 		set_destination_button.tooltip_text = "Fleet is already in transit"
@@ -50,6 +58,9 @@ func open_menu(fleet: FleetData, screen_position: Vector2) -> void:
 		set_destination_button.tooltip_text = "Fleet has no ships"
 	else:
 		set_destination_button.tooltip_text = "Choose a destination star"
+	cancel_orders_button.visible = ordered
+	cancel_orders_button.disabled = false
+	cancel_orders_button.tooltip_text = "Withdraw the fleet's travel orders"
 
 	rename_button.disabled = true
 	modify_button.disabled = true
@@ -57,7 +68,11 @@ func open_menu(fleet: FleetData, screen_position: Vector2) -> void:
 	rename_button.tooltip_text = "Fleet renaming will be implemented later"
 	modify_button.tooltip_text = "Fleet modification will be implemented later"
 	delete_button.tooltip_text = "Fleet deletion will be implemented later"
-	menu_note.text = "Only Set Fleet Destination is available in this build."
+	menu_note.text = (
+		"Orders depart at the end of the turn."
+		if ordered
+		else "Only Set Fleet Destination is available in this build."
+	)
 
 	visible = true
 	_place_panel(screen_position)
@@ -102,11 +117,18 @@ func _on_root_input(event: InputEvent) -> void:
 
 
 func _on_set_destination_pressed() -> void:
-	if _fleet == null or _fleet.in_transit:
+	if _fleet == null or _fleet.in_transit or _fleet.has_orders():
 		return
 	if _fleet.speed_ly_per_turn() <= 0.0:
 		return
 	destination_requested.emit(_fleet)
+	close()
+
+
+func _on_cancel_orders_pressed() -> void:
+	if _fleet == null or _fleet.in_transit or not _fleet.has_orders():
+		return
+	orders_cancelled.emit(_fleet)
 	close()
 
 

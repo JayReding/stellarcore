@@ -30,7 +30,7 @@ func _run() -> void:
 		_finish()
 		return
 	_check(
-		home_node.home_label.visible and home_node.home_label.text == "NEWHOME",
+		home_node.home_label.visible and home_node.home_label.text == "⭐ NEWHOME",
 		"Newhome keeps its dedicated home label"
 	)
 	_check(
@@ -220,11 +220,95 @@ func _run() -> void:
 	dialog.confirm_button.pressed.emit()
 	await process_frame
 
+	# Confirming stages the orders: the fleet holds at its system and only
+	# departs when the turn advances.
 	_check(not dialog.visible, "Confirming closes the dialog")
-	_check(fleet.in_transit, "Confirming sends the fleet into transit")
+	_check(not fleet.in_transit, "Confirming stages orders instead of departing")
+	_check(fleet.has_orders(), "The fleet holds travel orders")
+	_check(
+		fleet.ordered_destination_id == destination.id,
+		"The fleet remembers its ordered destination"
+	)
+	_check(
+		fleet.route_turns_total == 0,
+		"No route is plotted until departure"
+	)
+	_check(scene._destination_fleet == null, "Destination selection mode ends")
+	_check(
+		scene.status_label.text.contains("has orders for %s" % destination.display_name),
+		"The status line announces the staged orders"
+	)
+	_check(
+		scene.status_label.text.contains("departs when the turn advances"),
+		"The status line notes the departure timing"
+	)
+	_check(
+		panel.fleet_list.get_child_count() == 1,
+		"A staged fleet stays on Fleet Command"
+	)
+	_check(
+		scene._course_mesh.get_surface_count() == 0,
+		"No course line is drawn before departure"
+	)
+	_check(
+		scene._fleet_markers.is_empty(),
+		"No transit marker appears before departure"
+	)
+
+	# The staged fleet offers cancellation instead of a new destination.
+	fleet_row = panel.fleet_list.get_child(0) as Button
+	_check(fleet_row != null, "The staged fleet stays listed")
+	fleet_row.pressed.emit()
+	await process_frame
+	_check(menu.visible, "The staged fleet opens the orders popup")
+	_check(not menu.set_destination_button.visible, "Staged fleets hide Set Fleet Destination")
+	_check(menu.cancel_orders_button.visible, "Staged fleets offer Cancel Fleet Orders")
+	_check(
+		menu.fleet_meta_label.text.contains("Ordered for %s" % destination.display_name),
+		"The popup names the ordered destination"
+	)
+	menu.cancel_orders_button.pressed.emit()
+	await process_frame
+	_check(not menu.visible, "Cancelling closes the popup")
+	_check(not fleet.has_orders(), "Cancelling withdraws the orders")
+	_check(not fleet.in_transit, "A cancelled fleet stays docked")
+	_check(
+		destination.fleets.has(fleet) or home.fleets.has(fleet),
+		"A cancelled fleet keeps its station"
+	)
+	_check(
+		scene.status_label.text.contains("cancelled"),
+		"The status line confirms the cancellation"
+	)
+
+	# Reorder and let the turn advance depart the fleet for real.
+	fleet_row = panel.fleet_list.get_child(0) as Button
+	_check(fleet_row != null, "The cancelled fleet is still listed")
+	fleet_row.pressed.emit()
+	await process_frame
+	menu.set_destination_button.pressed.emit()
+	await process_frame
+	scene._choose_destination_star(destination_node)
+	await process_frame
+	dialog.confirm_button.pressed.emit()
+	await process_frame
+	_check(fleet.has_orders(), "The fleet is ordered again")
+
+	# A second departure advances together with the first, so both markers
+	# coincide and share one stacked label.
+	var second := FleetData.new()
+	second.name = "Newhome Beta"
+	second.add_ship("FTL Probe")
+	second.dock_at(home)
+	home.fleets.append(second)
+	second.begin_travel(destination)
+
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(fleet.in_transit, "The fleet departs when the turn advances")
 	_check(
 		fleet.destination_id == destination.id,
-		"The fleet remembers its destination"
+		"The departed fleet remembers its destination"
 	)
 	_check(
 		fleet.route_turns_total == expected_turns,
@@ -234,22 +318,37 @@ func _run() -> void:
 		is_equal_approx(fleet.route_speed_ly_per_turn, 10.0),
 		"The route records the fleet speed"
 	)
-	_check(scene._destination_fleet == null, "Destination selection mode ends")
-	_check(
-		scene.status_label.text.contains("set course"),
-		"The status line announces the departure"
-	)
 	_check(
 		scene._course_mesh.get_surface_count() == 1,
-		"A dashed course line is drawn"
+		"A dashed course line is drawn on departure"
 	)
-	_check(scene._fleet_markers.size() == 1, "A transit marker is created")
-	if scene._fleet_markers.size() == 1:
-		var marker: FleetMarker = scene._fleet_markers[0]
-		_check(marker.fleet == fleet, "The transit marker belongs to the fleet")
+	_check(scene._fleet_markers.size() == 2, "Both departures get markers")
+	_check(
+		scene._fleet_labels.size() == 1,
+		"Coincident departures share a single label stack"
+	)
+	_check(
+		_fleet_label_lines(scene) == ["Newhome Alpha", "Newhome Beta"],
+		"Fleet names stack vertically in departure order"
+	)
+	if scene._fleet_labels.size() == 1:
 		_check(
-			_fleet_label_lines(scene) == [fleet.name],
-			"The stacked label shows only the fleet name"
+			(scene._fleet_labels[0] as Label3D).font_size == 22,
+			"Stacked fleet labels use the smaller type size"
+		)
+		_check(
+			_color_is_blue((scene._fleet_labels[0] as Label3D)),
+			"Stacked fleet labels use blue text"
+		)
+	if scene._fleet_markers.size() >= 1:
+		var marker: FleetMarker = scene._fleet_markers[0]
+		_check(
+			marker.fleet == fleet or marker.fleet.name == "Newhome Beta",
+			"The transit marker belongs to a departed fleet"
+		)
+		_check(
+			_fleet_label_lines(scene) == ["Newhome Alpha", "Newhome Beta"],
+			"The stacked label shows both fleet names"
 		)
 		_check(
 			marker.get_node_or_null("PickBody") != null,
@@ -272,35 +371,6 @@ func _run() -> void:
 		await process_frame
 		_check(not scene._fleet_menu.visible, "The orders popup closes")
 
-	# A second departure stacks its name under the first instead of colliding.
-	var second := FleetData.new()
-	second.name = "Newhome Beta"
-	second.add_ship("FTL Probe")
-	second.dock_at(home)
-	home.fleets.append(second)
-	second.begin_travel(destination)
-	scene._rebuild_fleet_markers()
-	await process_frame
-	_check(
-		scene._fleet_labels.size() == 1,
-		"Departures from one star share a single label stack"
-	)
-	_check(
-		_fleet_label_lines(scene) == ["Newhome Alpha", "Newhome Beta"],
-		"Fleet names stack vertically in departure order"
-	)
-	if scene._fleet_labels.size() == 1:
-		_check(
-			(scene._fleet_labels[0] as Label3D).font_size == 22,
-			"Stacked fleet labels use the smaller type size"
-		)
-	home.fleets.erase(second)
-	scene._rebuild_fleet_markers()
-	await process_frame
-	_check(
-		_fleet_label_lines(scene) == ["Newhome Alpha"],
-		"Removing a departure restores the single name"
-	)
 	_check(
 		panel.fleet_list.get_child_count() == 0,
 		"In-transit fleets leave Fleet Command"
@@ -321,8 +391,12 @@ func _run() -> void:
 	menu.close()
 	await process_frame
 	_check(not menu.visible, "The orders popup closes")
+	_check(
+		not menu.cancel_orders_button.visible,
+		"Departed fleets offer no cancellation"
+	)
 
-	var turns_to_check := maxi(expected_turns - 1, 0)
+	var turns_to_check := maxi(expected_turns - 2, 0)
 	for i in turns_to_check:
 		scene.turn_manager.advance_turn()
 		await process_frame
@@ -341,6 +415,10 @@ func _run() -> void:
 	_check(
 		destination_node.survey_label.visible,
 		"Arrival adds the survey label to the explored system"
+	)
+	_check(
+		destination_node.survey_label.font_size == home_node.home_label.font_size,
+		"Explored systems use the same label size as Newhome"
 	)
 	_check(
 		destination_node.survey_label.text == destination.display_name,
@@ -467,6 +545,12 @@ func _fleet_label_lines(scene: Node) -> Array:
 		if label != null:
 			return Array(label.text.split("\n"))
 	return []
+
+
+func _color_is_blue(label: Label3D) -> bool:
+	if label == null:
+		return false
+	return label.modulate.b > label.modulate.r
 
 
 func _check(condition: bool, message: String) -> void:

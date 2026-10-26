@@ -225,7 +225,7 @@ func _run() -> void:
 	_check(scene.research_data == 130, "Research Data can be added globally")
 	_check(scene.research_amount_label.text == "130 RD", "The HUD adds Research Data")
 
-	scene.technologies_button.pressed.emit()
+	scene._on_technologies_requested()
 	var tech_tree: TechTree = scene._tech_tree
 	_check(tech_tree != null and tech_tree.visible, "The technology tree opens")
 	if tech_tree != null:

@@ -39,7 +39,7 @@ func setup(star_data: StarData) -> void:
 
 	home_label.visible = data.is_home
 	if data.is_home:
-		home_label.text = data.display_name.to_upper()
+		home_label.text = "⭐ " + data.display_name.to_upper()
 		home_label.position = Vector3(0.0, radius + 2.0, 0.0)
 
 	refresh_survey_label()

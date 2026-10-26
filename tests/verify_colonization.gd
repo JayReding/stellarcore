@@ -103,7 +103,24 @@ func _run() -> void:
 	var research_before: int = scene.research_data
 	dialog.confirm_button.pressed.emit()
 	await process_frame
-	_check(fleet.in_transit, "Confirming sends the Colony Ship into transit")
+	_check(not fleet.in_transit, "Confirming stages orders instead of departing")
+	_check(fleet.has_orders(), "Confirming stores the destination as orders")
+	_check(
+		fleet.ordered_destination_id == destination.id,
+		"Orders name the destination"
+	)
+	_check(
+		fleet.route_turns_total == 0,
+		"No route is plotted before departure"
+	)
+
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(fleet.in_transit, "The fleet departs when the turn advances")
+	_check(
+		fleet.destination_id == destination.id,
+		"The departed fleet remembers its destination"
+	)
 	_check(
 		fleet.route_turns_total == expected_turns,
 		"The route uses the Colony Ship travel time"
@@ -113,7 +130,7 @@ func _run() -> void:
 		"The route records the Colony Ship speed"
 	)
 
-	var turns_taken := 0
+	var turns_taken := 1
 	for i in 60:
 		if not fleet.in_transit:
 			break

@@ -38,7 +38,7 @@ const GAMEPLAY_MUSIC_VOLUME_DB := -18.0
 @onready var fleet_courses_root: Node3D = $FleetCourses
 @onready var star_panel: StarInfoPanel = $UI/StarInfoPanel
 @onready var seed_label: Label = $UI/HUD/SeedLabel
-@onready var technologies_button: Button = $UI/HUD/TechnologiesButton
+@onready var research_panel: PanelContainer = %ResearchPanel
 @onready var research_amount_label: Label = %ResearchAmount
 @onready var research_project_label: Label = %ResearchProject
 @onready var research_turns_label: Label = %ResearchTurns
@@ -92,6 +92,8 @@ var _ignore_release := false
 var _press_position := Vector2.ZERO
 var _press_hit: StarNode
 var _press_fleet: FleetMarker
+var _research_pressing := false
+var _research_press_position := Vector2.ZERO
 var _hover_timer := 0.0
 
 
@@ -109,7 +111,7 @@ func _ready() -> void:
 	star_panel.system_view_requested.connect(_on_system_view_requested)
 	star_panel.shipyard_requested.connect(_on_shipyard_requested)
 	star_panel.fleet_selected.connect(_on_fleet_selected)
-	technologies_button.pressed.connect(_on_technologies_requested)
+	research_panel.gui_input.connect(_on_research_panel_input)
 	turn_manager.turn_advanced.connect(_on_turn_advanced)
 	turn_manager.end_turn_started.connect(_on_end_turn_started)
 	turn_manager.end_turn_countdown_changed.connect(_on_end_turn_countdown_changed)
@@ -480,6 +482,25 @@ func _on_technologies_requested() -> void:
 	_tech_tree.open(research_data)
 
 
+## Opens the tech tree when the Research Data panel is clicked without
+## dragging, so map orbits starting on the panel do not pop the tree open.
+func _on_research_panel_input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if click.pressed:
+		_research_pressing = true
+		_research_press_position = click.position
+		return
+	if not _research_pressing:
+		return
+	_research_pressing = false
+	if click.position.distance_to(_research_press_position) >= DRAG_THRESHOLD:
+		return
+	_on_technologies_requested()
+	get_viewport().set_input_as_handled()
+
+
 func _on_research_started(technology: Dictionary) -> void:
 	var cost := int(technology.get("cost", 0))
 	set_research_data(research_data - cost)
@@ -569,6 +590,7 @@ func _ensure_fleet_menu() -> void:
 		return
 	add_child(_fleet_menu)
 	_fleet_menu.destination_requested.connect(_on_destination_requested)
+	_fleet_menu.orders_cancelled.connect(_on_orders_cancelled)
 
 
 func _ensure_colony_dialog() -> void:
@@ -653,18 +675,27 @@ func _on_destination_confirmed(fleet: FleetData, destination: StarData) -> void:
 		_cancel_destination_selection("")
 		return
 
-	fleet.begin_travel(destination)
+	# Orders are staged: the fleet holds at its system and departs when the
+	# turn advances, at which point they become final.
+	fleet.set_orders(destination)
 	_destination_fleet = null
-	_rebuild_fleet_markers()
-	_rebuild_fleet_courses()
 	_set_status(
-		"%s set course for %s — %d turns at %.0f ly/turn."
-		% [
-			fleet.name,
-			destination.display_name,
-			fleet.route_turns_total,
-			fleet.route_speed_ly_per_turn,
+		"%s has orders for %s — departs when the turn advances." % [
+			fleet.name, destination.display_name
 		],
+		STATUS_INFO_COLOR
+	)
+	if _selected_star != null:
+		_show_star_panel(_selected_star)
+
+
+func _on_orders_cancelled(fleet: FleetData) -> void:
+	if fleet == null or not fleet.has_orders():
+		return
+	var destination_name := fleet.ordered_destination_name
+	fleet.clear_orders()
+	_set_status(
+		"%s's orders for %s are cancelled." % [fleet.name, destination_name],
 		STATUS_INFO_COLOR
 	)
 	if _selected_star != null:
@@ -894,6 +925,20 @@ func _advance_fleets() -> void:
 	var arrivals: Array[String] = []
 	var any_moved := false
 	var panel_changed := false
+
+	for star in _galaxy.stars:
+		for fleet_data in star.fleets.duplicate():
+			var fleet: FleetData = fleet_data
+			if fleet.in_transit or not fleet.has_orders():
+				continue
+			var send_to := _star_by_id(fleet.ordered_destination_id)
+			if send_to == null:
+				fleet.clear_orders()
+				continue
+			fleet.begin_travel(send_to)
+			fleet.clear_orders()
+			any_moved = true
+			panel_changed = true
 
 	for star in _galaxy.stars:
 		for fleet_data in star.fleets.duplicate():
@@ -1266,7 +1311,7 @@ func _add_fleet_label(
 	label.outline_size = 8
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.92)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	label.modulate = Color(1.0, 0.88, 0.62, 1.0)
+	label.modulate = Color(0.55, 0.82, 1.0, 1.0)
 	label.render_priority = 2
 	fleets_root.add_child(label)
 	_fleet_labels.append(label)
@@ -1353,9 +1398,6 @@ func _update_hover_cursor() -> void:
 		return
 
 	var mouse := get_viewport().get_mouse_position()
-	if technologies_button.get_global_rect().has_point(mouse):
-		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
-		return
 	var hovered_button := get_viewport().gui_get_hovered_control() as BaseButton
 	if hovered_button != null and not hovered_button.disabled:
 		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)

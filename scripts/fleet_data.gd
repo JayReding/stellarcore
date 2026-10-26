@@ -60,6 +60,11 @@ const GREEK_LETTERS: Array[String] = [
 @export var route_speed_ly_per_turn: float = 0.0
 @export var route_turns_total: int = 0
 @export var route_turns_elapsed: int = 0
+## Destination assigned by the player, awaiting departure at turn end. Orders
+## are staged: the fleet stays docked until the turn advances, and cancelling
+## restores it to normal duty.
+@export var ordered_destination_id: String = ""
+@export var ordered_destination_name: String = ""
 
 
 func ship_count() -> int:
@@ -77,6 +82,26 @@ func remove_one_ship(ship_name: String) -> bool:
 		return false
 	ships.remove_at(index)
 	return true
+
+
+## Whether the fleet holds travel orders it has not departed on yet.
+func has_orders() -> bool:
+	return not in_transit and not ordered_destination_id.is_empty()
+
+
+## Stages travel orders without departing. The fleet stays docked until the
+## turn advances, when the orders become final.
+func set_orders(destination: StarData) -> void:
+	if destination == null:
+		return
+	ordered_destination_id = destination.id
+	ordered_destination_name = destination.display_name
+
+
+## Withdraws staged orders, returning the fleet to normal duty.
+func clear_orders() -> void:
+	ordered_destination_id = ""
+	ordered_destination_name = ""
 
 
 ## The fleet moves at the speed of its slowest ship.

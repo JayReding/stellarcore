@@ -211,7 +211,10 @@ func _create_fleet_row(fleet: FleetData) -> Button:
 	row.add_child(name_label)
 
 	var summary_label := Label.new()
-	summary_label.text = fleet.ship_summary()
+	var summary_text := fleet.ship_summary()
+	if fleet.has_orders():
+		summary_text += "  •  Ordered: %s" % fleet.ordered_destination_name
+	summary_label.text = summary_text
 	summary_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	summary_label.add_theme_font_size_override("font_size", 10)
 	summary_label.add_theme_color_override("font_color", Color(0.55, 0.68, 0.82))

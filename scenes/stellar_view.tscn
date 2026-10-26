@@ -169,27 +169,6 @@ theme_override_colors/font_color = Color(0.3, 0.44, 0.6, 1)
 theme_override_font_sizes/font_size = 10
 text = "GALAXY SEED  000000   /   25 SYSTEMS"
 
-[node name="TechnologiesButton" type="Button" parent="UI/HUD" unique_id=890076077]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -90.0
-offset_top = 20.0
-offset_right = 90.0
-offset_bottom = 58.0
-grow_horizontal = 2
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.82, 0.92, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBox_tech_normal")
-theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
-theme_override_styles/hover = SubResource("StyleBox_tech_hover")
-text = "Technologies"
-
 [node name="ResearchPanel" type="PanelContainer" parent="UI/HUD" unique_id=1837429194]
 unique_name_in_owner = true
 layout_mode = 1
@@ -197,7 +176,8 @@ offset_left = 28.0
 offset_top = 108.0
 offset_right = 268.0
 offset_bottom = 108.0
-mouse_filter = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "Open the technology tree"
 theme_override_styles/panel = SubResource("StyleBox_research")
 
 [node name="ResearchContent" type="VBoxContainer" parent="UI/HUD/ResearchPanel" unique_id=1099432593]

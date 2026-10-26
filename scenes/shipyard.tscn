@@ -522,6 +522,28 @@ theme_override_font_sizes/font_size = 10
 text = "Ship production costs are not yet assigned."
 autowrap_mode = 3
 
+[node name="ProduceRow" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="ProduceButton" type="Button" parent="Root/UI/Content/CenterColumn/CenterContent/ProduceRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_produce_normal")
+theme_override_styles/hover = SubResource("StyleBox_produce_hover")
+theme_override_styles/pressed = SubResource("StyleBox_produce_pressed")
+theme_override_styles/disabled = SubResource("StyleBox_produce_disabled")
+text = "Add To Construction Queue"
+
 [node name="FleetColumn" type="PanelContainer" parent="Root/UI/Content"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
@@ -613,37 +635,9 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
 theme_override_font_sizes/font_size = 12
-text = "Produce Ship queues the selected hull. Completed ships join the newest fleet."
+text = "Queued ships join the newest fleet in the system."
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="ProduceButton" type="Button" parent="Root/UI"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -110.0
-offset_top = -64.0
-offset_right = 110.0
-offset_bottom = -24.0
-grow_horizontal = 2
-grow_vertical = 0
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBox_produce_normal")
-theme_override_styles/hover = SubResource("StyleBox_produce_hover")
-theme_override_styles/pressed = SubResource("StyleBox_produce_pressed")
-theme_override_styles/disabled = SubResource("StyleBox_produce_disabled")
-text = "Produce Ship"
-
 [node name="Hint" type="Label" parent="Root/UI"]
 layout_mode = 1
 anchors_preset = 2

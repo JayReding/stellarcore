@@ -36,15 +36,16 @@ godot --path .
 | Right-click a fleet or marker | Open the fleet orders popup at the cursor |
 | Click away from the orders popup | Dismiss it |
 | Set Fleet Destination | Enter destination-selection mode |
+| Cancel Fleet Orders | Withdraw staged orders before the turn ends |
 | Click a star while choosing a destination | Open the course confirmation dialog |
-| Confirm Destination | Send the fleet and close the dialog |
+| Confirm Destination | Stage the fleet's orders for departure on turn advance |
 | `Esc` while choosing a destination | Cancel destination selection |
-| Technologies button | Open the technology tree |
+| Research Data panel | Click to open the technology tree |
 | Scroll in the technology tree | Pan around the category grid |
 | Click a planet (surveyed) | Open that system in the full-screen System View |
 | Click a planet (System View) | Inspect that planet's structures and resource flow |
 | Shipyard button (Newhome) | Open the Newhome III shipyard |
-| Produce Ship | Queue one of the selected hull (cost is spent up front) |
+| Add To Construction Queue | Queue one of the selected hull (cost is spent up front) |
 | Cancel (shipyard queue) | Cancel a queued build and refund unused resources |
 | Drag a ship chip | Move it onto another fleet in the shipyard |
 | + New Fleet | Create an empty fleet to drag ships into |
@@ -90,10 +91,10 @@ godot --path .
   its course, and structures apply their output and upkeep.
 - A 3D star per system with an emissive surface, halo, and selection ring. Stars
   render at 80% of their original radius so the map stays readable.
-- Newhome is marked with a floating `NEWHOME` label and a home-system panel.
+- Newhome is marked with a floating gold `⭐ NEWHOME` label and a home-system panel.
 - Explored systems show their star name beneath the star. The name appears as
   soon as a probe surveys the system and stays visible in the Stellar View;
-  Newhome keeps its separate gold `NEWHOME` label.
+  Newhome keeps its separate gold `⭐ NEWHOME` label.
 - Every system carries 2–6 procedurally generated planets ordered outward from
   its star. Classes are position-weighted: rocky and high-mineral worlds in the
   inner system, rare Earth-like worlds in the middle, dead worlds just beyond
@@ -165,9 +166,18 @@ godot --path .
 - The fleet orders popup offers **Set Fleet Destination**, **Rename Fleet**,
   **Modify Fleet**, and **Delete Fleet** (red text). Only destination assignment
   is implemented in this slice; the other actions are present but disabled.
+  Clicking a fleet row in Fleet Command opens the popup for stationed and
+  ordered fleets alike.
 - **Set Fleet Destination** lets the player click a star. A confirmation dialog
   shows the destination, distance, fleet speed, and required turns before the
   course is accepted. `Back` returns to star selection, and `Esc` cancels.
+  Accepting stages the fleet's orders instead of launching it: the fleet stays
+  docked and listed on Fleet Command with its ordered destination, and only
+  departs when the turn advances, at which point the orders are final.
+- While a fleet holds orders, opening its popup replaces **Set Fleet
+  Destination** with **Cancel Fleet Orders**, which withdraws the orders and
+  returns the fleet to normal duty. Cancellation is only available before the
+  end of the turn.
 - Fleets travel at the speed of their slowest ship. The FTL Probe moves
   **10 light years per turn** while the **Colony Ship** manages only **5**, so
   the number of turns is `ceil(distance / speed)` and the fleet moves on each
@@ -181,10 +191,10 @@ godot --path .
 - The arriving FTL Probe is consumed after it surveys the system. If it was the
   fleet's only ship, the fleet is deleted and its name becomes available for
   future production.
-- The bottom-center status line reports destination prompts, departures, and
-  arrivals. Arrival notices include the probe loss, the system's planet count and
-  planet types, and the destination's panel immediately exposes its surveyed
-  planet list.
+- The bottom-center status line reports destination prompts, staged orders,
+  cancellations, and arrivals. Arrival notices include the probe loss, the
+  system's planet count and planet types, and the destination's panel
+  immediately exposes its surveyed planet list.
 - The **Shipyard structure** in orbit of **Newhome III** is the only shipyard in
   the current slice and consumes 2 Helium 3 per turn. The panel's **Shipyard**
   button is enabled only for Newhome and opens a full-screen construction
@@ -197,11 +207,11 @@ godot --path .
   **1 Antimatter**, **3 turns** to build), which appears in the shipyard hull
   list once unlocked. The 1 Antimatter is a placeholder until the ship
   refueling mechanic lands, and future technologies may influence build times.
-- **Produce Ship** at the bottom center queues one of the selected hull and
-  spends its cost up front from the system's local stockpile. Each turn applies
-  one turn of work to the queue, oldest hull first, so queued probes finish
-  four at a time. Completed ships join the newest stationed fleet, or a new
-  fleet when none is stationed.
+- **Add To Construction Queue** in the middle column queues one of the
+  selected hull and spends its cost up front from the system's local stockpile.
+  Each turn applies one turn of work to the queue, oldest hull first, so queued
+  probes finish four at a time. Completed ships join the newest stationed
+  fleet, or a new fleet when none is stationed.
 - Queued builds show their progress (**Turn 1 of 3** style) with a **Cancel**
   button. Cancelling refunds unused resources pro-rata, except Antimatter,
   which is always fully refunded as fuel is loaded last.
@@ -215,10 +225,11 @@ godot --path .
   fleet releases its name. Once all 24 letters are used, a generation number is
   appended (**Newhome Alpha 2**, then **Newhome Omega 2**, and so on).
 - The shipyard's cost readout shows each required resource and turns missing
-  resources red with the shortfall amount. **Produce Ship** is disabled and
+  resources red with the shortfall amount. **Add To Construction Queue** is disabled and
   greyed out when the local stockpile cannot cover the full cost, and the status
   line explains what is missing.
-- A **Technologies** button in the top bar opens a full-screen technology tree.
+- Clicking the **Research Data** readout in the top-left HUD opens a full-screen
+  technology tree.
   The tree is a scrolling grid: one column per category (**Propulsion**,
   **Exploration**, **Industrial**, **Military**, **Advanced Technology**) with
   tier labels running down the side, and new technologies appear under their
@@ -394,7 +405,8 @@ godot --headless --path . --script res://tests/verify_shipyard.gd
 
 The exploration check validates the fleet orders popup and its click-away,
 right-click, and Escape dismissal, the disabled management actions, destination
-selection and confirmation, travel-time math,
+selection and confirmation, staged orders with the Cancel Fleet Orders swap,
+departure on turn advance, travel-time math,
 the dashed course line and moving marker, the stacked per-star departure labels,
 marker removal on arrival, turn-by-turn
 movement, probe destruction, fleet deletion, fleet-name reuse, Fleet Command
@@ -420,7 +432,7 @@ Data, and the shipyard's local Titanium readout:
 godot --headless --path . --script res://tests/verify_resources.gd
 ```
 
-The technology tree check validates the top-bar button, the category-column
+The technology tree check validates the clickable Research Data readout, the category-column
 grid with tier gutters, the placement and cards of the Propulsion, Exploration,
 Industrial, and Military sections across Tier 1 and Tier 2 (including the new
 Destroyer Hull Plan), card contents and yellow cost/time readout, the green

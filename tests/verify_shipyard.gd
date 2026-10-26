@@ -82,7 +82,7 @@ func _run() -> void:
 		shipyard.no_options_note.text.contains("no modules or variants"),
 		"No-options explanation is present"
 	)
-	_check(shipyard.produce_button.text == "Produce Ship", "Produce button has the right label")
+	_check(shipyard.produce_button.text == "Add To Construction Queue", "Produce button has the right label")
 	_check(
 		not shipyard.produce_button.disabled,
 		"Produce button is enabled while resources are sufficient"
@@ -110,10 +110,9 @@ func _run() -> void:
 			"Affordable Antimatter cost is not red"
 		)
 	_check(
-		shipyard.produce_button.anchor_left == 0.5
-		and shipyard.produce_button.anchor_right == 0.5
-		and shipyard.produce_button.anchor_top == 1.0,
-		"Produce button is anchored to the bottom center"
+		shipyard.produce_button.get_parent() != null
+		and shipyard.produce_button.get_parent().name == "ProduceRow",
+		"Produce button sits in the middle column's right-aligned row"
 	)
 	_check(shipyard.meta_label.text.contains("NEWHOME III"), "Header shows Newhome III")
 	_check(shipyard.meta_label.text.contains("0 FLEETS"), "Header shows the fleet count")
