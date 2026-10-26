@@ -5,19 +5,25 @@
 [ext_resource type="PackedScene" uid="uid://cfogiilbflrhn" path="res://scenes/ui/star_info_panel.tscn" id="3_panel"]
 [ext_resource type="Script" uid="uid://c68jx0c8umr53" path="res://scripts/turn_manager.gd" id="4_turn"]
 [ext_resource type="AudioStream" uid="uid://v4u014lqafa0" path="res://assets/music/Mesmerizing Galaxy Loop.mp3" id="5_music"]
-
-[ext_resource type="Shader" path="res://shaders/nebula_sky.gdshader" id="6_nebula"]
+[ext_resource type="Shader" uid="uid://14eggb6qonne" path="res://shaders/nebula_sky.gdshader" id="6_nebula"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nebula"]
 shader = ExtResource("6_nebula")
+shader_parameter/deep_color = Color(0.006, 0.01, 0.026, 1)
+shader_parameter/mid_color = Color(0.035, 0.075, 0.18, 1)
+shader_parameter/high_color = Color(0.1, 0.17, 0.34, 1)
+shader_parameter/ice_color = Color(0.38, 0.5, 0.7, 1)
+shader_parameter/cloud_scale = 2.1
+shader_parameter/star_density = 1.0
+shader_parameter/star_brightness = 0.9
 
 [sub_resource type="Sky" id="Sky_nebula"]
 sky_material = SubResource("ShaderMaterial_nebula")
 
 [sub_resource type="Environment" id="Environment_space"]
 background_mode = 2
-sky = SubResource("Sky_nebula")
 background_color = Color(0.004, 0.006, 0.013, 1)
+sky = SubResource("Sky_nebula")
 ambient_light_source = 2
 ambient_light_color = Color(0.25, 0.35, 0.55, 1)
 ambient_light_energy = 0.1
@@ -30,6 +36,36 @@ glow_levels/4 = 0.0
 glow_levels/5 = 0.7
 glow_intensity = 0.6
 glow_bloom = 0.08
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_research"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.027, 0.052, 0.09, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.22, 0.46, 0.74, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_bg"]
+bg_color = Color(0.025, 0.07, 0.12, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_fill"]
+bg_color = Color(0.38, 0.8, 0.66, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_tech_normal"]
 content_margin_left = 16.0
@@ -78,36 +114,6 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_research"]
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
-bg_color = Color(0.027, 0.052, 0.09, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.46, 0.74, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_bg"]
-bg_color = Color(0.025, 0.07, 0.12, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_fill"]
-bg_color = Color(0.38, 0.8, 0.66, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
 
 [node name="StellarView" type="Node3D" unique_id=906409263]
 script = ExtResource("1_view")
@@ -185,8 +191,8 @@ offset_left = 28.0
 offset_top = 108.0
 offset_right = 268.0
 offset_bottom = 108.0
-mouse_default_cursor_shape = 2
 tooltip_text = "Open the technology tree"
+mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBox_research")
 
 [node name="ResearchContent" type="VBoxContainer" parent="UI/HUD/ResearchPanel" unique_id=1099432593]

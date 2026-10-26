@@ -42,12 +42,14 @@ godot --path .
 | `Esc` while choosing a destination | Cancel destination selection |
 | Research Data panel | Click to open the technology tree |
 | Scroll in the technology tree | Pan around the category grid |
+| Ctrl + mouse wheel in the technology tree | Zoom the grid in and out |
 | Click a planet (surveyed) | Open that system in the full-screen System View |
 | Click a planet (System View) | Inspect that planet's structures and resource flow |
 | Shipyard button (Newhome) | Open the Newhome III shipyard |
 | Add To Construction Queue | Queue one of the selected hull (cost is spent up front) |
 | Cancel (shipyard queue) | Cancel a queued build and refund unused resources |
 | Drag a ship chip | Move it onto another fleet in the shipyard |
+| Right-click an empty fleet | Delete it from the shipyard |
 | + New Fleet | Create an empty fleet to drag ships into |
 | End Turn | Start or cancel the five-second countdown to advance the turn |
 | `Esc` (Stellar View) | Deselect, cancel destination selection, or close the fleet orders popup |
@@ -92,9 +94,10 @@ godot --path .
 - A 3D star per system with an emissive surface, halo, and selection ring. Stars
   render at 80% of their original radius so the map stays readable.
 - Newhome is marked with a floating gold `⭐ NEWHOME` label and a home-system panel.
-- Explored systems show their star name beneath the star. The name appears as
-  soon as a probe surveys the system and stays visible in the Stellar View;
-  Newhome keeps its separate gold `⭐ NEWHOME` label.
+- Explored systems show their star name beneath the star, in the same type size
+  as the Newhome label. The name appears as soon as a probe surveys the system
+  and stays visible in the Stellar View; colonized systems gain a dot after
+  their name. Newhome keeps its separate gold `⭐ NEWHOME` label.
 - Every system carries 2–6 procedurally generated planets ordered outward from
   its star. Classes are position-weighted: rocky and high-mineral worlds in the
   inner system, rare Earth-like worlds in the middle, dead worlds just beyond
@@ -211,14 +214,16 @@ godot --path .
   selected hull and spends its cost up front from the system's local stockpile.
   Each turn applies one turn of work to the queue, oldest hull first, so queued
   probes finish four at a time. Completed ships join the newest stationed
-  fleet, or a new fleet when none is stationed.
+  fleet with no destination — ordered and travelling fleets keep the ships
+  they have — or a new fleet when no unordered fleet is stationed.
 - Queued builds show their progress (**Turn 1 of 3** style) with a **Cancel**
   button. Cancelling refunds unused resources pro-rata, except Antimatter,
   which is always fully refunded as fuel is loaded last.
 - Fleet rows list each ship as a draggable chip. Dragging a ship onto another
   fleet moves it there; a fleet emptied this way is removed and its name
   becomes available again. The **+ New Fleet** button creates an empty fleet
-  to drag ships into.
+  to drag ships into. Right-clicking an empty fleet's row deletes it (occupied
+  fleets ignore the gesture so no ships are lost by accident).
 - Fleets are named after their production system plus a Greek letter, beginning
   with **Newhome Alpha**, **Newhome Beta**, and continuing through **Newhome
   Omega**. Names are allocated from the galaxy's active fleets, so a deleted
@@ -230,10 +235,12 @@ godot --path .
   line explains what is missing.
 - Clicking the **Research Data** readout in the top-left HUD opens a full-screen
   technology tree.
-  The tree is a scrolling grid: one column per category (**Propulsion**,
-  **Exploration**, **Industrial**, **Military**, **Advanced Technology**) with
+  The tree is a scrolling grid: one column per unlocked category (**Propulsion**,
+  **Exploration**, **Industrial**, **Military**; **Advanced Technology** stays
+  hidden until a later unlock) with
   tier labels running down the side, and new technologies appear under their
-  category column as the tree grows. Tier 1 contains **Propulsion**
+  category column as the tree grows. Scroll with the mouse wheel and zoom with
+  Ctrl+mouse wheel. Tier 1 contains **Propulsion**
   (**FTL Probes**), **Exploration** (**Colony Ships**, 100 RD, 5 turns),
   **Industrial** (**Ore Processing**), and **Military** (**Destroyer Hull
   Plan**, 50 RD, 3 turns): a small, light military platform using standard
@@ -397,7 +404,7 @@ build time and empty customization panel, the 25 Titanium/10 Antimatter cost
 and upfront deduction, queued multi-turn builds with per-turn progress,
 batched sub-turn completions, cancellation with pro-rated Titanium and full
 Antimatter refunds, insufficient-resource button gating and red cost readout,
-the newest-fleet default for completions, the New Fleet button, drag-and-drop
+the newest-fleet default for completions (ordered fleets are skipped), the New Fleet button, drag-and-drop
 ship moves between fleets, empty-fleet removal with name reuse, Greek fleet
 naming and overflow, the Colony Ship unlock, its 500 Titanium/1 Antimatter
 cost, 3-turn build time, and 5 ly/turn speed, Fleet Command refresh, and the
@@ -439,7 +446,8 @@ godot --headless --path . --script res://tests/verify_resources.gd
 The technology tree check validates the clickable Research Data readout, the category-column
 grid with tier gutters, the placement and cards of the Propulsion, Exploration,
 Industrial, and Military sections across Tier 1 and Tier 2 (including the new
-Destroyer Hull Plan), card contents and yellow cost/time readout, the green
+Destroyer Hull Plan), the hidden Advanced Technology column, card contents and
+yellow cost/time readout, the green
 AVAILABLE state, the Research Data readout, scrolling, and the close paths:
 
 ```bash

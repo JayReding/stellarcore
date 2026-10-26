@@ -615,7 +615,7 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
 theme_override_font_sizes/font_size = 10
-text = "Drag a ship onto another fleet to move it.\nA fleet that loses its last ship is removed."
+text = "Drag a ship onto another fleet to move it.\nA fleet that loses its last ship is removed.\nRight-click an empty fleet to delete it."
 autowrap_mode = 3
 
 [node name="FeedbackLabel" type="Label" parent="Root/UI"]
@@ -635,7 +635,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
 theme_override_font_sizes/font_size = 12
-text = "Queued ships join the newest fleet in the system."
+text = "Queued ships join the newest fleet with no destination."
 horizontal_alignment = 1
 autowrap_mode = 3
 [node name="Hint" type="Label" parent="Root/UI"]

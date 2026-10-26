@@ -139,6 +139,10 @@ func _run() -> void:
 		turns_taken += 1
 	_check(not fleet.in_transit, "The Colony Ship completes its course")
 	_check(destination.surveyed, "Arrival surveys the destination")
+	_check(
+		destination_node.survey_label.text == destination.display_name,
+		"Uncolonized systems show a plain name label"
+	)
 	_check(not destination.has_colony(), "Arrival does not found a Colony itself")
 	_check(
 		_colony_count(destination) == 0,
@@ -226,6 +230,10 @@ func _run() -> void:
 	_check(
 		_colony_count(destination) == 1,
 		"Founding creates exactly one Colony"
+	)
+	_check(
+		destination_node.survey_label.text == destination.display_name + " ●",
+		"Colonized systems gain a dot after their name"
 	)
 	_check(fleet.ships.is_empty(), "The Colony Ship is consumed by founding")
 	_check(

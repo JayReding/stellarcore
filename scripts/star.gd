@@ -90,12 +90,15 @@ func _process(delta: float) -> void:
 
 ## Names explored systems beneath the star. Newhome keeps its dedicated
 ## home label, so its survey label stays hidden to avoid duplicating the name.
+## Colonized systems get a dot after their name.
 func refresh_survey_label() -> void:
 	_surveyed = data != null and data.surveyed
 	survey_label.visible = _surveyed and not data.is_home
 	if not survey_label.visible:
 		return
 	survey_label.text = data.display_name
+	if data.has_colony():
+		survey_label.text += " ●"
 	survey_label.position = Vector3(0.0, -(data.visual_radius + 1.35), 0.0)
 
 

@@ -834,7 +834,7 @@ func _advance_ship_construction() -> void:
 
 
 func _complete_ship_build(star: StarData, definition: Dictionary) -> void:
-	var fleet := star.newest_stationed_fleet()
+	var fleet := star.newest_available_fleet()
 	if fleet == null:
 		fleet = FleetData.new()
 		if _galaxy != null:
@@ -1116,6 +1116,7 @@ func _on_colony_chosen(
 	_set_status(message, STATUS_SUCCESS_COLOR)
 	refresh_resources()
 	_rebuild_fleet_markers()
+	_refresh_star_survey_label(star)
 	if _selected_star != null and _selected_star.data == star:
 		_show_star_panel(_selected_star)
 	_advance_colony_queue()

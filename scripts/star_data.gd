@@ -73,13 +73,23 @@ func stationed_fleets() -> Array[FleetData]:
 	return result
 
 
-## The fleet completed ships join by default: the newest stationed fleet, or
-## null when the yard must create one.
-func newest_stationed_fleet() -> FleetData:
-	var stationed := stationed_fleets()
-	if stationed.is_empty():
+## Stationed fleets with no destination set or staged. Shipyard output only
+## joins these, so ordered and travelling fleets keep the ships they have.
+func available_fleets() -> Array[FleetData]:
+	var result: Array[FleetData] = []
+	for fleet in stationed_fleets():
+		if fleet.destination_id.is_empty() and not fleet.has_orders():
+			result.append(fleet)
+	return result
+
+
+## The fleet completed ships join: the newest available fleet, or null when
+## the yard must create one.
+func newest_available_fleet() -> FleetData:
+	var available := available_fleets()
+	if available.is_empty():
 		return null
-	return stationed[stationed.size() - 1]
+	return available[available.size() - 1]
 
 
 func all_structures() -> Array[StructureData]:

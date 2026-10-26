@@ -33,7 +33,7 @@ func _run() -> void:
 
 	var grid := tech_tree.tech_grid
 	_check(grid != null, "The tree renders a category grid")
-	_check(grid.columns == 6, "The grid has a tier gutter plus five categories")
+	_check(grid.columns == 5, "The grid has a tier gutter plus four shown categories")
 
 	var headers: Array[String] = []
 	for child in grid.get_children():
@@ -42,9 +42,12 @@ func _run() -> void:
 	_check(
 		headers == [
 			"PROPULSION", "EXPLORATION", "INDUSTRIAL", "MILITARY",
-			"ADVANCED TECHNOLOGY",
 		],
-		"Category columns follow the configured order"
+		"Shown category columns follow the configured order"
+	)
+	_check(
+		grid.get_node_or_null("CategoryHeader_AdvancedTechnology") == null,
+		"Advanced Technology stays hidden until unlocked"
 	)
 
 	_check(_tier_label(grid, 1) == "TIER 1", "Tier rows start at Tier 1")
@@ -126,16 +129,16 @@ func _run() -> void:
 		)
 
 	_check(
-		_count_cards(grid, 2, "AdvancedTechnology") == 0,
-		"Advanced Technology starts empty"
+		grid.get_node_or_null("TechCell_2_AdvancedTechnology") == null,
+		"Hidden categories render no cells"
 	)
 	_check(
 		tech_tree.meta_label.text.contains("5 TECHNOLOGIES"),
 		"Technology count is displayed"
 	)
 	_check(
-		tech_tree.meta_label.text.contains("5 CATEGORIES"),
-		"Category count is displayed"
+		tech_tree.meta_label.text.contains("4 CATEGORIES"),
+		"Shown category count is displayed"
 	)
 	_check(
 		tech_tree.meta_label.text.contains("2 TIERS"),
@@ -170,6 +173,47 @@ func _run() -> void:
 	root.size = Vector2i(1920, 1080)
 	await process_frame
 	await process_frame
+
+	# Ctrl+mouse wheel zooms the grid; plain wheel input leaves it alone.
+	var zoom_in := InputEventMouseButton.new()
+	zoom_in.button_index = MOUSE_BUTTON_WHEEL_UP
+	zoom_in.pressed = true
+	zoom_in.ctrl_pressed = true
+	zoom_in.position = Vector2(960, 540)
+	tech_tree._input(zoom_in)
+	_check(tech_tree._zoom > 1.0, "Ctrl+wheel up zooms in")
+	_check(
+		tech_tree.tech_grid.scale.x > 1.0,
+		"Zooming scales the grid"
+	)
+	var plain_wheel := InputEventMouseButton.new()
+	plain_wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	plain_wheel.pressed = true
+	plain_wheel.ctrl_pressed = false
+	plain_wheel.position = Vector2(960, 540)
+	var zoom_before_plain := tech_tree._zoom
+	tech_tree._input(plain_wheel)
+	_check(
+		is_equal_approx(tech_tree._zoom, zoom_before_plain),
+		"Plain wheel input does not zoom"
+	)
+	for i in 20:
+		tech_tree._input(zoom_in)
+	_check(
+		is_equal_approx(tech_tree._zoom, 2.0),
+		"Zooming in clamps at the maximum"
+	)
+	var zoom_out := InputEventMouseButton.new()
+	zoom_out.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	zoom_out.pressed = true
+	zoom_out.ctrl_pressed = true
+	zoom_out.position = Vector2(960, 540)
+	for i in 30:
+		tech_tree._input(zoom_out)
+	_check(
+		is_equal_approx(tech_tree._zoom, 0.5),
+		"Zooming out clamps at the minimum"
+	)
 
 	tech_tree.back_button.pressed.emit()
 	_check(not tech_tree.visible, "Back button closes the technology tree")

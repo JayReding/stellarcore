@@ -24,6 +24,12 @@ const CATEGORY_COLORS := {
 	"Military": Color(0.96, 0.48, 0.48),
 	"Advanced Technology": Color(0.8, 0.6, 1.0),
 }
+## Categories stay hidden until unlocked by a later game stage. Advanced
+## Technology has no unlock yet, so its column is reserved for the future.
+const HIDDEN_CATEGORIES: Array[String] = ["Advanced Technology"]
+## Mouse-wheel zoom limits for the tech tree grid.
+const MIN_ZOOM := 0.5
+const MAX_ZOOM := 2.0
 const TECHNOLOGIES := [
 	{
 		"id": "ftl_probes",
@@ -121,6 +127,7 @@ var _turns_total: int = 0
 var _turns_remaining: int = 0
 var _completed_tech_ids: Array[String] = []
 var _dialog_technology: Dictionary = {}
+var _zoom := 1.0
 var _tween: Tween
 
 
@@ -138,6 +145,7 @@ func open(research_data: int = 0) -> void:
 	_research_data = maxi(research_data, 0)
 	_update_funds()
 	_hide_research_dialog()
+	_reset_zoom()
 	refresh_tech_cards()
 	visible = true
 	_kill_tween()
@@ -145,6 +153,12 @@ func open(research_data: int = 0) -> void:
 	_tween = create_tween()
 	_tween.tween_property(root, "modulate:a", 1.0, 0.2)
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+func _reset_zoom() -> void:
+	_zoom = 1.0
+	tech_grid.scale = Vector2.ONE
+	tech_grid.custom_minimum_size = Vector2.ZERO
 
 
 func refresh_research_data(research_data: int) -> void:
@@ -182,6 +196,55 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Ctrl+mouse wheel zooms the grid around the cursor. Plain wheel input is
+## left alone so the scroll container keeps scrolling normally.
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if not (event is InputEventMouseButton):
+		return
+	var wheel := event as InputEventMouseButton
+	if not wheel.pressed or not wheel.ctrl_pressed:
+		return
+	if wheel.button_index == MOUSE_BUTTON_WHEEL_UP:
+		_apply_zoom(1.1, wheel.position)
+		get_viewport().set_input_as_handled()
+	elif wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		_apply_zoom(1.0 / 1.1, wheel.position)
+		get_viewport().set_input_as_handled()
+
+
+func _apply_zoom(factor: float, anchor: Vector2) -> void:
+	var old := _zoom
+	_zoom = clampf(_zoom * factor, MIN_ZOOM, MAX_ZOOM)
+	if is_equal_approx(_zoom, old):
+		return
+	# custom_minimum_size feeds the scrollbars, so re-derive the unscaled
+	# base before scaling; everything happens before the next frame.
+	tech_grid.custom_minimum_size = Vector2.ZERO
+	var base := tech_grid.get_combined_minimum_size()
+	tech_grid.custom_minimum_size = base * _zoom
+	tech_grid.scale = Vector2(_zoom, _zoom)
+	# Keep the content under the cursor stable across the zoom step.
+	var local := anchor - tech_scroll.get_global_rect().position
+	var content := (
+		Vector2(tech_scroll.scroll_horizontal, tech_scroll.scroll_vertical)
+		+ local
+	) / old
+	var target := content * _zoom - local
+	tech_scroll.scroll_horizontal = int(maxf(target.x, 0.0))
+	tech_scroll.scroll_vertical = int(maxf(target.y, 0.0))
+
+
+func _shown_categories() -> Array[String]:
+	var shown: Array[String] = []
+	for category in CATEGORY_ORDER:
+		if HIDDEN_CATEGORIES.has(str(category)):
+			continue
+		shown.append(str(category))
+	return shown
+
+
 func _populate() -> void:
 	for child in tech_grid.get_children():
 		tech_grid.remove_child(child)
@@ -192,17 +255,18 @@ func _populate() -> void:
 	for technology in TECHNOLOGIES:
 		max_tier = maxi(max_tier, int(technology.get("tier", 1)))
 
-	tech_grid.columns = CATEGORY_ORDER.size() + 1
+	var categories := _shown_categories()
+	tech_grid.columns = categories.size() + 1
 
 	var corner := Control.new()
 	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tech_grid.add_child(corner)
-	for category in CATEGORY_ORDER:
+	for category in categories:
 		tech_grid.add_child(_make_category_header(str(category)))
 
 	for tier in range(1, max_tier + 1):
 		tech_grid.add_child(_make_tier_cell(tier))
-		for category in CATEGORY_ORDER:
+		for category in categories:
 			var cell := _make_tech_cell(tier, str(category))
 			tech_grid.add_child(cell)
 			_populate_tech_cell(cell, tier, str(category))
@@ -210,7 +274,7 @@ func _populate() -> void:
 	var noun := "TECHNOLOGY" if TECHNOLOGIES.size() == 1 else "TECHNOLOGIES"
 	meta_label.text = "TECH TREE  •  %d %s  •  %d CATEGORIES  •  %d %s" % [
 		TECHNOLOGIES.size(), noun,
-		CATEGORY_ORDER.size(),
+		categories.size(),
 		max_tier, "TIER" if max_tier == 1 else "TIERS",
 	]
 	refresh_tech_cards()

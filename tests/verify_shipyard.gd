@@ -280,6 +280,27 @@ func _run() -> void:
 		"Drop targets resolve for the second fleet"
 	)
 
+	# An empty fleet can be deleted with a right-click on its row.
+	shipyard.new_fleet_button.pressed.emit()
+	await process_frame
+	_check(home.fleets.size() == 3, "A third fleet is created")
+	var third := home.fleets[2]
+	_check(third.name == "Newhome Gamma", "The third fleet is Newhome Gamma")
+	_right_click_control(_fleet_row_panel(shipyard, third))
+	_check(not home.fleets.has(third), "Right-click deletes the empty fleet")
+	_check(home.fleets.size() == 2, "Only the working fleets remain")
+	_check(
+		shipyard.feedback_label.text.contains("Deleted empty Newhome Gamma"),
+		"Deletion names the removed fleet"
+	)
+	_check(
+		scene._galaxy.next_fleet_name("Newhome") == "Newhome Gamma",
+		"The deleted empty fleet's name is available again"
+	)
+	_right_click_control(_fleet_row_panel(shipyard, beta))
+	_check(home.fleets.size() == 2, "Occupied fleets survive right-clicks")
+	_check(beta.ships.size() == 4, "Occupied fleets keep their ships")
+
 	_check(FleetData.default_name("Newhome", 0) == "Newhome Alpha", "Greek naming starts at Alpha")
 	_check(FleetData.default_name("Newhome", 23) == "Newhome Omega", "Greek naming ends at Omega")
 	_check(
@@ -478,6 +499,27 @@ func _run() -> void:
 	)
 	_check(home.resources.titanium == 205, "Three turns net +60 Titanium overall")
 
+	# Fleets holding orders are skipped by completions.
+	var ordered_target: StarData = null
+	for star in scene._galaxy.stars:
+		if star != home:
+			ordered_target = star
+			break
+	_check(ordered_target != null, "Another system exists to order toward")
+	second.set_orders(ordered_target)
+	home.resources.titanium = 600
+	home.resources.antimatter = 50
+	shipyard._on_hull_pressed(ShipyardView.available_hulls(scene.unlocked_ships)[0])
+	shipyard.produce_button.pressed.emit()
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(second.ships.size() == 2, "Ordered fleets receive no new ships")
+	_check(
+		beta.ships.size() == 5,
+		"Completions fall through to the newest unordered fleet"
+	)
+	_check(second.in_transit, "The ordered fleet still departs on schedule")
+
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.physical_keycode = KEY_ESCAPE
@@ -495,6 +537,13 @@ func _run() -> void:
 	_check(not shipyard.visible, "Systems without a shipyard cannot open the view")
 
 	_finish()
+
+
+func _right_click_control(control: Control) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_RIGHT
+	click.pressed = true
+	control.gui_input.emit(click)
 
 
 func _fleet_row_panel(

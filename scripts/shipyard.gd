@@ -306,11 +306,15 @@ func _create_fleet_row(fleet: FleetData) -> PanelContainer:
 	panel.custom_minimum_size = Vector2(0, 56)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.tooltip_text = "%s — %s\nDrag a ship onto another fleet to move it" % [
-		fleet.name, fleet.ship_summary()
-	]
+	if fleet.ships.is_empty():
+		panel.tooltip_text = "%s is empty.\nRight-click to delete this fleet." % fleet.name
+	else:
+		panel.tooltip_text = "%s — %s\nDrag a ship onto another fleet to move it" % [
+			fleet.name, fleet.ship_summary()
+		]
 	panel.add_theme_stylebox_override("panel", _fleet_row_style())
 	panel.set_meta("fleet_target", fleet)
+	panel.gui_input.connect(_on_fleet_row_input.bind(fleet))
 
 	var content := VBoxContainer.new()
 	panel.add_child(content)
@@ -386,6 +390,28 @@ func _make_ship_chip(fleet: FleetData, ship_index: int) -> PanelContainer:
 
 	chip.gui_input.connect(_on_ship_chip_input.bind(fleet, ship_index))
 	return chip
+
+
+func _on_fleet_row_input(event: InputEvent, fleet: FleetData) -> void:
+	if fleet == null or _system_data == null:
+		return
+	if not (event is InputEventMouseButton):
+		return
+	var click := event as InputEventMouseButton
+	if not click.pressed or click.button_index != MOUSE_BUTTON_RIGHT:
+		return
+	# Only empty fleets can be deleted this way; occupied rows ignore the
+	# gesture so ships are never lost by accident.
+	if not fleet.ships.is_empty():
+		return
+	if not _system_data.fleets.has(fleet) or fleet.in_transit:
+		return
+	_cancel_drag()
+	_system_data.fleets.erase(fleet)
+	_feedback = "Deleted empty %s." % fleet.name
+	_populate_fleets()
+	_update_header()
+	_update_production_status()
 
 
 func _on_ship_chip_input(
@@ -935,7 +961,7 @@ func _update_production_status() -> void:
 
 	var status := _feedback
 	if status.is_empty():
-		status = "Ships join the newest fleet in the system."
+		status = "Ships join the newest fleet with no destination."
 	if not affordable:
 		var warning := "Insufficient resources — %s." % _missing_resources_text()
 		status = warning if status.is_empty() else "%s %s" % [status, warning]
