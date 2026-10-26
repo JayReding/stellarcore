@@ -19,6 +19,22 @@ func _run() -> void:
 	var home: StarData = scene._galaxy.home_star()
 	var panel: StarInfoPanel = scene.star_panel
 
+	var environment := scene.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	_check(environment != null, "Stellar View has a world environment")
+	if environment != null and environment.environment != null:
+		_check(
+			environment.environment.background_mode == Environment.BG_SKY,
+			"Stellar View renders a sky background"
+		)
+		var sky: Sky = environment.environment.sky
+		_check(sky != null, "Stellar View has a sky resource")
+		if sky != null and sky.sky_material != null:
+			_check(
+				(sky.sky_material as ShaderMaterial).shader
+				!= null,
+				"The sky uses the procedural nebula shader"
+			)
+
 	panel.show_star(home)
 	_check(panel.planet_list.visible, "Home system exposes planets")
 	_check(

@@ -275,6 +275,9 @@ godot --path .
 - Mouse picking, hover cursor, right-side system readout, and smooth camera
   focus.
 - A faint polar reference grid extending to the 50 ly map boundary.
+- A procedural Babylon-5-style background: a seamless 3D-noise nebula sky in
+  subtle blues with a dim background star field, rendered once behind the
+  Stellar View.
 
 ## Project layout
 
@@ -314,6 +317,7 @@ scripts/
   ui/tech_node.gd          Technology card population
   title_screen.gd          Title menu, theme music, and credits
 shaders/
+  nebula_sky.gdshader      Seamless blue nebula and starfield sky
   star_surface.gdshader    Emissive star surface
   planet_atmosphere.gdshader  Rim haze for Earth-like and Dead Worlds
 ```

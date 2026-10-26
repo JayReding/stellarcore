@@ -6,8 +6,17 @@
 [ext_resource type="Script" uid="uid://c68jx0c8umr53" path="res://scripts/turn_manager.gd" id="4_turn"]
 [ext_resource type="AudioStream" uid="uid://v4u014lqafa0" path="res://assets/music/Mesmerizing Galaxy Loop.mp3" id="5_music"]
 
+[ext_resource type="Shader" path="res://shaders/nebula_sky.gdshader" id="6_nebula"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nebula"]
+shader = ExtResource("6_nebula")
+
+[sub_resource type="Sky" id="Sky_nebula"]
+sky_material = SubResource("ShaderMaterial_nebula")
+
 [sub_resource type="Environment" id="Environment_space"]
-background_mode = 1
+background_mode = 2
+sky = SubResource("Sky_nebula")
 background_color = Color(0.004, 0.006, 0.013, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.25, 0.35, 0.55, 1)
