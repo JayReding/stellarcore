@@ -1,0 +1,174 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/history_view.gd" id="1_history"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_normal"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.08, 0.19, 0.32, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.54, 0.86, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.05, 0.13, 0.23, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 0.9, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
+content_margin_left = 14.0
+content_margin_top = 9.0
+content_margin_right = 14.0
+content_margin_bottom = 9.0
+bg_color = Color(0.12, 0.28, 0.46, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.68, 1, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="HistoryView" type="CanvasLayer" unique_id=3200000001]
+layer = 10
+visible = false
+script = ExtResource("1_history")
+
+[node name="Root" type="Control" parent="." unique_id=3200000002]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Root" unique_id=3200000003]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.005, 0.011, 0.022, 1)
+
+[node name="UI" type="Control" parent="Root" unique_id=3200000004]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Eyebrow" type="Label" parent="Root/UI" unique_id=3200000005]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 26.0
+offset_right = 480.0
+offset_bottom = 46.0
+theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
+theme_override_font_sizes/font_size = 12
+text = "STELLAR RECORDS"
+
+[node name="NameLabel" type="Label" parent="Root/UI" unique_id=3200000006]
+layout_mode = 1
+offset_left = 38.0
+offset_top = 44.0
+offset_right = 640.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 34
+text = "Message History"
+
+[node name="HistoryCount" type="Label" parent="Root/UI" unique_id=3200000007]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = 40.0
+offset_top = 94.0
+offset_right = 720.0
+offset_bottom = 114.0
+theme_override_colors/font_color = Color(0.6, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 MESSAGES"
+
+[node name="BackButton" type="Button" parent="Root/UI" unique_id=3200000008]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 30.0
+offset_right = -40.0
+offset_bottom = 68.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
+theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBox_back_normal")
+theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
+theme_override_styles/hover = SubResource("StyleBox_back_hover")
+text = "BACK TO STELLAR VIEW"
+
+[node name="HistoryScroll" type="ScrollContainer" parent="Root/UI" unique_id=3200000009]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 180.0
+offset_right = -40.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MessageList" type="VBoxContainer" parent="Root/UI/HistoryScroll" unique_id=3200000010]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="EmptyLabel" type="Label" parent="Root/UI" unique_id=3200000011]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -20.0
+offset_right = 200.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
+theme_override_font_sizes/font_size = 14
+text = "No messages yet."
+horizontal_alignment = 1

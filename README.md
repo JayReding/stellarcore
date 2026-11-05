@@ -52,8 +52,10 @@ godot --path .
 | Right-click an empty fleet | Delete it from the shipyard |
 | + New Fleet | Create an empty fleet to drag ships into |
 | End Turn | Start or cancel the five-second countdown to advance the turn |
+| Status line | Click to open the message history |
+| Message History row | Click to focus the system that generated the message |
 | `Esc` (Stellar View) | Deselect, cancel destination selection, or close the fleet orders popup |
-| `Esc` (System View, Technologies, or Shipyard) | Return to Stellar View |
+| `Esc` (System View, Technologies, Shipyard, or History) | Return to Stellar View |
 
 ## What is implemented
 
@@ -197,7 +199,10 @@ godot --path .
 - The bottom-center status line reports destination prompts, staged orders,
   cancellations, and arrivals. Arrival notices include the probe loss, the
   system's planet count and planet types, and the destination's panel
-  immediately exposes its surveyed planet list.
+  immediately exposes its surveyed planet list. Clicking the status line opens
+  the **Message History** page, which lists every past status message newest
+  first (capped at 200 entries); clicking a message from a star system selects
+  that system and focuses the camera on it.
 - The **Shipyard structure** in orbit of **Newhome III** is the only shipyard in
   the current slice and consumes 2 Helium 3 per turn. The panel's **Shipyard**
   button is enabled only for Newhome and opens a full-screen construction
@@ -292,6 +297,7 @@ godot --path .
 scenes/
   title_screen.tscn        Title screen (main scene)
   stellar_view.tscn        Stellar View galaxy map
+  history_view.tscn        Full-screen message history
   system_view.tscn         Full-screen system overlay
   tech_tree.tscn           Full-screen technology tree
   shipyard.tscn            Full-screen Newhome III shipyard
@@ -323,6 +329,7 @@ scripts/
   ui/fleet_dialog.gd       Course confirmation popup
   ui/tech_node.gd          Technology card population
   title_screen.gd          Title menu, theme music, and credits
+  history_view.gd          Message history log and overlay
 shaders/
   nebula_sky.gdshader      Seamless blue nebula and starfield sky
   star_surface.gdshader    Emissive star surface
@@ -357,6 +364,14 @@ and the handoff to the looping lower-volume gameplay track:
 
 ```bash
 godot --headless --path . --script res://tests/verify_title_screen.gd
+```
+
+The headless history check validates message logging with star context, the
+newest-first rows, opening from the status line, focusing a row's system,
+disabled star-free rows, Back/Escape close paths, and the log cap:
+
+```bash
+godot --headless --path . --script res://tests/verify_history.gd
 ```
 
 The headless galaxy check validates Newhome, the 100 ly bounds, class mix,

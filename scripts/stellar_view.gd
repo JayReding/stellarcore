@@ -9,6 +9,7 @@ const SHIPYARD_SCENE: PackedScene = preload("res://scenes/shipyard.tscn")
 const FLEET_DIALOG_SCENE: PackedScene = preload("res://scenes/ui/fleet_dialog.tscn")
 const FLEET_MENU_SCENE: PackedScene = preload("res://scenes/ui/fleet_menu.tscn")
 const COLONY_DIALOG_SCENE: PackedScene = preload("res://scenes/ui/colony_dialog.tscn")
+const HISTORY_VIEW_SCENE: PackedScene = preload("res://scenes/history_view.tscn")
 const STAR_COLLISION_LAYER := 2
 const FLEET_COLLISION_LAYER := 4
 const DRAG_THRESHOLD := 5.0
@@ -24,6 +25,8 @@ const COURSE_HALF_WIDTH := 0.12
 const STATUS_INFO_COLOR := Color(0.68, 0.84, 1.0, 1.0)
 const STATUS_PROMPT_COLOR := Color(0.95, 0.78, 0.45, 1.0)
 const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
+## Oldest entries drop off once the message history grows past this.
+const MAX_LOG_ENTRIES := 200
 ## Gameplay music runs below the title theme (-10 dB): half volume (-16 dB)
 ## reduced by another twenty percent, roughly -18 dB.
 const GAMEPLAY_MUSIC_VOLUME_DB := -18.0
@@ -69,6 +72,10 @@ var _shipyard: ShipyardView
 var _fleet_dialog: FleetDialog
 var _fleet_menu: FleetMenu
 var _colony_dialog: ColonyDialog
+var _history_view: HistoryView
+## Every past status message, oldest first. Entries record the system that
+## generated them when there is one, so the history page can focus it.
+var _message_log: Array[Dictionary] = []
 ## Colony-founding decisions waiting on the player, in arrival order. Each
 ## entry maps a fleet to the colony-less system it arrived in.
 var _pending_colonies: Array[Dictionary] = []
@@ -94,6 +101,8 @@ var _press_hit: StarNode
 var _press_fleet: FleetMarker
 var _research_pressing := false
 var _research_press_position := Vector2.ZERO
+var _status_pressing := false
+var _status_press_position := Vector2.ZERO
 var _hover_timer := 0.0
 
 
@@ -112,6 +121,7 @@ func _ready() -> void:
 	star_panel.shipyard_requested.connect(_on_shipyard_requested)
 	star_panel.fleet_selected.connect(_on_fleet_selected)
 	research_panel.gui_input.connect(_on_research_panel_input)
+	status_label.gui_input.connect(_on_status_label_input)
 	turn_manager.turn_advanced.connect(_on_turn_advanced)
 	turn_manager.end_turn_started.connect(_on_end_turn_started)
 	turn_manager.end_turn_countdown_changed.connect(_on_end_turn_countdown_changed)
@@ -646,14 +656,17 @@ func _choose_destination_star(star: StarNode) -> void:
 	if not fleet.in_transit and star.data.id == fleet.system_id:
 		_set_status(
 			"%s is already at %s." % [fleet.name, star.data.display_name],
-			STATUS_INFO_COLOR
+			STATUS_INFO_COLOR,
+			star.data
 		)
 		return
 
 	var distance := fleet.position_ly.distance_to(star.data.position_ly)
 	var turns := fleet.turns_to_position(star.data.position_ly)
 	if turns <= 0:
-		_set_status("That destination is not reachable.", STATUS_INFO_COLOR)
+		_set_status(
+			"That destination is not reachable.", STATUS_INFO_COLOR, star.data
+		)
 		return
 
 	_ensure_fleet_dialog()
@@ -670,7 +683,8 @@ func _on_destination_confirmed(fleet: FleetData, destination: StarData) -> void:
 	if distance <= 0.0:
 		_set_status(
 			"%s is already at %s." % [fleet.name, destination.display_name],
-			STATUS_INFO_COLOR
+			STATUS_INFO_COLOR,
+			destination
 		)
 		_cancel_destination_selection("")
 		return
@@ -683,7 +697,8 @@ func _on_destination_confirmed(fleet: FleetData, destination: StarData) -> void:
 		"%s has orders for %s — departs when the turn advances." % [
 			fleet.name, destination.display_name
 		],
-		STATUS_INFO_COLOR
+		STATUS_INFO_COLOR,
+		destination
 	)
 	if _selected_star != null:
 		_show_star_panel(_selected_star)
@@ -693,10 +708,12 @@ func _on_orders_cancelled(fleet: FleetData) -> void:
 	if fleet == null or not fleet.has_orders():
 		return
 	var destination_name := fleet.ordered_destination_name
+	var home_star := _star_by_id(fleet.system_id)
 	fleet.clear_orders()
 	_set_status(
 		"%s's orders for %s are cancelled." % [fleet.name, destination_name],
-		STATUS_INFO_COLOR
+		STATUS_INFO_COLOR,
+		home_star
 	)
 	if _selected_star != null:
 		_show_star_panel(_selected_star)
@@ -754,6 +771,7 @@ func _advance_construction() -> void:
 		return
 
 	var completions: Array[String] = []
+	var completion_star: StarData = null
 	for star in _galaxy.stars:
 		if star == null or not star.is_constructing():
 			continue
@@ -771,9 +789,10 @@ func _advance_construction() -> void:
 		completions.append("Construction complete: %s on %s (%s)." % [
 			structure_name, planet_name, star.display_name
 		])
+		completion_star = star
 
 	if not completions.is_empty():
-		_set_status(completions[-1], STATUS_SUCCESS_COLOR)
+		_set_status(completions[-1], STATUS_SUCCESS_COLOR, completion_star)
 
 
 ## Applies one turn of shipyard work to every queued hull, oldest first.
@@ -786,6 +805,7 @@ func _advance_ship_construction() -> void:
 
 	var finished: Array[Dictionary] = []
 	var affected: Array[StarData] = []
+	var finished_star: StarData = null
 	for star in _galaxy.stars:
 		if star == null or star.ship_queue.is_empty():
 			continue
@@ -808,6 +828,7 @@ func _advance_ship_construction() -> void:
 					"system_name": star.display_name,
 					"ship_name": str(definition.get("name", "Ship")),
 				})
+				finished_star = star
 				continue
 			var remaining := build_time - progress
 			if work + 0.0001 >= remaining:
@@ -818,6 +839,7 @@ func _advance_ship_construction() -> void:
 					"system_name": star.display_name,
 					"ship_name": str(definition.get("name", "Ship")),
 				})
+				finished_star = star
 			else:
 				item["progress"] = progress + work
 				work = 0.0
@@ -830,7 +852,9 @@ func _advance_ship_construction() -> void:
 	_rebuild_fleet_markers()
 	if _selected_star != null and affected.has(_selected_star.data):
 		_show_star_panel(_selected_star)
-	_set_status(_ship_completion_text(finished), STATUS_SUCCESS_COLOR)
+	_set_status(
+		_ship_completion_text(finished), STATUS_SUCCESS_COLOR, finished_star
+	)
 
 
 func _complete_ship_build(star: StarData, definition: Dictionary) -> void:
@@ -913,9 +937,68 @@ func _turn_text(turn: int) -> String:
 	return "Turn %d" % turn
 
 
-func _set_status(message: String, color: Color = STATUS_INFO_COLOR) -> void:
+func _set_status(
+	message: String,
+	color: Color = STATUS_INFO_COLOR,
+	star: StarData = null
+) -> void:
 	status_label.text = message
 	status_label.add_theme_color_override("font_color", color)
+	_message_log.append({
+		"text": message,
+		"color": color,
+		"star_id": star.id if star != null else "",
+		"system_name": star.display_name if star != null else "",
+	})
+	while _message_log.size() > MAX_LOG_ENTRIES:
+		_message_log.pop_front()
+
+
+func _on_history_requested() -> void:
+	if _history_view == null:
+		_history_view = HISTORY_VIEW_SCENE.instantiate() as HistoryView
+		add_child(_history_view)
+		_history_view.message_chosen.connect(_on_history_message_chosen)
+	_history_view.open(_message_log)
+
+
+func _on_history_message_chosen(star_id: String) -> void:
+	var star := _star_by_id(star_id)
+	if star == null:
+		return
+	var node := _star_node_for(star)
+	if node == null:
+		return
+	if _history_view != null:
+		_history_view.close()
+	_select_star(node)
+	camera_rig.focus_on(node.global_position, _focus_distance_for(node))
+
+
+func _star_node_for(data: StarData) -> StarNode:
+	for node in _star_nodes:
+		if node != null and node.data == data:
+			return node
+	return null
+
+
+## Opens the message history when the status line is clicked without
+## dragging, so map orbits starting on it do not pop the page open.
+func _on_status_label_input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if click.pressed:
+		_status_pressing = true
+		_status_press_position = click.position
+		return
+	if not _status_pressing:
+		return
+	_status_pressing = false
+	if click.position.distance_to(_status_press_position) >= DRAG_THRESHOLD:
+		return
+	_on_history_requested()
+	get_viewport().set_input_as_handled()
 
 
 func _advance_fleets() -> void:
@@ -925,6 +1008,7 @@ func _advance_fleets() -> void:
 	var arrivals: Array[String] = []
 	var any_moved := false
 	var panel_changed := false
+	var arrival_star: StarData = null
 
 	for star in _galaxy.stars:
 		for fleet_data in star.fleets.duplicate():
@@ -963,6 +1047,7 @@ func _advance_fleets() -> void:
 						colony_queued
 					)
 				)
+				arrival_star = destination
 				if _fleet_dialog != null:
 					_fleet_dialog.close_if_showing_fleet(fleet)
 				if _fleet_menu != null:
@@ -978,7 +1063,7 @@ func _advance_fleets() -> void:
 			_shipyard.refresh()
 
 	if not arrivals.is_empty():
-		_set_status(arrivals[-1], STATUS_SUCCESS_COLOR)
+		_set_status(arrivals[-1], STATUS_SUCCESS_COLOR, arrival_star)
 
 	_advance_colony_queue()
 
@@ -1095,7 +1180,8 @@ func _on_colony_chosen(
 	):
 		_set_status(
 			"The colony can no longer be founded there.",
-			STATUS_INFO_COLOR
+			STATUS_INFO_COLOR,
+			star
 		)
 		_advance_colony_queue()
 		return
@@ -1113,7 +1199,7 @@ func _on_colony_chosen(
 	]
 	if disbanded:
 		message += " The fleet was disbanded."
-	_set_status(message, STATUS_SUCCESS_COLOR)
+	_set_status(message, STATUS_SUCCESS_COLOR, star)
 	refresh_resources()
 	_rebuild_fleet_markers()
 	_refresh_star_survey_label(star)
@@ -1326,6 +1412,7 @@ func _is_overlay_open() -> bool:
 		or (_fleet_dialog != null and _fleet_dialog.visible)
 		or (_fleet_menu != null and _fleet_menu.visible)
 		or (_colony_dialog != null and _colony_dialog.visible)
+		or (_history_view != null and _history_view.visible)
 	)
 
 
