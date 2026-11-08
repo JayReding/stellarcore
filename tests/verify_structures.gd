@@ -582,11 +582,11 @@ func _run() -> void:
 	_check(shipyard_button != null, "Construction lists the Shipyard")
 	_check(ore_button != null, "Construction lists the Ore Processing Station")
 	_check(
-		_construction_cost_text(ore_button) == "200 Titanium (150 short) • 3 turns",
+		_construction_cost_text(ore_button) == "Cost: 200 Titanium (150 short) • 3 turns",
 		"Construction rows restate the cost, build time, and shortfall"
 	)
 	_check(
-		_construction_cost_text(shipyard_button) == "Free • Instant",
+		_construction_cost_text(shipyard_button) == "Cost: Free • Instant",
 		"The Shipyard stays free and instant"
 	)
 	_check(
@@ -626,7 +626,7 @@ func _run() -> void:
 		"Construct_%s" % StructureData.ORE_PROCESSING
 	) as Button
 	_check(
-		_construction_cost_text(ore_button) == "200 Titanium • 3 turns",
+		_construction_cost_text(ore_button) == "Cost: 200 Titanium • 3 turns",
 		"Funded rows show the clean cost and build time"
 	)
 	_check(
@@ -679,21 +679,71 @@ func _run() -> void:
 		"The Stellar View shows the structure and its remaining turns"
 	)
 
-	# Only one project runs per system at a time.
+	# Several projects may run in the same system at once. With only 20
+	# Titanium left, the Helium3 Station is disabled for lack of funds.
 	var helium_button := system_view.construct_list.get_node_or_null(
 		"Construct_%s" % StructureData.HELIUM_3_STATION
 	) as Button
 	_check(
 		helium_button != null and helium_button.disabled,
-		"No second project starts while one is in progress"
+		"A second project stays disabled without enough Titanium"
+	)
+	_check(
+		_has_construction_action(helium_button, "NEEDS 180 TITANIUM"),
+		"The second option names its shortfall instead of blocking on progress"
+	)
+
+	# Funding the system unlocks the second project alongside the first.
+	home.resources.titanium = 220
+	scene.refresh_resources()
+	await process_frame
+	helium_button = system_view.construct_list.get_node_or_null(
+		"Construct_%s" % StructureData.HELIUM_3_STATION
+	) as Button
+	_check(
+		helium_button != null and not helium_button.disabled,
+		"A funded second project can be queued while one runs"
 	)
 	helium_button.pressed.emit()
 	await process_frame
 	_check(
-		home.construction_type_id == StructureData.ORE_PROCESSING
-		and home.resources.titanium == 20,
-		"Pressing another option does not replace the active project"
+		home.resources.titanium == 20,
+		"The second project spends its 200 Titanium up front"
 	)
+	_check(
+		home.construction_count() == 2
+		and home.construction_type_id == StructureData.ORE_PROCESSING
+		and home.construction_turns_remaining == 3,
+		"Both projects queue; the first stays the legacy head"
+	)
+	_check(
+		system_view.construct_status.text.contains(
+			"Construction started: Helium3 Station on Newhome I"
+		),
+		"Queueing reports the second project"
+	)
+	_check(
+		system_view.construction_queue_list.get_child_count() == 2,
+		"Planet Detail lists both queued projects"
+	)
+	_check(
+		_has_construction_hud_row(
+			scene, "Newhome — Helium3 Station", "3 TURNS LEFT"
+		),
+		"The Stellar View tracks the second project too"
+	)
+	# Cancelling the second project fully refunds it and leaves the first.
+	system_view._on_cancel_construction_pressed(1)
+	await process_frame
+	_check(
+		home.construction_count() == 1
+		and home.construction_type_id == StructureData.ORE_PROCESSING
+		and home.resources.titanium == 220,
+		"Cancelling the second project refunds its full cost"
+	)
+	home.resources.titanium = 20
+	scene.refresh_resources()
+	await process_frame
 
 	# Turns advance the project on both the HUD and the popup.
 	scene.turn_manager.advance_turn()
@@ -814,6 +864,123 @@ func _run() -> void:
 		"The popup stays open after building"
 	)
 
+	# Cancelling mid-build returns a pro-rated refund and clears the queue.
+	# Newhome I holds the ore station and refinery here; the Helium3 Station
+	# is still buildable on it and home holds 230 Titanium.
+	var queue_button := system_view.construct_list.get_node_or_null(
+		"Construct_%s" % StructureData.HELIUM_3_STATION
+	) as Button
+	_check(
+		queue_button != null and not queue_button.disabled,
+		"The Helium3 Station is buildable on Newhome I"
+	)
+	if queue_button == null:
+		_finish()
+		return
+	queue_button.pressed.emit()
+	await process_frame
+	_check(
+		home.resources.titanium == 30,
+		"The queue test build spends 200 Titanium"
+	)
+	_check(
+		home.is_constructing()
+		and home.construction_planet == home.planets[0],
+		"The new project targets Newhome I"
+	)
+	_check(
+		system_view.construction_queue_list.get_child_count() == 1,
+		"Planet Detail shows the construction queue"
+	)
+	_check(
+		_has_queue_status(system_view, "Newhome I")
+		and _has_queue_status(system_view, "Turn 1 of 3"),
+		"The queue shows the project planet and progress"
+	)
+	var queue_bar := _queue_progress_bar(system_view)
+	_check(
+		queue_bar != null
+		and queue_bar.max_value == 3.0
+		and queue_bar.value == 0.0,
+		"The queue progress starts empty on turn one"
+	)
+	scene.turn_manager.advance_turn()
+	await process_frame
+	_check(
+		home.construction_turns_remaining == 2,
+		"One turn leaves two turns of construction"
+	)
+	_check(
+		_has_queue_status(system_view, "Turn 2 of 3"),
+		"The queue counts up as turns advance"
+	)
+	_check(home.resources.titanium == 90, "Turn 10 nets +60 Titanium")
+	system_view._on_cancel_construction_pressed(0)
+	await process_frame
+	_check(
+		not home.is_constructing(),
+		"Cancel clears the construction project"
+	)
+	_check(
+		home.resources.titanium == 223,
+		"Cancel refunds floor(200 * 2 / 3) = 133 Titanium"
+	)
+	_check(
+		not home.planets[0].has_structure(StructureData.HELIUM_3_STATION),
+		"Cancelling adds no structure to the planet"
+	)
+	_check(
+		not scene.construction_panel.visible,
+		"The Stellar View clears cancelled construction"
+	)
+	_check(
+		system_view.build_feedback.text.contains("Cancelled")
+		and system_view.build_feedback.text.contains("133 Titanium"),
+		"Cancel reports the refund in Planet Detail"
+	)
+	_check(
+		_container_has_label_text(
+			system_view.construction_queue_list,
+			"No structure under construction."
+		),
+		"The queue shows its empty state after cancel"
+	)
+
+	# Cancelling with no project is a no-op, and cancelling immediately
+	# refunds the full cost.
+	_check(
+		home.cancel_construction().is_empty(),
+		"Cancelling with no project returns no refund"
+	)
+	system_view._on_cancel_construction_pressed(0)
+	await process_frame
+	_check(
+		not home.is_constructing() and home.resources.titanium == 223,
+		"Cancel with no project changes nothing"
+	)
+	queue_button = system_view.construct_list.get_node_or_null(
+		"Construct_%s" % StructureData.HELIUM_3_STATION
+	) as Button
+	_check(
+		queue_button != null and not queue_button.disabled,
+		"The Helium3 Station is buildable again after cancel"
+	)
+	if queue_button == null:
+		_finish()
+		return
+	queue_button.pressed.emit()
+	await process_frame
+	_check(
+		home.resources.titanium == 23,
+		"Rebuilding spends 200 Titanium again"
+	)
+	system_view._on_cancel_construction_pressed(0)
+	await process_frame
+	_check(
+		not home.is_constructing() and home.resources.titanium == 223,
+		"Immediate cancel refunds the full 200 Titanium"
+	)
+
 	# The popup closes on demand while the planet sidebar stays in place.
 	system_view.construct_close_button.pressed.emit()
 	await process_frame
@@ -841,6 +1008,54 @@ func _run() -> void:
 		and system_view.visible
 		and system_view.selected_planet() == null,
 		"Esc closes the planet sidebar before the System View"
+	)
+
+	# Parallel projects finish together. An isolated star queues an ore
+	# station and a Helium3 station at once; both advance each turn and
+	# both complete after three turns.
+	var parallel_star := StarData.new()
+	parallel_star.id = "test-parallel"
+	parallel_star.display_name = "Parallel"
+	parallel_star.surveyed = true
+	var parallel_a := PlanetData.new()
+	parallel_a.designation = "Parallel I"
+	parallel_a.planet_class = PlanetData.PlanetClass.ROCKY
+	var parallel_b := PlanetData.new()
+	parallel_b.designation = "Parallel II"
+	parallel_b.planet_class = PlanetData.PlanetClass.GAS_GIANT
+	parallel_a.add_structure(StructureData.COLONY)
+	var parallel_planets: Array[PlanetData] = [parallel_a, parallel_b]
+	parallel_star.planets = parallel_planets
+	parallel_star.resources = ResourceStockpile.new()
+	parallel_star.resources.titanium = 500
+	parallel_star.resources.spend({ResourceStockpile.TITANIUM: 200})
+	parallel_star.start_construction(StructureData.ORE_PROCESSING, parallel_a, 3)
+	parallel_star.resources.spend({ResourceStockpile.TITANIUM: 200})
+	parallel_star.start_construction(StructureData.HELIUM_3_STATION, parallel_b, 3)
+	_check(
+		parallel_star.construction_count() == 2,
+		"Two structures queue at once with enough resources"
+	)
+	_check(
+		parallel_star.has_queued(StructureData.ORE_PROCESSING, parallel_a)
+		and parallel_star.has_queued(StructureData.HELIUM_3_STATION, parallel_b),
+		"Each queued project tracks its own planet"
+	)
+	var first_done := parallel_star.advance_construction()
+	_check(
+		first_done.is_empty() and parallel_star.construction_count() == 2,
+		"Both projects still run after one turn"
+	)
+	parallel_star.advance_construction()
+	var finished := parallel_star.advance_construction()
+	_check(
+		finished.size() == 2 and not parallel_star.is_constructing(),
+		"Both projects finish on their final turn"
+	)
+	_check(
+		parallel_a.has_structure(StructureData.ORE_PROCESSING)
+		and parallel_b.has_structure(StructureData.HELIUM_3_STATION),
+		"Each finished structure lands on its own planet"
 	)
 
 	# The Shipyard is the exception: free and instant. A fresh colony system
@@ -1094,6 +1309,23 @@ func _has_construction_action(button: Button, text: String) -> bool:
 	return false
 
 
+func _has_queue_status(view: Node, text: String) -> bool:
+	for row in view.construction_queue_list.get_children():
+		for label in row.find_children("*", "Label", true, false):
+			if (label as Label).text.contains(text):
+				return true
+	return false
+
+
+func _queue_progress_bar(view: Node) -> ProgressBar:
+	var bars: Array[Node] = view.construction_queue_list.find_children(
+		"*", "ProgressBar", true, false
+	)
+	if bars.is_empty():
+		return null
+	return bars[0] as ProgressBar
+
+
 func _has_construction_hud_row(
 	view: Node, name_text: String, turns_text: String
 ) -> bool:
@@ -1102,9 +1334,8 @@ func _has_construction_hud_row(
 		if row == null:
 			continue
 		var labels: Array[Label] = []
-		for sub in row.get_children():
-			if sub is Label:
-				labels.append(sub as Label)
+		for sub in row.find_children("*", "Label", true, false):
+			labels.append(sub as Label)
 		if (
 			labels.size() == 2
 			and labels[0].text == name_text

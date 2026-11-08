@@ -105,16 +105,16 @@ func _make_planet_row(planet: PlanetData) -> Button:
 	button.tooltip_text = "%s — %s" % [
 		planet.designation, planet.class_name_label()
 	]
-	button.add_theme_font_size_override("font_size", 14)
-	button.add_theme_color_override("font_color", Color(0.84, 0.93, 1))
-	button.add_theme_color_override("font_hover_color", Color(0.97, 1, 1))
+	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+	button.add_theme_color_override("font_hover_color", Color(0, 0, 0, 1))
 	button.add_theme_color_override(
-		"font_disabled_color", Color(0.42, 0.52, 0.64)
+		"font_disabled_color", Color(0.55, 0.57, 0.6)
 	)
 	button.add_theme_stylebox_override("normal", _row_style(false))
 	button.add_theme_stylebox_override("hover", _row_style(true))
 	button.add_theme_stylebox_override("pressed", _row_style(false, true))
-	button.add_theme_stylebox_override("disabled", _row_style(false))
+	button.add_theme_stylebox_override("disabled", LCARS.disabled_style())
 	if taken:
 		button.text += "  •  OCCUPIED"
 	else:
@@ -123,27 +123,11 @@ func _make_planet_row(planet: PlanetData) -> Button:
 
 
 func _row_style(hover := false, pressed := false) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.content_margin_left = 16.0
-	style.content_margin_top = 10.0
-	style.content_margin_right = 16.0
-	style.content_margin_bottom = 10.0
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_right = 6
-	style.corner_radius_bottom_left = 6
-	style.bg_color = Color(0.04, 0.1, 0.17, 0.95)
-	style.border_color = Color(0.18, 0.34, 0.52, 0.7)
-	if hover:
-		style.bg_color = Color(0.08, 0.2, 0.34, 0.98)
-		style.border_color = Color(0.38, 0.68, 1, 0.9)
 	if pressed:
-		style.bg_color = Color(0.03, 0.08, 0.14, 1)
-	return style
+		return LCARS.button_pressed_style(LCARS.GREEN)
+	if hover:
+		return LCARS.button_hover_style(LCARS.GREEN)
+	return LCARS.button_style(LCARS.GREEN)
 
 
 func _on_planet_pressed(planet: PlanetData) -> void:

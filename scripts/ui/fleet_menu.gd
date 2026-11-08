@@ -25,6 +25,14 @@ var _fleet: FleetData
 func _ready() -> void:
 	set_destination_button.pressed.connect(_on_set_destination_pressed)
 	cancel_orders_button.pressed.connect(_on_cancel_orders_pressed)
+	LCARS.style_button(set_destination_button, "blue")
+	LCARS.style_button(cancel_orders_button, "blue")
+	LCARS.style_button(rename_button, "ghost_blue")
+	LCARS.style_button(modify_button, "ghost_blue")
+	LCARS.style_button(delete_button, "red")
+	delete_button.add_theme_color_override(
+		"font_disabled_color", Color(1.0, 0.36, 0.32, 0.82)
+	)
 	root.gui_input.connect(_on_root_input)
 	visible = false
 

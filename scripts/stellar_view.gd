@@ -23,7 +23,7 @@ const COURSE_DASH_LENGTH := 0.9
 const COURSE_GAP_LENGTH := 0.58
 const COURSE_HALF_WIDTH := 0.12
 const STATUS_INFO_COLOR := Color(0.68, 0.84, 1.0, 1.0)
-const STATUS_PROMPT_COLOR := Color(0.95, 0.78, 0.45, 1.0)
+const STATUS_PROMPT_COLOR := Color(1.0, 0.8, 0.4, 1.0)
 const STATUS_SUCCESS_COLOR := Color(0.55, 0.92, 0.78, 1.0)
 ## Oldest entries drop off once the message history grows past this.
 const MAX_LOG_ENTRIES := 200
@@ -51,7 +51,14 @@ const GAMEPLAY_MUSIC_VOLUME_DB := -18.0
 @onready var turn_manager: TurnManager = $TurnManager
 @onready var turn_label: Label = $UI/HUD/TurnLabel
 @onready var end_turn_button: Button = $UI/HUD/EndTurnButton
-@onready var turn_countdown_label: Label = $UI/HUD/TurnCountdownLabel
+@onready var menu_button: Button = %MenuButton
+@onready var menu_dim: ColorRect = %MenuDim
+@onready var menu_popup: PanelContainer = %MenuPopup
+@onready var exit_to_menu_button: Button = %ExitToMenuButton
+@onready var quit_button: Button = %QuitButton
+@onready var menu_confirm: PanelContainer = %MenuConfirm
+@onready var confirm_cancel_button: Button = %ConfirmCancelButton
+@onready var confirm_exit_button: Button = %ConfirmExitButton
 @onready var status_label: Label = $UI/HUD/StatusLabel
 @onready var music_player: AudioStreamPlayer = %GameplayMusic
 
@@ -99,6 +106,9 @@ var _ignore_release := false
 var _press_position := Vector2.ZERO
 var _press_hit: StarNode
 var _press_fleet: FleetMarker
+var _right_down := false
+var _right_dragging := false
+var _right_press_position := Vector2.ZERO
 var _research_pressing := false
 var _research_press_position := Vector2.ZERO
 var _status_pressing := false
@@ -127,6 +137,20 @@ func _ready() -> void:
 	turn_manager.end_turn_countdown_changed.connect(_on_end_turn_countdown_changed)
 	turn_manager.end_turn_cancelled.connect(_on_end_turn_cancelled)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	menu_button.pressed.connect(_on_menu_pressed)
+	exit_to_menu_button.pressed.connect(_on_exit_to_menu_pressed)
+	quit_button.pressed.connect(_on_quit_pressed)
+	confirm_cancel_button.pressed.connect(_on_confirm_cancel_pressed)
+	confirm_exit_button.pressed.connect(_on_confirm_exit_pressed)
+	menu_dim.gui_input.connect(_on_menu_dim_input)
+	LCARS.style_button(menu_button, "blue")
+	LCARS.style_button(exit_to_menu_button, "blue")
+	LCARS.style_button(quit_button, "red")
+	LCARS.style_button(confirm_cancel_button, "ghost_blue")
+	LCARS.style_button(confirm_exit_button, "blue")
+	menu_dim.visible = false
+	menu_popup.visible = false
+	menu_confirm.visible = false
 	turn_label.text = _turn_text(turn_manager.current_turn)
 	_reset_end_turn_ui()
 	status_label.text = ""
@@ -203,7 +227,7 @@ func _update_research_data_hud() -> void:
 	if active.is_empty():
 		research_project_label.text = "NO ACTIVE RESEARCH"
 		research_project_label.add_theme_color_override(
-			"font_color", Color(0.45, 0.58, 0.72)
+			"font_color", Color(0.5, 0.64, 0.82)
 		)
 		research_turns_label.text = ""
 		research_progress.visible = false
@@ -215,7 +239,7 @@ func _update_research_data_hud() -> void:
 		active.get("name", "Research")
 	).to_upper()
 	research_project_label.add_theme_color_override(
-		"font_color", Color(0.95, 0.78, 0.45)
+		"font_color", Color(1.0, 0.8, 0.4)
 	)
 	research_turns_label.text = "%d %s LEFT" % [
 		turns_remaining, "TURN" if turns_remaining == 1 else "TURNS"
@@ -226,7 +250,7 @@ func _update_research_data_hud() -> void:
 
 
 ## Lists every in-progress structure build across the galaxy with its remaining
-## turns. Construction is limited to one project per star system at a time.
+## turns. Several projects may run in the same system at once.
 func _update_construction_hud() -> void:
 	for child in construction_list.get_children():
 		construction_list.remove_child(child)
@@ -235,22 +259,37 @@ func _update_construction_hud() -> void:
 	var projects: Array[Dictionary] = []
 	if _galaxy != null:
 		for star in _galaxy.stars:
-			if star != null and star.is_constructing():
+			if star == null:
+				continue
+			for queued in star.construction_projects():
 				projects.append({
 					"system_name": star.display_name,
-					"structure_name": star.construction_display_name(),
-					"turns_remaining": star.construction_turns_remaining,
+					"structure_name": star.construction_display_name(queued),
+					"turns_remaining": int(queued.get("turns_remaining", 0)),
 				})
 
 	construction_panel.visible = not projects.is_empty()
 	for project in projects:
 		construction_list.add_child(_make_construction_hud_row(project))
+	# A lone entry needs no delineation.
+	if construction_list.get_child_count() == 1:
+		var divider := construction_list.get_child(0).find_child(
+			"Divider", true, false
+		)
+		if divider != null:
+			(divider as CanvasItem).visible = false
 
 
 func _make_construction_hud_row(project: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 6)
+
+	var stack := VBoxContainer.new()
+	stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stack.add_theme_constant_override("separation", 1)
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(stack)
 
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [
@@ -259,27 +298,35 @@ func _make_construction_hud_row(project: Dictionary) -> HBoxContainer:
 	]
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override(
-		"font_color", Color(0.82, 0.89, 0.97)
+		"font_color", Color(0.82, 0.9, 1.0)
 	)
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(name_label)
+	stack.add_child(name_label)
 
 	var turns_remaining := int(project.get("turns_remaining", 0))
 	var turns_label := Label.new()
 	turns_label.text = "%d %s LEFT" % [
 		turns_remaining, "TURN" if turns_remaining == 1 else "TURNS"
 	]
+	turns_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	turns_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	turns_label.add_theme_font_size_override("font_size", 10)
+	turns_label.add_theme_font_size_override("font_size", 14)
 	turns_label.add_theme_color_override(
-		"font_color", Color(0.95, 0.78, 0.45)
+		"font_color", Color(1.0, 0.8, 0.4)
 	)
 	turns_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	turns_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(turns_label)
+	stack.add_child(turns_label)
+
+	var divider := ColorRect.new()
+	divider.name = "Divider"
+	divider.custom_minimum_size = Vector2(0, 2)
+	divider.color = Color(0, 0.627, 0.188, 1)
+	divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(divider)
 
 	return row
 
@@ -295,12 +342,29 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Esc backs out of the menu flow before anything else.
+	if (
+		(menu_popup != null and (menu_popup.visible or _confirm_visible()))
+		and event is InputEventKey
+		and event.pressed
+		and not event.echo
+		and event.is_action_pressed("ui_cancel")
+	):
+		if _confirm_visible():
+			_on_confirm_cancel_pressed()
+		else:
+			_close_menu()
+		get_viewport().set_input_as_handled()
+		return
 	if _is_overlay_open():
 		return
 
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_on_right_pressed(event)
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			if event.pressed:
+				_on_right_pressed(event)
+			else:
+				_on_right_released(event)
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_on_left_pressed(event)
@@ -314,7 +378,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_on_mouse_motion(event)
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.is_action_pressed("ui_cancel"):
-			if _destination_fleet != null:
+			if menu_popup != null and menu_popup.visible:
+				_close_menu()
+			elif _destination_fleet != null:
 				_cancel_destination_selection("Destination selection canceled.")
 			else:
 				_clear_selection()
@@ -356,6 +422,17 @@ func _on_left_pressed(event: InputEventMouseButton) -> void:
 
 
 func _on_mouse_motion(event: InputEventMouseMotion) -> void:
+	# The right mouse button drives the camera. The left button only clicks,
+	# so left motion just voids the pending click past the drag threshold.
+	if _right_down:
+		if not _right_dragging:
+			if (event.position - _right_press_position).length() < DRAG_THRESHOLD:
+				return
+			_right_dragging = true
+			Input.set_default_cursor_shape(Input.CURSOR_DRAG)
+		camera_rig.orbit_by_screen_delta(event.relative)
+		return
+
 	if not _press_active:
 		return
 
@@ -366,15 +443,26 @@ func _on_mouse_motion(event: InputEventMouseMotion) -> void:
 		_press_hit = null
 		_press_fleet = null
 		_ignore_release = false
-		Input.set_default_cursor_shape(Input.CURSOR_DRAG)
 
-	camera_rig.orbit_by_screen_delta(event.relative)
+
+## Right-press only arms a camera drag. The click itself fires on release so
+## a drag can orbit without summoning popups or cancelling orders.
+func _on_right_pressed(event: InputEventMouseButton) -> void:
+	_right_down = true
+	_right_dragging = false
+	_right_press_position = event.position
 
 
 ## Right-click summons the fleet orders popup for the fleet under the cursor.
 ## A right-click anywhere else cancels destination selection; clicking away
 ## from an open popup dismisses the popup itself.
-func _on_right_pressed(event: InputEventMouseButton) -> void:
+func _on_right_released(event: InputEventMouseButton) -> void:
+	var was_drag := _right_dragging
+	_right_down = false
+	_right_dragging = false
+	if was_drag:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		return
 	if _destination_fleet != null:
 		_cancel_destination_selection("Destination selection canceled.")
 		get_viewport().set_input_as_handled()
@@ -737,14 +825,12 @@ func _on_end_turn_pressed() -> void:
 
 
 func _on_end_turn_started(seconds_left: float) -> void:
-	end_turn_button.text = "Cancel End Turn"
 	end_turn_button.tooltip_text = "Cancel ending the turn"
-	turn_countdown_label.visible = true
 	_set_countdown_text(seconds_left)
 
 
 func _on_end_turn_countdown_changed(seconds_left: float) -> void:
-	if not turn_countdown_label.visible:
+	if not turn_manager.is_ending_turn():
 		return
 	_set_countdown_text(seconds_left)
 
@@ -764,7 +850,7 @@ func _on_turn_advanced(turn: int) -> void:
 	_apply_structure_economy()
 
 
-## Advances every system's construction project. Completed structures are added
+## Advances every system's construction projects. Completed structures are added
 ## to their planets before the economy runs, so they produce on arrival.
 func _advance_construction() -> void:
 	if _galaxy == null:
@@ -775,21 +861,19 @@ func _advance_construction() -> void:
 	for star in _galaxy.stars:
 		if star == null or not star.is_constructing():
 			continue
-		var completed := star.advance_construction()
-		if completed.is_empty():
-			continue
-		var type_id := str(completed.get("type_id", ""))
-		var structure_name := str(
-			StructureData.definition_for(type_id).get("name", "Structure")
-		)
-		var planet: PlanetData = completed.get("planet")
-		var planet_name := (
-			planet.designation if planet != null else "unknown planet"
-		)
-		completions.append("Construction complete: %s on %s (%s)." % [
-			structure_name, planet_name, star.display_name
-		])
-		completion_star = star
+		for completed in star.advance_construction():
+			var type_id := str(completed.get("type_id", ""))
+			var structure_name := str(
+				StructureData.definition_for(type_id).get("name", "Structure")
+			)
+			var planet: PlanetData = completed.get("planet")
+			var planet_name := (
+				planet.designation if planet != null else "unknown planet"
+			)
+			completions.append("Construction complete: %s on %s (%s)." % [
+				structure_name, planet_name, star.display_name
+			])
+			completion_star = star
 
 	if not completions.is_empty():
 		_set_status(completions[-1], STATUS_SUCCESS_COLOR, completion_star)
@@ -924,13 +1008,14 @@ func _apply_structure_economy() -> void:
 
 func _set_countdown_text(seconds_left: float) -> void:
 	var seconds := maxi(1, ceili(seconds_left))
-	turn_countdown_label.text = "Ending turn in %d..." % seconds
+	LCARS.style_button(end_turn_button, "red")
+	end_turn_button.text = "ENDING TURN IN %d..." % seconds
 
 
 func _reset_end_turn_ui() -> void:
-	end_turn_button.text = "End Turn"
+	LCARS.style_button(end_turn_button, "yellow")
+	end_turn_button.text = "END TURN"
 	end_turn_button.tooltip_text = "End the turn after the countdown"
-	turn_countdown_label.visible = false
 
 
 func _turn_text(turn: int) -> String:
@@ -1036,7 +1121,12 @@ func _advance_fleets() -> void:
 			var arrived: bool = fleet.advance_travel_turn()
 			any_moved = true
 			if arrived:
-				var probe_destroyed := fleet.ships.has("FTL Probe")
+				# Only the first probe to reach a new system burns out
+				# transmitting its survey data. Probes arriving at an
+				# already-surveyed star survive to fly on.
+				var probe_destroyed := (
+					fleet.ships.has("FTL Probe") and not destination.surveyed
+				)
 				var colony_queued := _complete_fleet_arrival(
 					star, fleet, destination
 				)
@@ -1074,7 +1164,15 @@ func _complete_fleet_arrival(
 	if origin != null:
 		origin.fleets.erase(fleet)
 
-	fleet.remove_one_ship("FTL Probe")
+	# The first probe to reach a new system burns out transmitting its
+	# survey data. Any other probes aboard survive, and arrivals at
+	# already-surveyed systems burn nothing.
+	var surveyed_now := destination.surveyed == false
+	if surveyed_now:
+		fleet.remove_one_ship("FTL Probe")
+		destination.surveyed = true
+		add_research_data(25)
+		_refresh_star_survey_label(destination)
 	var colony_queued := _queue_colony_decision(fleet, destination)
 	if fleet.ships.is_empty():
 		fleet.clear_route()
@@ -1084,10 +1182,6 @@ func _complete_fleet_arrival(
 			destination.fleets.append(fleet)
 		fleet.dock_at(destination)
 
-	if destination.surveyed == false:
-		destination.surveyed = true
-		add_research_data(25)
-		_refresh_star_survey_label(destination)
 	return colony_queued
 
 
@@ -1393,7 +1487,7 @@ func _add_fleet_label(
 	label.position = GalaxyScale.to_world(position_ly) + FLEET_LABEL_OFFSET
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.font_size = 22
+	label.font_size = 26
 	label.pixel_size = 0.04
 	label.outline_size = 8
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.92)
@@ -1413,7 +1507,76 @@ func _is_overlay_open() -> bool:
 		or (_fleet_menu != null and _fleet_menu.visible)
 		or (_colony_dialog != null and _colony_dialog.visible)
 		or (_history_view != null and _history_view.visible)
+		or (menu_popup != null and menu_popup.visible)
+		or (menu_confirm != null and menu_confirm.visible)
 	)
+
+
+## Toggles the centered main menu modal. The dim covers the view while the
+## menu or its exit confirmation is up.
+func _on_menu_pressed() -> void:
+	if menu_popup == null:
+		return
+	if menu_popup.visible or _confirm_visible():
+		_close_menu()
+	else:
+		menu_dim.visible = true
+		menu_popup.visible = true
+		menu_confirm.visible = false
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+func _confirm_visible() -> bool:
+	return menu_confirm != null and menu_confirm.visible
+
+
+func _on_menu_dim_input(event: InputEvent) -> void:
+	if (
+		menu_dim.visible
+		and event is InputEventMouseButton
+		and event.button_index == MOUSE_BUTTON_LEFT
+		and event.pressed
+	):
+		_close_menu()
+
+
+func _close_menu() -> void:
+	if menu_dim != null:
+		menu_dim.visible = false
+	if menu_popup != null:
+		menu_popup.visible = false
+	if menu_confirm != null:
+		menu_confirm.visible = false
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+## Exiting needs confirmation, so swap the menu for the confirm dialog.
+func _on_exit_to_menu_pressed() -> void:
+	if menu_popup != null:
+		menu_popup.visible = false
+	if menu_confirm != null:
+		menu_confirm.visible = true
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+## Back out of the exit confirmation to the menu.
+func _on_confirm_cancel_pressed() -> void:
+	if menu_confirm != null:
+		menu_confirm.visible = false
+	if menu_popup != null:
+		menu_popup.visible = true
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+## Confirmed: return to the title screen.
+func _on_confirm_exit_pressed() -> void:
+	_close_menu()
+	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
+
+
+## Quits the game.
+func _on_quit_pressed() -> void:
+	get_tree().quit()
 
 
 func _clear_selection() -> void:

@@ -82,7 +82,7 @@ func _run() -> void:
 		shipyard.no_options_note.text.contains("no modules or variants"),
 		"No-options explanation is present"
 	)
-	_check(shipyard.produce_button.text == "Add To Construction Queue", "Produce button has the right label")
+	_check(shipyard.produce_button.text == "ADD TO CONSTRUCTION QUEUE", "Produce button has the right label")
 	_check(
 		not shipyard.produce_button.disabled,
 		"Produce button is enabled while resources are sufficient"

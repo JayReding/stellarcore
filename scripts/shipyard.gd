@@ -18,11 +18,10 @@ const HULLS := [
 		"icon": "FTL",
 		"description": (
 			"A small, unmanned faster-than-light probe built for deep-space "
-			+ "reconnaissance and survey support. FTL Probes are single-use "
-			+ "vehicles. The power needed to transmit system data casuses them "
-			+ "to burn out after arrival and data transmission. However, they "
-			+ "can be built quickly from limited resources. Exploring new "
-			+ "worlds grants bonus Research Data."
+			+ "reconnaissance and survey support. The first probe to reach a "
+			+ "new system burns out transmitting its survey data, but probes "
+			+ "arriving at surveyed systems survive to fly on to new worlds. "
+			+ "Exploring new worlds grants bonus Research Data."
 		),
 		"customization": "None",
 		"cost": {
@@ -228,7 +227,10 @@ func _populate_hulls() -> void:
 		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = str(hull.get("description", ""))
-		button.add_theme_font_size_override("font_size", 16)
+		button.add_theme_font_size_override("font_size", 19)
+		button.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+		button.add_theme_color_override("font_hover_color", Color(0, 0, 0, 1))
+		button.add_theme_color_override("font_pressed_color", Color(0, 0, 0, 1))
 
 		var selected := (
 			str(hull.get("id", "")) == str(_selected_hull.get("id", ""))
@@ -330,7 +332,7 @@ func _create_fleet_row(fleet: FleetData) -> PanelContainer:
 	name_label.text = fleet.name
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 14)
+	name_label.add_theme_font_size_override("font_size", 17)
 	name_label.add_theme_color_override("font_color", Color(0.84, 0.92, 1))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(name_label)
@@ -341,7 +343,7 @@ func _create_fleet_row(fleet: FleetData) -> PanelContainer:
 		ship_total, "ship" if ship_total == 1 else "ships"
 	]
 	count_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	count_label.add_theme_font_size_override("font_size", 11)
+	count_label.add_theme_font_size_override("font_size", 13)
 	count_label.add_theme_color_override("font_color", Color(0.55, 0.68, 0.82))
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(count_label)
@@ -356,7 +358,7 @@ func _create_fleet_row(fleet: FleetData) -> PanelContainer:
 		var empty_label := Label.new()
 		empty_label.text = "No ships — drag ships here."
 		empty_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		empty_label.add_theme_font_size_override("font_size", 11)
+		empty_label.add_theme_font_size_override("font_size", 13)
 		empty_label.add_theme_color_override(
 			"font_color", Color(0.45, 0.57, 0.7)
 		)
@@ -383,8 +385,8 @@ func _make_ship_chip(fleet: FleetData, ship_index: int) -> PanelContainer:
 	var label := Label.new()
 	label.text = str(fleet.ships[ship_index])
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 11)
-	label.add_theme_color_override("font_color", Color(0.84, 0.92, 1))
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chip.add_child(label)
 
@@ -468,8 +470,8 @@ func _begin_drag_preview() -> void:
 	_drag_preview.add_theme_stylebox_override("panel", _chip_style(true))
 	var label := Label.new()
 	label.text = str(_drag_payload.get("ship_name", "Ship"))
-	label.add_theme_font_size_override("font_size", 12)
-	label.add_theme_color_override("font_color", Color(0.97, 1, 1))
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drag_preview.add_child(label)
 	_drag_preview.set_anchors_preset(Control.PRESET_TOP_LEFT)
@@ -655,7 +657,7 @@ func _make_queue_row(
 	var name_label := Label.new()
 	name_label.text = str(definition.get("name", "Ship"))
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.97))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(name_label)
@@ -664,7 +666,7 @@ func _make_queue_row(
 	status_label.name = "QueueStatus"
 	status_label.text = _queue_status_text(item, definition)
 	status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	status_label.add_theme_font_size_override("font_size", 11)
+	status_label.add_theme_font_size_override("font_size", 13)
 	status_label.add_theme_color_override(
 		"font_color", Color(0.52, 0.65, 0.8)
 	)
@@ -672,12 +674,12 @@ func _make_queue_row(
 	info.add_child(status_label)
 
 	var cancel_button := Button.new()
-	cancel_button.text = "Cancel"
+	cancel_button.text = "CANCEL"
 	cancel_button.focus_mode = Control.FOCUS_NONE
 	cancel_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	cancel_button.tooltip_text = "Cancel this build and refund unused resources"
 	cancel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	cancel_button.add_theme_font_size_override("font_size", 11)
+	cancel_button.add_theme_font_size_override("font_size", 13)
 	cancel_button.add_theme_color_override("font_color", Color(0.84, 0.93, 1))
 	cancel_button.add_theme_color_override(
 		"font_hover_color", Color(0.97, 1, 1, 1)
@@ -770,47 +772,15 @@ func _refund_summary_text(refund: Dictionary) -> String:
 
 
 func _cancel_style(hover := false) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.content_margin_left = 12.0
-	style.content_margin_top = 6.0
-	style.content_margin_right = 12.0
-	style.content_margin_bottom = 6.0
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_bottom_left = 4
-	style.bg_color = Color(0.05, 0.11, 0.19, 0.95)
-	style.border_color = Color(0.22, 0.46, 0.74, 0.7)
 	if hover:
-		style.bg_color = Color(0.09, 0.2, 0.34, 0.98)
-		style.border_color = Color(0.38, 0.68, 1.0, 0.9)
-	return style
+		return LCARS.ghost_style(LCARS.BLUE, true)
+	return LCARS.ghost_style(LCARS.BLUE)
 
 
 func _chip_style(highlight := false) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.content_margin_left = 8.0
-	style.content_margin_top = 3.0
-	style.content_margin_right = 8.0
-	style.content_margin_bottom = 3.0
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_bottom_left = 4
-	style.bg_color = Color(0.06, 0.14, 0.24, 0.95)
-	style.border_color = Color(0.24, 0.5, 0.8, 0.75)
 	if highlight:
-		style.bg_color = Color(0.1, 0.24, 0.4, 1.0)
-		style.border_color = Color(0.5, 0.8, 1.0, 1.0)
-	return style
+		return LCARS.button_style(LCARS.BLUE)
+	return LCARS.button_style(LCARS.GREEN)
 
 
 func _next_fleet_name() -> String:
@@ -914,7 +884,7 @@ func _add_cost_label(text: String, color: Color, resource_id: String) -> void:
 	var label := Label.new()
 	label.name = "Cost_%s" % resource_id if not resource_id.is_empty() else "Cost"
 	label.text = text
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_color_override("font_color", color)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	cost_value.add_child(label)
@@ -971,59 +941,39 @@ func _update_production_status() -> void:
 func _hull_button_style(
 	selected: bool, hover := false, pressed := false
 ) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.content_margin_left = 12.0
-	style.content_margin_top = 10.0
-	style.content_margin_right = 12.0
-	style.content_margin_bottom = 10.0
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_right = 6
-	style.corner_radius_bottom_left = 6
-
-	if selected:
-		style.bg_color = Color(0.08, 0.2, 0.34, 0.95)
-		style.border_color = Color(0.42, 0.72, 1.0, 0.9)
-	else:
-		style.bg_color = Color(0.028, 0.055, 0.09, 0.9)
-		style.border_color = Color(0.18, 0.34, 0.52, 0.7)
-
-	if hover:
-		style.bg_color = (
-			Color(0.11, 0.26, 0.43, 1.0)
-			if selected
-			else Color(0.05, 0.12, 0.2, 0.95)
-		)
-		style.border_color = Color(0.38, 0.68, 1.0, 0.9)
 	if pressed:
-		style.bg_color = Color(0.045, 0.12, 0.21, 1.0)
-
-	return style
+		return LCARS.button_pressed_style(
+			LCARS.BLUE if selected else LCARS.GREEN
+		)
+	if hover:
+		return LCARS.button_hover_style(
+			LCARS.BLUE if selected else LCARS.GREEN
+		)
+	if selected:
+		return LCARS.button_style(LCARS.BLUE)
+	return LCARS.button_style(LCARS.GREEN)
 
 
 func _fleet_row_style(hover := false, pressed := false) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_right = 6
-	style.corner_radius_bottom_left = 6
-	style.bg_color = Color(0.025, 0.05, 0.085, 0.85)
-	style.border_color = Color(0.17, 0.31, 0.48, 0.65)
-
+	style.bg_color = Color(0, 0, 0, 1)
+	style.border_color = LCARS.BLUE
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.content_margin_left = 12.0
+	style.content_margin_top = 8.0
+	style.content_margin_right = 12.0
+	style.content_margin_bottom = 8.0
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
 	if hover:
-		style.bg_color = Color(0.05, 0.12, 0.2, 0.95)
-		style.border_color = Color(0.36, 0.64, 0.96, 0.9)
+		style.bg_color = Color(0, 0.565, 0.941, 0.22)
 	if pressed:
-		style.bg_color = Color(0.04, 0.1, 0.17, 1.0)
-
+		style.bg_color = Color(0, 0.08, 0.16, 1)
 	return style
 
 

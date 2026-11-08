@@ -132,19 +132,6 @@ func _run() -> void:
 		grid.get_node_or_null("TechCell_2_AdvancedTechnology") == null,
 		"Hidden categories render no cells"
 	)
-	_check(
-		tech_tree.meta_label.text.contains("5 TECHNOLOGIES"),
-		"Technology count is displayed"
-	)
-	_check(
-		tech_tree.meta_label.text.contains("4 CATEGORIES"),
-		"Shown category count is displayed"
-	)
-	_check(
-		tech_tree.meta_label.text.contains("2 TIERS"),
-		"Tier count is displayed"
-	)
-
 	var card_height := -1.0
 	var cards_match := true
 	await process_frame

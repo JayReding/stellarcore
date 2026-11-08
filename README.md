@@ -27,7 +27,7 @@ godot --path .
 
 | Input | Action |
 | --- | --- |
-| Left-drag | Rotate around the galaxy and tilt vertically |
+| Right-drag | Rotate around the galaxy and tilt vertically |
 | Mouse wheel | Zoom in/out |
 | Click a star | Select it and open the system panel |
 | Double-click a star | Focus the camera on it |
@@ -89,8 +89,9 @@ godot --path .
   in the technology tree, beginning at **0 RD**. Colonies produce Research Data
   each turn.
 - A turn loop starting at **Turn 1**. The current turn is shown in the bottom-left
-  HUD. **End Turn** in the bottom-right starts a five-second countdown; clicking
-  the button again cancels it. When the countdown finishes, the turn advances,
+  HUD. **End Turn** in the bottom-right starts a five-second countdown shown on
+  the button itself ("Ending turn in 5..."); clicking the button again cancels
+  it. When the countdown finishes, the turn advances,
   `TurnManager` emits `turn_advanced`, every fleet in transit moves one leg of
   its course, and structures apply their output and upkeep.
 - A 3D star per system with an emissive surface, halo, and selection ring. Stars
@@ -153,7 +154,13 @@ godot --path .
   one Shipyard per system is allowed, and a structure already on the planet
   shows **ALREADY PRESENT**. Unaffordable rows are disabled with a red
   shortfall amount. Only one construction project runs per star system at a
-  time; the other rows read **IN PROGRESS** until it finishes. The popup stays
+  time; the other rows read **IN PROGRESS** until it finishes. Planet Detail
+  also shows a **CONSTRUCTION QUEUE** section with the active project's
+  structure, planet, and Turn X of Y progress plus a **Cancel** button.
+  Cancelling mid-build refunds the unused share of the cost to the system
+  stockpile — `floor(cost x turns left / total)` per resource, with Antimatter
+  refunded in full — and clears the project from the sidebars, the popup, and
+  the Stellar View panel. The popup stays
   open with a confirmation message, and the sidebars, flows, summaries, and
   per-turn economy pick finished structures up the turn they complete. `Esc`
   closes the popup first, then the Planet Detail sidebar, then the System View

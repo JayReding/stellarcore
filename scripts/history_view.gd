@@ -80,12 +80,12 @@ func _make_row(entry: Dictionary) -> Button:
 	)
 	button.disabled = not clickable
 	button.tooltip_text = ("Focus %s" % system_name) if clickable else ""
-	button.add_theme_font_size_override("font_size", 14)
+	button.add_theme_font_size_override("font_size", 17)
 	button.add_theme_color_override("font_color", entry.get("color", Color.WHITE))
-	button.add_theme_stylebox_override("normal", _row_style(Color(0.028, 0.055, 0.09, 0.9)))
-	button.add_theme_stylebox_override("hover", _row_style(Color(0.11, 0.26, 0.43, 1.0)))
-	button.add_theme_stylebox_override("pressed", _row_style(Color(0.045, 0.12, 0.21, 1.0)))
-	button.add_theme_stylebox_override("disabled", _row_style(Color(0.02, 0.035, 0.06, 0.7)))
+	button.add_theme_stylebox_override("normal", _row_style(Color(0, 0, 0, 1)))
+	button.add_theme_stylebox_override("hover", _row_style(Color(0, 0.565, 0.941, 0.28)))
+	button.add_theme_stylebox_override("pressed", _row_style(Color(0, 0.08, 0.16, 1)))
+	button.add_theme_stylebox_override("disabled", _row_style(Color(0.07, 0.07, 0.08, 1)))
 	if clickable:
 		button.pressed.connect(_on_row_pressed.bind(star_id))
 
@@ -103,7 +103,7 @@ func _make_row(entry: Dictionary) -> Button:
 	message_label.text = str(entry.get("text", ""))
 	message_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	message_label.add_theme_font_size_override("font_size", 13)
+	message_label.add_theme_font_size_override("font_size", 16)
 	message_label.add_theme_color_override(
 		"font_color", entry.get("color", Color.WHITE)
 	)
@@ -114,8 +114,8 @@ func _make_row(entry: Dictionary) -> Button:
 	var system_label := Label.new()
 	system_label.text = system_name if not system_name.is_empty() else "—"
 	system_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	system_label.add_theme_font_size_override("font_size", 11)
-	system_label.add_theme_color_override("font_color", Color(0.5, 0.62, 0.76))
+	system_label.add_theme_font_size_override("font_size", 13)
+	system_label.add_theme_color_override("font_color", LCARS.TEXT_DIM)
 	system_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(system_label)
 
@@ -123,18 +123,7 @@ func _make_row(entry: Dictionary) -> Button:
 
 
 func _row_style(background: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = background
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.border_color = Color(0.18, 0.34, 0.52, 0.7)
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_right = 6
-	style.corner_radius_bottom_left = 6
-	return style
+	return LCARS.row_style(background)
 
 
 func _on_row_pressed(star_id: String) -> void:

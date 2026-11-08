@@ -54,7 +54,7 @@ func show_confirmation(
 	speed_value.text = "%.1f ly / turn" % fleet.speed_ly_per_turn()
 	var suffix := "turn" if turns == 1 else "turns"
 	turns_value.text = "%d %s" % [turns, suffix]
-	confirm_button.text = "Confirm Destination"
+	confirm_button.text = "CONFIRM DESTINATION"
 	confirm_button.disabled = turns <= 0
 
 	_show()

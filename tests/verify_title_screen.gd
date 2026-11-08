@@ -31,7 +31,7 @@ func _run() -> void:
 
 	var buttons := _menu_buttons(title)
 	_check(buttons.size() == 5, "Menu has five entries")
-	var labels := ["New Game", "Load Saved Game", "Options", "Credits", "Quit to Desktop"]
+	var labels := ["NEW GAME", "LOAD SAVED GAME", "OPTIONS", "CREDITS", "QUIT TO DESKTOP"]
 	_check(
 		_button_labels(buttons) == labels,
 		"Menu entries are in order"

@@ -38,8 +38,13 @@ const CLASS_SIZE_FACTORS: Array[float] = [1.50, 1.32, 1.16, 1.03, 0.92, 0.80]
 ## Ships waiting to be built, in order. Each entry maps a hull id to its
 ## accumulated turns of work. One turn of work is applied per turn.
 @export var ship_queue: Array[Dictionary] = []
-## The single structure currently under construction in this system. Only one
-## construction project runs per star system at a time.
+## Structures currently under construction in this system. Each entry maps
+## "type_id" to the structure, "planet" to its target, and the remaining/total
+## turn counters. Every project advances one turn per turn, so several
+## structures can be built simultaneously when the stockpile allows it.
+@export var construction_queue: Array[Dictionary] = []
+## Legacy single-slot fields, synced to the first queued project for
+## backward compatibility.
 @export var construction_type_id: String = ""
 @export var construction_planet: PlanetData = null
 @export var construction_turns_remaining: int = 0
@@ -116,51 +121,173 @@ func can_build_structures() -> bool:
 	return has_colony()
 
 
-## Whether a structure is currently under construction in this system.
+## Whether any structure is currently under construction in this system.
 func is_constructing() -> bool:
-	return not construction_type_id.is_empty()
+	return not construction_queue.is_empty()
+
+
+## Live list of queued construction projects. Each entry maps "type_id",
+## "planet", "turns_remaining", and "turns_total".
+func construction_projects() -> Array[Dictionary]:
+	var projects: Array[Dictionary] = []
+	projects.assign(construction_queue.duplicate(true))
+	return projects
+
+
+func construction_count() -> int:
+	return construction_queue.size()
+
+
+## Whether the given structure type is already queued, optionally on a
+## specific planet.
+func has_queued(type_id: String, planet: PlanetData = null) -> bool:
+	for project in construction_queue:
+		if str(project.get("type_id", "")) != type_id:
+			continue
+		if planet != null and project.get("planet") != planet:
+			continue
+		return true
+	return false
+
+
+func has_queued_shipyard() -> bool:
+	return has_queued(StructureData.SHIPYARD)
 
 
 ## Queues a structure for construction on a planet. The caller spends the
-## construction cost up front.
+## construction cost up front. Several projects may run at once; each
+## advances one turn per turn.
 func start_construction(type_id: String, planet: PlanetData, turns: int) -> void:
-	construction_type_id = type_id
-	construction_planet = planet
-	construction_turns_total = maxi(turns, 1)
-	construction_turns_remaining = construction_turns_total
+	var total := maxi(turns, 1)
+	construction_queue.append({
+		"type_id": type_id,
+		"planet": planet,
+		"turns_remaining": total,
+		"turns_total": total,
+	})
+	_sync_legacy_construction()
 
 
-## Advances construction by one turn. Returns the completed structure and its
-## planet when the project finishes, or an empty Dictionary while it runs.
-func advance_construction() -> Dictionary:
-	if not is_constructing():
-		return {}
+## Advances every queued project by one turn. Returns the completed projects
+## (each mapping "type_id" and "planet"); completed structures are added to
+## their planets before the economy runs, so they produce on arrival.
+func advance_construction() -> Array[Dictionary]:
+	var completed: Array[Dictionary] = []
+	if construction_queue.is_empty():
+		return completed
 
-	construction_turns_remaining = maxi(0, construction_turns_remaining - 1)
-	if construction_turns_remaining > 0:
-		return {}
+	for project in construction_queue:
+		project["turns_remaining"] = maxi(
+			0, int(project.get("turns_remaining", 0)) - 1
+		)
 
-	var completed := {
-		"type_id": construction_type_id,
-		"planet": construction_planet,
-	}
-	var planet := construction_planet
-	if planet != null and not planet.has_structure(construction_type_id):
-		planet.add_structure(construction_type_id)
-	construction_type_id = ""
-	construction_planet = null
-	construction_turns_remaining = 0
-	construction_turns_total = 0
-	refresh_shipyard_planet()
+	var finished: Array[Dictionary] = []
+	var running: Array[Dictionary] = []
+	for project in construction_queue:
+		if int(project.get("turns_remaining", 0)) > 0:
+			running.append(project)
+			continue
+		var type_id := str(project.get("type_id", ""))
+		var target: PlanetData = project.get("planet")
+		if target != null and not target.has_structure(type_id):
+			target.add_structure(type_id)
+		finished.append({"type_id": type_id, "planet": target})
+
+	construction_queue = running
+	_sync_legacy_construction()
+	completed.assign(finished)
 	return completed
 
 
-## Human-readable name of the structure under construction, if any.
-func construction_display_name() -> String:
-	if not is_constructing():
+## Cancels the queued project at the given index. Returns pro-rated refund
+## amounts: Antimatter is refunded in full, everything else scales with the
+## share of turns still remaining. Returns an empty Dictionary for a bad
+## index. Prefer this over cancel_construction() when several projects run.
+func cancel_construction_at(index: int) -> Dictionary:
+	if index < 0 or index >= construction_queue.size():
+		return {}
+
+	var project: Dictionary = construction_queue[index]
+	var refund := _refund_for_project(project)
+	construction_queue.remove_at(index)
+	_sync_legacy_construction()
+	return refund
+
+
+## Cancels the most recently queued project. Returns its pro-rated refund,
+## or an empty Dictionary when nothing is under construction. Kept for
+## single-project callers; per-row UI should use cancel_construction_at().
+func cancel_construction() -> Dictionary:
+	if construction_queue.is_empty():
+		return {}
+	return cancel_construction_at(construction_queue.size() - 1)
+
+
+## Cancels the queued project for the given structure type and planet.
+## Returns its refund, or an empty Dictionary when no such project exists.
+func cancel_construction_for(type_id: String, planet: PlanetData = null) -> Dictionary:
+	for i in construction_queue.size():
+		var project: Dictionary = construction_queue[i]
+		if str(project.get("type_id", "")) != type_id:
+			continue
+		if planet != null and project.get("planet") != planet:
+			continue
+		return cancel_construction_at(i)
+	return {}
+
+
+func _refund_for_project(project: Dictionary) -> Dictionary:
+	var refund := {}
+	var definition := StructureData.definition_for(
+		str(project.get("type_id", ""))
+	)
+	var cost: Dictionary = definition.get("cost", {})
+	var total := maxi(int(project.get("turns_total", 0)), 1)
+	var fraction := clampf(
+		float(int(project.get("turns_remaining", 0))) / float(total),
+		0.0,
+		1.0
+	)
+	for resource_id in cost:
+		var id := str(resource_id)
+		if id == ResourceStockpile.ANTIMATTER:
+			refund[id] = int(cost[resource_id])
+		else:
+			refund[id] = int(
+				floor(float(cost[resource_id]) * fraction)
+			)
+	return refund
+
+
+## Keeps the legacy single-slot fields pointed at the first queued project.
+func _sync_legacy_construction() -> void:
+	if construction_queue.is_empty():
+		construction_type_id = ""
+		construction_planet = null
+		construction_turns_remaining = 0
+		construction_turns_total = 0
+		refresh_shipyard_planet()
+		return
+	var first: Dictionary = construction_queue[0]
+	construction_type_id = str(first.get("type_id", ""))
+	construction_planet = first.get("planet")
+	construction_turns_total = maxi(int(first.get("turns_total", 1)), 1)
+	construction_turns_remaining = clampi(
+		int(first.get("turns_remaining", 0)), 0, construction_turns_total
+	)
+	refresh_shipyard_planet()
+
+
+## Human-readable name of a queued structure. With no argument, names the
+## first queued project, or "" when nothing is under construction.
+func construction_display_name(project: Dictionary = {}) -> String:
+	var type_id := construction_type_id
+	if not project.is_empty():
+		type_id = str(project.get("type_id", ""))
+	if type_id.is_empty():
 		return ""
 	return str(
-		StructureData.definition_for(construction_type_id).get("name", "Structure")
+		StructureData.definition_for(type_id).get("name", "Structure")
 	)
 
 

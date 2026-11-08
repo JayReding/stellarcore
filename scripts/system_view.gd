@@ -45,6 +45,7 @@ static var _halo_texture: ImageTexture
 @onready var planet_flow_list: VBoxContainer = %PlanetFlowList
 @onready var build_button: Button = %BuildButton
 @onready var build_feedback: Label = %BuildFeedback
+@onready var construction_queue_list: VBoxContainer = %ConstructionQueueList
 @onready var construct_backdrop: ColorRect = %ConstructBackdrop
 @onready var construct_popup: PanelContainer = %ConstructPopup
 @onready var construct_subtitle: Label = %ConstructSubtitle
@@ -499,7 +500,7 @@ func _add_planet_labels(holder: Node3D, planet: PlanetData, radius: float) -> vo
 	designation.position = Vector3(0.0, radius + 1.7, 0.0)
 	designation.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	designation.no_depth_test = true
-	designation.font_size = 46
+	designation.font_size = 55
 	designation.pixel_size = 0.014
 	designation.outline_size = 12
 	designation.outline_modulate = Color(0.0, 0.0, 0.0, 0.96)
@@ -513,7 +514,7 @@ func _add_planet_labels(holder: Node3D, planet: PlanetData, radius: float) -> vo
 	class_label.position = Vector3(0.0, radius + 0.8, 0.0)
 	class_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	class_label.no_depth_test = true
-	class_label.font_size = 32
+	class_label.font_size = 38
 	class_label.pixel_size = 0.014
 	class_label.outline_size = 9
 	class_label.outline_modulate = Color(0.0, 0.0, 0.0, 0.95)
@@ -583,7 +584,7 @@ func _make_resource_row(
 	name_label.text = resource_name
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", Color(0.68, 0.77, 0.88))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(name_label)
@@ -594,7 +595,7 @@ func _make_resource_row(
 	amount_label.custom_minimum_size = Vector2(54, 0)
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	amount_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	amount_label.add_theme_font_size_override("font_size", 13)
+	amount_label.add_theme_font_size_override("font_size", 16)
 	amount_label.add_theme_color_override("font_color", color)
 	amount_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(amount_label)
@@ -605,7 +606,7 @@ func _make_resource_row(
 	change_label.custom_minimum_size = Vector2(50, 0)
 	change_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	change_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	change_label.add_theme_font_size_override("font_size", 13)
+	change_label.add_theme_font_size_override("font_size", 16)
 	change_label.add_theme_color_override(
 		"font_color", _change_color(change)
 	)
@@ -646,7 +647,7 @@ func _populate_system_structures() -> void:
 		planet_header.text = "%s  •  %s" % [
 			planet.designation, planet.class_name_label()
 		]
-		planet_header.add_theme_font_size_override("font_size", 12)
+		planet_header.add_theme_font_size_override("font_size", 14)
 		planet_header.add_theme_color_override(
 			"font_color", planet.class_color().lightened(0.12)
 		)
@@ -674,16 +675,16 @@ func _make_structure_row(
 	button.add_theme_stylebox_override(
 		"normal",
 		_sidebar_row_style(
-			Color(0.09, 0.18, 0.3, 0.55)
+			Color(0, 0.565, 0.941, 0.28)
 			if planet == _selected_planet
 			else Color(0, 0, 0, 0)
 		)
 	)
 	button.add_theme_stylebox_override(
-		"hover", _sidebar_row_style(Color(0.12, 0.25, 0.4, 0.55))
+		"hover", _sidebar_row_style(Color(0, 0.565, 0.941, 0.28))
 	)
 	button.add_theme_stylebox_override(
-		"pressed", _sidebar_row_style(Color(0.05, 0.13, 0.23, 0.75))
+		"pressed", _sidebar_row_style(Color(0, 0.08, 0.16, 0.75))
 	)
 	button.pressed.connect(_select_planet.bind(planet))
 
@@ -708,7 +709,7 @@ func _make_structure_row(
 	name_label.text = structure.display_name()
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.97))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(name_label)
@@ -716,7 +717,7 @@ func _make_structure_row(
 	var location_label := Label.new()
 	location_label.text = structure.location_label()
 	location_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	location_label.add_theme_font_size_override("font_size", 11)
+	location_label.add_theme_font_size_override("font_size", 13)
 	location_label.add_theme_color_override(
 		"font_color", Color(0.52, 0.65, 0.8)
 	)
@@ -766,6 +767,7 @@ func _populate_planet_detail() -> void:
 			row.name = "PlanetFlow_%d" % i
 			planet_flow_list.add_child(row)
 
+	_populate_construction_queue()
 	build_feedback.text = ""
 
 
@@ -809,11 +811,20 @@ func _populate_construction() -> void:
 		return
 
 	if _data.is_constructing():
-		construct_status.text = "Construction in progress: %s on %s — %d %s left." % [
-			_data.construction_display_name(),
-			_data.construction_planet.designation if _data.construction_planet != null else "unknown planet",
-			_data.construction_turns_remaining,
-			"turn" if _data.construction_turns_remaining == 1 else "turns",
+		var summaries: Array[String] = []
+		for project in _data.construction_projects():
+			var turns := maxi(int(project.get("turns_remaining", 0)), 0)
+			var planet: PlanetData = project.get("planet")
+			summaries.append("%s on %s — %d %s left." % [
+				_data.construction_display_name(project),
+				planet.designation if planet != null else "unknown planet",
+				turns,
+				"turn" if turns == 1 else "turns",
+			])
+		construct_status.text = "%d project%s under construction: %s" % [
+			summaries.size(),
+			"" if summaries.size() == 1 else "s",
+			"  ".join(summaries),
 		]
 	else:
 		construct_status.text = "Select a structure to build it on %s." % (
@@ -846,13 +857,14 @@ func _construction_options() -> Array[Dictionary]:
 		if not _unlocked_structures.has(id):
 			reason = "REQUIRES RESEARCH"
 		elif (
-			id == StructureData.SHIPYARD and _data.has_shipyard()
+			id == StructureData.SHIPYARD
+			and (_data.has_shipyard() or _data.has_queued_shipyard())
 		):
 			reason = "SHIPYARD PRESENT"
 		elif _selected_planet.has_structure(id):
 			reason = "ALREADY PRESENT"
-		elif _data.is_constructing():
-			reason = "IN PROGRESS"
+		elif _data.has_queued(id, _selected_planet):
+			reason = "ALREADY QUEUED"
 		else:
 			reason = _construction_shortfall_reason(cost)
 		options.append({
@@ -887,7 +899,7 @@ func _make_construction_row(option: Dictionary) -> Button:
 	var buildable := reason.is_empty()
 
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 44)
+	button.custom_minimum_size = Vector2(0, 80)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -898,16 +910,25 @@ func _make_construction_row(option: Dictionary) -> Button:
 		_structure_flow_summary(definition),
 	]
 	button.add_theme_stylebox_override(
-		"normal", _sidebar_row_style(Color(0, 0, 0, 0))
+		"normal",
+		LCARS.button_style(LCARS.GREEN)
+		if buildable
+		else LCARS.disabled_style()
 	)
 	button.add_theme_stylebox_override(
-		"hover", _sidebar_row_style(Color(0.12, 0.25, 0.4, 0.55))
+		"hover",
+		LCARS.button_hover_style(LCARS.GREEN)
+		if buildable
+		else LCARS.disabled_style()
 	)
 	button.add_theme_stylebox_override(
-		"pressed", _sidebar_row_style(Color(0.05, 0.13, 0.23, 0.75))
+		"pressed",
+		LCARS.button_pressed_style(LCARS.GREEN)
+		if buildable
+		else LCARS.disabled_style()
 	)
 	button.add_theme_stylebox_override(
-		"disabled", _sidebar_row_style(Color(0, 0, 0, 0))
+		"disabled", LCARS.disabled_style()
 	)
 	button.pressed.connect(
 		_on_construct_pressed.bind(str(option.get("type_id", "")))
@@ -916,19 +937,12 @@ func _make_construction_row(option: Dictionary) -> Button:
 	var row := HBoxContainer.new()
 	button.add_child(row)
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	row.offset_left = 6.0
-	row.offset_right = -6.0
+	row.offset_left = 14.0
+	row.offset_right = -14.0
 	row.offset_top = 2.0
 	row.offset_bottom = -2.0
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var dot := ColorRect.new()
-	dot.custom_minimum_size = Vector2(7, 7)
-	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	dot.color = definition.get("color", Color.WHITE)
-	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(dot)
 
 	var info := VBoxContainer.new()
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -940,36 +954,41 @@ func _make_construction_row(option: Dictionary) -> Button:
 	var name_label := Label.new()
 	name_label.text = str(definition.get("name", "Structure"))
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override(
 		"font_color",
-		Color(0.82, 0.89, 0.97) if buildable else Color(0.45, 0.55, 0.67)
+		Color(0, 0, 0, 1) if buildable else Color(0.45, 0.55, 0.67)
 	)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(name_label)
 
 	var flow_label := Label.new()
-	flow_label.text = _structure_flow_summary(definition)
+	flow_label.text = "Production: %s" % _structure_flow_summary(definition)
 	flow_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	flow_label.add_theme_font_size_override("font_size", 11)
+	flow_label.add_theme_font_size_override("font_size", 13)
 	flow_label.add_theme_color_override(
-		"font_color", Color(0.52, 0.65, 0.8)
+		"font_color",
+		Color(0, 0, 0, 1) if buildable else Color(0.52, 0.65, 0.8)
 	)
 	flow_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(flow_label)
 
 	var cost_label := Label.new()
 	cost_label.name = "CostLabel"
-	cost_label.text = _construction_cost_summary(
+	cost_label.text = "Cost: %s" % _construction_cost_summary(
 		option.get("cost", {}), int(option.get("build_time", 0))
 	)
 	cost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	cost_label.add_theme_font_size_override("font_size", 11)
+	cost_label.add_theme_font_size_override("font_size", 13)
 	cost_label.add_theme_color_override(
 		"font_color",
-		Color(0.55, 0.42, 0.4)
-		if reason.begins_with("NEEDS") or reason == "NO STOCKPILE"
-		else Color(0.62, 0.72, 0.84)
+		Color(0, 0, 0, 1)
+		if buildable
+		else (
+			Color(0.55, 0.42, 0.4)
+			if reason.begins_with("NEEDS") or reason == "NO STOCKPILE"
+			else Color(0.62, 0.72, 0.84)
+		)
 	)
 	cost_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(cost_label)
@@ -978,10 +997,10 @@ func _make_construction_row(option: Dictionary) -> Button:
 	action_label.text = "BUILD" if buildable else reason
 	action_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	action_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	action_label.add_theme_font_size_override("font_size", 11)
+	action_label.add_theme_font_size_override("font_size", 13)
 	action_label.add_theme_color_override(
 		"font_color",
-		Color(0.52, 0.9, 0.76) if buildable else Color(0.55, 0.42, 0.4)
+		Color(0, 0, 0, 1) if buildable else Color(0.55, 0.42, 0.4)
 	)
 	action_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(action_label)
@@ -1051,11 +1070,12 @@ func _on_construct_pressed(type_id: String) -> void:
 		return
 	if not _unlocked_structures.has(type_id):
 		return
-	if _data.is_constructing():
-		return
 	if (
-		type_id == StructureData.SHIPYARD and _data.has_shipyard()
+		type_id == StructureData.SHIPYARD
+		and (_data.has_shipyard() or _data.has_queued_shipyard())
 	) or _selected_planet.has_structure(type_id):
+		return
+	if _data.has_queued(type_id, _selected_planet):
 		return
 
 	var definition: Dictionary = StructureData.definition_for(type_id)
@@ -1081,7 +1101,7 @@ func _on_construct_pressed(type_id: String) -> void:
 	_data.start_construction(type_id, _selected_planet, build_time)
 	_after_construction_changed(
 		"Construction started: %s on %s — %d %s." % [
-			_data.construction_display_name(),
+			str(definition.get("name", "Structure")),
 			_selected_planet.designation,
 			build_time,
 			"turn" if build_time == 1 else "turns",
@@ -1096,6 +1116,153 @@ func _after_construction_changed(confirmation: String) -> void:
 	structures_changed.emit()
 	construct_status.text = confirmation
 	build_feedback.text = confirmation
+
+
+## Shows the system's in-progress structure builds, if any, in Planet Detail.
+## Every queued project gets a row naming the structure and its planet, with
+## Turn X of Y progress and its own cancel button.
+func _populate_construction_queue() -> void:
+	_clear_children(construction_queue_list)
+	if _data == null:
+		return
+	if not _data.is_constructing():
+		_add_muted_label(
+			construction_queue_list, "No structure under construction."
+		)
+		return
+	var index := 0
+	for project in _data.construction_projects():
+		var row := _make_construction_queue_row(project, index)
+		row.name = "ConstructionQueueRow_%d" % index
+		construction_queue_list.add_child(row)
+		index += 1
+
+
+func _make_construction_queue_row(project: Dictionary, index: int) -> HBoxContainer:
+	var total := maxi(int(project.get("turns_total", 1)), 1)
+	var remaining := clampi(int(project.get("turns_remaining", 0)), 0, total)
+	var elapsed := mini(total - remaining + 1, total)
+	var target: PlanetData = project.get("planet")
+	var planet_name := (
+		target.designation
+		if target != null
+		else "unknown planet"
+	)
+
+	var row := HBoxContainer.new()
+	row.name = "ConstructionQueueRow"
+	row.add_theme_constant_override("separation", 8)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	info.add_theme_constant_override("separation", 2)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(info)
+
+	var name_label := Label.new()
+	name_label.text = _data.construction_display_name(project)
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 16)
+	name_label.add_theme_color_override(
+		"font_color", Color(0.82, 0.89, 0.97)
+	)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(name_label)
+
+	var status_label := Label.new()
+	status_label.text = "%s  •  Turn %d of %d" % [
+		planet_name, elapsed, total
+	]
+	status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	status_label.add_theme_font_size_override("font_size", 13)
+	status_label.add_theme_color_override(
+		"font_color", Color(0.52, 0.65, 0.8)
+	)
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(status_label)
+
+	var progress := ProgressBar.new()
+	progress.max_value = total
+	progress.value = total - remaining
+	progress.show_percentage = false
+	progress.custom_minimum_size = Vector2(0, 6)
+	progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(progress)
+
+	var cancel_button := Button.new()
+	cancel_button.text = "CANCEL"
+	cancel_button.focus_mode = Control.FOCUS_NONE
+	cancel_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	cancel_button.tooltip_text = (
+		"Cancel construction and refund unused resources"
+	)
+	cancel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cancel_button.add_theme_font_size_override("font_size", 13)
+	cancel_button.add_theme_color_override("font_color", Color(0.84, 0.93, 1))
+	cancel_button.add_theme_color_override(
+		"font_hover_color", Color(0.97, 1, 1, 1)
+	)
+	cancel_button.add_theme_stylebox_override("normal", _cancel_style())
+	cancel_button.add_theme_stylebox_override("hover", _cancel_style(true))
+	cancel_button.add_theme_stylebox_override("pressed", _cancel_style())
+	cancel_button.pressed.connect(_on_cancel_construction_pressed.bind(index))
+	row.add_child(cancel_button)
+
+	return row
+
+
+## Cancels one queued build by its queue index, refunds the unused share of
+## its cost to the system stockpile, and refreshes every construction surface
+## through the usual structures_changed path.
+func _on_cancel_construction_pressed(index: int) -> void:
+	if _data == null or not _data.is_constructing():
+		return
+
+	var projects := _data.construction_projects()
+	if index < 0 or index >= projects.size():
+		return
+	var project: Dictionary = projects[index]
+	var structure_name := _data.construction_display_name(project)
+	var target: PlanetData = project.get("planet")
+	var planet_name := (
+		target.designation
+		if target != null
+		else "unknown planet"
+	)
+	var refund := _data.cancel_construction_at(index)
+	if _data.resources != null:
+		for resource_id in refund:
+			_data.resources.add_amount(
+				str(resource_id), int(refund[resource_id])
+			)
+	_after_construction_changed(
+		"Cancelled %s on %s — refunded %s." % [
+			structure_name, planet_name, _refund_summary_text(refund)
+		]
+	)
+
+
+## Human-readable refund totals for a cancelled build.
+func _refund_summary_text(refund: Dictionary) -> String:
+	var parts: Array[String] = []
+	for resource_id in refund:
+		var amount := int(refund[resource_id])
+		if amount <= 0:
+			continue
+		parts.append("%d %s" % [
+			amount, ResourceStockpile.display_name(str(resource_id))
+		])
+	if parts.is_empty():
+		return "nothing"
+	return " and ".join(parts)
+
+
+func _cancel_style(hover := false) -> StyleBoxFlat:
+	if hover:
+		return LCARS.ghost_style(LCARS.BLUE, true)
+	return LCARS.ghost_style(LCARS.BLUE)
 
 
 func _make_planet_structure_row(structure: StructureData) -> HBoxContainer:
@@ -1115,7 +1282,7 @@ func _make_planet_structure_row(structure: StructureData) -> HBoxContainer:
 	name_label.text = structure.display_name()
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", Color(0.82, 0.89, 0.97))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(name_label)
@@ -1123,7 +1290,7 @@ func _make_planet_structure_row(structure: StructureData) -> HBoxContainer:
 	var location_label := Label.new()
 	location_label.text = structure.location_label()
 	location_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	location_label.add_theme_font_size_override("font_size", 11)
+	location_label.add_theme_font_size_override("font_size", 13)
 	location_label.add_theme_color_override(
 		"font_color", Color(0.52, 0.65, 0.8)
 	)
@@ -1150,7 +1317,7 @@ func _make_flow_row(entry: Dictionary) -> HBoxContainer:
 	amount_label.custom_minimum_size = Vector2(46, 0)
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	amount_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	amount_label.add_theme_font_size_override("font_size", 13)
+	amount_label.add_theme_font_size_override("font_size", 16)
 	amount_label.add_theme_color_override(
 		"font_color", _change_color(amount)
 	)
@@ -1161,7 +1328,7 @@ func _make_flow_row(entry: Dictionary) -> HBoxContainer:
 	name_label.text = ResourceStockpile.display_name(resource_id)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", Color(0.76, 0.84, 0.94))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(name_label)
@@ -1171,7 +1338,7 @@ func _make_flow_row(entry: Dictionary) -> HBoxContainer:
 	source_label.custom_minimum_size = Vector2(96, 0)
 	source_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	source_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	source_label.add_theme_font_size_override("font_size", 11)
+	source_label.add_theme_font_size_override("font_size", 13)
 	source_label.add_theme_color_override(
 		"font_color", Color(0.5, 0.62, 0.76)
 	)
@@ -1185,7 +1352,7 @@ func _add_muted_label(container: VBoxContainer, text: String) -> void:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_color_override("font_color", Color(0.52, 0.63, 0.76))
 	container.add_child(label)
 
@@ -1211,13 +1378,7 @@ func _change_color(value: int) -> Color:
 
 
 func _sidebar_row_style(background: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = background
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_bottom_left = 4
-	return style
+	return LCARS.row_style(background)
 
 
 ## Centers the star system in the space left of the sidebar instead of centering

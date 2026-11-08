@@ -3,86 +3,130 @@
 [ext_resource type="Script" uid="uid://lbqpd55ola63" path="res://scripts/title_screen.gd" id="1_title"]
 [ext_resource type="Texture2D" uid="uid://up3ddmcwmqds" path="res://assets/StellarCoreTitle.svg" id="2_art"]
 [ext_resource type="AudioStream" uid="uid://drx63b1guqa6k" path="res://assets/music/Mirage.mp3" id="3_music"]
+[ext_resource type="Shader" uid="uid://14eggb6qonne" path="res://shaders/nebula_sky.gdshader" id="4_nebula"]
+[ext_resource type="Shader" uid="uid://dnb0pes2owwqw" path="res://shaders/star_surface.gdshader" id="5_star"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_menu_normal"]
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
-bg_color = Color(0.04, 0.1, 0.17, 0.92)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_menu_pressed"]
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
-bg_color = Color(0.03, 0.08, 0.14, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_menu_hover"]
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
-bg_color = Color(0.08, 0.2, 0.34, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_menu_disabled"]
 content_margin_left = 24.0
 content_margin_top = 12.0
 content_margin_right = 24.0
 content_margin_bottom = 12.0
-bg_color = Color(0.022, 0.04, 0.068, 0.76)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.12, 0.2, 0.3, 0.6)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.07, 0.07, 0.08, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_credits"]
 content_margin_left = 28.0
 content_margin_top = 24.0
 content_margin_right = 28.0
 content_margin_bottom = 28.0
-bg_color = Color(0.027, 0.047, 0.082, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.28, 0.6, 0.94, 0.65)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_title_nebula"]
+shader = ExtResource("4_nebula")
+shader_parameter/deep_color = Color(0.006, 0.01, 0.026, 1)
+shader_parameter/mid_color = Color(0.035, 0.075, 0.18, 1)
+shader_parameter/high_color = Color(0.1, 0.17, 0.34, 1)
+shader_parameter/ice_color = Color(0.38, 0.5, 0.7, 1)
+shader_parameter/cloud_scale = 2.6
+shader_parameter/star_density = 1.2
+shader_parameter/star_brightness = 1.0
+
+[sub_resource type="Sky" id="Sky_title"]
+sky_material = SubResource("ShaderMaterial_title_nebula")
+
+[sub_resource type="Environment" id="Environment_title"]
+background_mode = 2
+background_color = Color(0.004, 0.006, 0.013, 1)
+sky = SubResource("Sky_title")
+ambient_light_source = 2
+ambient_light_color = Color(0.25, 0.35, 0.55, 1)
+ambient_light_energy = 0.1
+tonemap_mode = 2
+tonemap_white = 2.5
+glow_enabled = true
+glow_levels/2 = 0.0
+glow_levels/3 = 1.0
+glow_levels/4 = 0.0
+glow_levels/5 = 0.7
+glow_intensity = 0.7
+glow_bloom = 0.1
+
+[sub_resource type="SphereMesh" id="SphereMesh_title_sun"]
+radius = 3.5
+height = 7.0
+radial_segments = 64
+rings = 32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_title_star"]
+shader = ExtResource("5_star")
+shader_parameter/star_color = Color(1, 0.88, 0.62, 1)
+shader_parameter/intensity = 1.6
+shader_parameter/limb_darkening = 0.4
 
 [node name="TitleScreen" type="Control" unique_id=1237953807]
 layout_mode = 3
@@ -92,6 +136,39 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_title")
+
+[node name="Backdrop" type="SubViewportContainer" parent="." unique_id=443935867]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="TitleViewport" type="SubViewport" parent="Backdrop" unique_id=443935868]
+own_world_3d = true
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Backdrop/TitleViewport" unique_id=443935869]
+environment = SubResource("Environment_title")
+
+[node name="Sun" type="Node3D" parent="Backdrop/TitleViewport" unique_id=443935870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 2.5, -22)
+
+[node name="SunVisual" type="MeshInstance3D" parent="Backdrop/TitleViewport/Sun"]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_title_sun")
+material_override = SubResource("ShaderMaterial_title_star")
+
+[node name="TitleCamera" type="Camera3D" parent="Backdrop/TitleViewport" unique_id=443935871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+current = true
+fov = 55.0
 
 [node name="Background" type="TextureRect" parent="." unique_id=443935866]
 unique_name_in_owner = true
@@ -129,80 +206,80 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
 theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
-text = "New Game"
+text = "NEW GAME"
 
 [node name="LoadButton" type="Button" parent="Menu" unique_id=1938825669]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
 theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
-text = "Load Saved Game"
+text = "LOAD SAVED GAME"
 
 [node name="OptionsButton" type="Button" parent="Menu" unique_id=1556042564]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
 theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
-text = "Options"
+text = "OPTIONS"
 
 [node name="CreditsButton" type="Button" parent="Menu" unique_id=22372091]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
 theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
-text = "Credits"
+text = "CREDITS"
 
 [node name="QuitButton" type="Button" parent="Menu" unique_id=552461294]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.87, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.52, 0.64, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
 theme_override_styles/disabled = SubResource("StyleBox_menu_disabled")
-text = "Quit to Desktop"
+text = "QUIT TO DESKTOP"
 
 [node name="CreditsBackdrop" type="ColorRect" parent="." unique_id=1579231201]
 unique_name_in_owner = true
@@ -213,7 +290,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.6)
+color = Color(0, 0, 0, 0.82)
 
 [node name="CreditsPanel" type="PanelContainer" parent="." unique_id=414845156]
 unique_name_in_owner = true
@@ -239,20 +316,20 @@ theme_override_constants/separation = 10
 
 [node name="CreditsEyebrow" type="Label" parent="CreditsPanel/CreditsContent" unique_id=858967233]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "CREDITS"
 
 [node name="CreditsTitle" type="Label" parent="CreditsPanel/CreditsContent" unique_id=87769303]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 31
 text = "Stellar Core"
 
 [node name="CreditsBody" type="Label" parent="CreditsPanel/CreditsContent" unique_id=1364047173]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 17
 text = "(c) 2026 Jay Reding
 
 A space strategy prototype.
@@ -275,10 +352,10 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_menu_normal")
 theme_override_styles/pressed = SubResource("StyleBox_menu_pressed")
 theme_override_styles/hover = SubResource("StyleBox_menu_hover")
-text = "Close"
+text = "CLOSE"

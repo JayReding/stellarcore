@@ -7,66 +7,66 @@ content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.08, 0.19, 0.32, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.05, 0.13, 0.23, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_funds"]
 content_margin_left = 14.0
 content_margin_top = 12.0
 content_margin_right = 14.0
 content_margin_bottom = 12.0
-bg_color = Color(0.027, 0.052, 0.09, 0.96)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.46, 0.74, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0, 0, 0, 0.32)
-shadow_size = 8
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_confirm_normal"]
@@ -74,64 +74,64 @@ content_margin_left = 20.0
 content_margin_top = 9.0
 content_margin_right = 20.0
 content_margin_bottom = 9.0
-bg_color = Color(0.06, 0.24, 0.2, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.4, 0.86, 0.7, 0.85)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.627, 0.188, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_confirm_hover"]
 content_margin_left = 20.0
 content_margin_top = 9.0
 content_margin_right = 20.0
 content_margin_bottom = 9.0
-bg_color = Color(0.09, 0.34, 0.28, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.58, 0.96, 0.82, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.2, 0.85, 0.42, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_confirm_pressed"]
 content_margin_left = 20.0
 content_margin_top = 9.0
 content_margin_right = 20.0
 content_margin_bottom = 9.0
-bg_color = Color(0.04, 0.16, 0.14, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.32, 0.7, 0.58, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.42, 0.13, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_confirm_disabled"]
 content_margin_left = 20.0
 content_margin_top = 9.0
 content_margin_right = 20.0
 content_margin_bottom = 9.0
-bg_color = Color(0.04, 0.06, 0.09, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.16, 0.22, 0.3, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.07, 0.07, 0.08, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [node name="TechTree" type="CanvasLayer" unique_id=604771507]
 layer = 10
@@ -154,7 +154,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.005, 0.011, 0.022, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="UI" type="Control" parent="Root" unique_id=1343618934]
 layout_mode = 1
@@ -169,50 +169,32 @@ mouse_filter = 2
 layout_mode = 1
 offset_left = 40.0
 offset_top = 26.0
-offset_right = 480.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 12
-text = "RESEARCH & DEVELOPMENT"
-
-[node name="NameLabel" type="Label" parent="Root/UI" unique_id=1883698017]
-layout_mode = 1
-offset_left = 38.0
-offset_top = 44.0
 offset_right = 640.0
-offset_bottom = 92.0
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 34
-text = "Technologies"
-
-[node name="MetaLabel" type="Label" parent="Root/UI" unique_id=2073622086]
-unique_name_in_owner = true
-layout_mode = 1
-offset_left = 40.0
-offset_top = 94.0
-offset_right = 720.0
-offset_bottom = 114.0
-theme_override_colors/font_color = Color(0.6, 0.72, 0.85, 1)
-theme_override_font_sizes/font_size = 13
-text = "TECH TREE  •  1 TECHNOLOGY"
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 41
+text = "RESEARCH & DEVELOPMENT"
 
 [node name="BackButton" type="Button" parent="Root/UI" unique_id=2129665979]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 3
 anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
-offset_left = -240.0
-offset_top = 30.0
-offset_right = -40.0
-offset_bottom = 68.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -60.0
+offset_right = -28.0
+offset_bottom = -22.0
 grow_horizontal = 0
+grow_vertical = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
@@ -223,10 +205,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -270.0
-offset_top = 86.0
-offset_right = -40.0
-offset_bottom = 194.0
+offset_left = -250.0
+offset_top = 30.0
+offset_right = -30.0
+offset_bottom = 84.0
 grow_horizontal = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_funds")
@@ -235,24 +217,15 @@ theme_override_styles/panel = SubResource("StyleBox_funds")
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="FundsCap" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=1814586883]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
-text = "RESEARCH DATA"
-
 [node name="FundsLabel" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=224323208]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 text = "0 RD"
-
-[node name="FundsNote" type="Label" parent="Root/UI/FundsPanel/FundsContent" unique_id=2088356038]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
-theme_override_font_sizes/font_size = 10
-text = "Earned by surveying systems"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TreeScroll" type="ScrollContainer" parent="Root/UI" unique_id=1079899611]
 unique_name_in_owner = true
@@ -261,7 +234,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 40.0
-offset_top = 180.0
+offset_top = 140.0
 offset_right = -40.0
 offset_bottom = -64.0
 grow_horizontal = 2
@@ -287,7 +260,7 @@ offset_right = 500.0
 offset_bottom = -20.0
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.4, 0.54, 0.68, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "RESEARCH DATA IS SPENT TO UNLOCK TECHNOLOGIES"
 
 [node name="Hint" type="Label" parent="Root/UI" unique_id=1030128731]
@@ -304,7 +277,7 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.48, 0.62, 0.78, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "ESC TO RETURN"
 horizontal_alignment = 1
 
@@ -318,7 +291,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0, 0, 0, 0.68)
+color = Color(0, 0, 0, 0.82)
 
 [node name="ResearchDialog" type="PanelContainer" parent="Root/UI"]
 unique_name_in_owner = true
@@ -343,36 +316,36 @@ theme_override_constants/separation = 12
 
 [node name="DialogEyebrow" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "RESEARCH PROJECT"
 
 [node name="DialogTitle" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 29
 text = "Technology"
 
 [node name="DialogMeta" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "TIER 1  •  PROPULSION"
 
 [node name="DialogDescription" type="Label" parent="Root/UI/ResearchDialog/DialogContent"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
-theme_override_colors/font_color = Color(0.63, 0.72, 0.83, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 text = "Technology description"
 autowrap_mode = 3
 
 [node name="DialogSeparator" type="HSeparator" parent="Root/UI/ResearchDialog/DialogContent"]
 layout_mode = 2
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 
 [node name="DialogStats" type="GridContainer" parent="Root/UI/ResearchDialog/DialogContent"]
 layout_mode = 2
@@ -383,30 +356,30 @@ columns = 2
 [node name="CostKey" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "RESEARCH COST"
 
 [node name="DialogCost" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 14
 text = "0 RD"
 horizontal_alignment = 2
 
 [node name="TimeKey" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "TIME"
 
 [node name="DialogTime" type="Label" parent="Root/UI/ResearchDialog/DialogContent/DialogStats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 14
 text = "0 turns"
 horizontal_alignment = 2
 
@@ -415,7 +388,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.45, 0.45, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "Insufficient Research Data."
 autowrap_mode = 3
 
@@ -434,27 +407,27 @@ unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
-text = "Cancel"
+text = "CANCEL"
 
 [node name="DialogConfirmButton" type="Button" parent="Root/UI/ResearchDialog/DialogContent/DialogButtons"]
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.78, 0.98, 0.9, 1)
-theme_override_colors/font_hover_color = Color(0.9, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.68, 0.9, 0.82, 1)
-theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBox_confirm_normal")
 theme_override_styles/hover = SubResource("StyleBox_confirm_hover")
 theme_override_styles/pressed = SubResource("StyleBox_confirm_pressed")
 theme_override_styles/disabled = SubResource("StyleBox_confirm_disabled")
-text = "Begin Research"
+text = "BEGIN RESEARCH"

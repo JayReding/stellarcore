@@ -126,7 +126,7 @@ func _populate_resources(data: StarData) -> void:
 		name_label.text = str(resource.get("name", resource_id))
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		name_label.add_theme_font_size_override("font_size", 12)
+		name_label.add_theme_font_size_override("font_size", 14)
 		name_label.add_theme_color_override(
 			"font_color", Color(0.68, 0.77, 0.88)
 		)
@@ -139,7 +139,7 @@ func _populate_resources(data: StarData) -> void:
 		amount_label.custom_minimum_size = Vector2(48, 0)
 		amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		amount_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		amount_label.add_theme_font_size_override("font_size", 13)
+		amount_label.add_theme_font_size_override("font_size", 16)
 		amount_label.add_theme_color_override(
 			"font_color", resource.get("color", Color.WHITE)
 		)
@@ -167,7 +167,7 @@ func _populate_fleets(data: StarData) -> void:
 
 func _create_fleet_row(fleet: FleetData) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 26)
+	button.custom_minimum_size = Vector2(0, 44)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -176,50 +176,70 @@ func _create_fleet_row(fleet: FleetData) -> Button:
 	]
 	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	button.add_theme_stylebox_override(
-		"hover", _planet_row_style(Color(0.12, 0.25, 0.4, 0.45))
+		"hover", _planet_row_style(Color(0, 0.565, 0.941, 0.28))
 	)
 	button.add_theme_stylebox_override(
-		"pressed", _planet_row_style(Color(0.05, 0.13, 0.23, 0.7))
+		"pressed", _planet_row_style(Color(0, 0.08, 0.16, 1))
 	)
 	button.pressed.connect(_on_fleet_pressed.bind(fleet))
 	button.gui_input.connect(_on_fleet_row_input.bind(fleet))
 
-	var row := HBoxContainer.new()
+	var row := VBoxContainer.new()
 	button.add_child(row)
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	row.offset_left = 6.0
 	row.offset_top = 2.0
 	row.offset_right = -6.0
 	row.offset_bottom = -2.0
-	row.add_theme_constant_override("separation", 8)
+	row.add_theme_constant_override("separation", 0)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 8)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(top)
 
 	var dot := ColorRect.new()
 	dot.custom_minimum_size = Vector2(7, 7)
 	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	dot.color = Color(0.42, 0.72, 1.0)
 	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(dot)
+	top.add_child(dot)
 
 	var name_label := Label.new()
 	name_label.text = fleet.name
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 12)
+	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override("font_color", Color(0.8, 0.87, 0.96))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(name_label)
+	top.add_child(name_label)
+
+	var detail := HBoxContainer.new()
+	detail.add_theme_constant_override("separation", 8)
+	detail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(detail)
+
+	var indent := Control.new()
+	indent.custom_minimum_size = Vector2(15, 0)
+	indent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	detail.add_child(indent)
 
 	var summary_label := Label.new()
-	var summary_text := fleet.ship_summary()
+	var ship_total := fleet.ship_count()
+	var summary_text := "%d %s" % [
+		ship_total, "ship" if ship_total == 1 else "ships"
+	]
 	if fleet.has_orders():
 		summary_text += "  •  Ordered: %s" % fleet.ordered_destination_name
 	summary_label.text = summary_text
+	summary_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	summary_label.add_theme_font_size_override("font_size", 10)
+	summary_label.add_theme_font_size_override("font_size", 12)
 	summary_label.add_theme_color_override("font_color", Color(0.55, 0.68, 0.82))
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(summary_label)
+	detail.add_child(summary_label)
 
 	return button
 
@@ -276,10 +296,10 @@ func _create_planet_row(planet: PlanetData) -> Button:
 	button.tooltip_text = "Open %s in System View" % planet.designation
 	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	button.add_theme_stylebox_override(
-		"hover", _planet_row_style(Color(0.12, 0.25, 0.4, 0.45))
+		"hover", _planet_row_style(Color(0, 0.565, 0.941, 0.28))
 	)
 	button.add_theme_stylebox_override(
-		"pressed", _planet_row_style(Color(0.05, 0.13, 0.23, 0.7))
+		"pressed", _planet_row_style(Color(0, 0.08, 0.16, 1))
 	)
 	button.pressed.connect(_on_planet_pressed)
 
@@ -304,7 +324,7 @@ func _create_planet_row(planet: PlanetData) -> Button:
 	name_label.text = planet.designation
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 12)
+	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override("font_color", Color(0.8, 0.87, 0.96))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(name_label)
@@ -312,7 +332,7 @@ func _create_planet_row(planet: PlanetData) -> Button:
 	var class_label := Label.new()
 	class_label.text = planet.class_name_label()
 	class_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	class_label.add_theme_font_size_override("font_size", 11)
+	class_label.add_theme_font_size_override("font_size", 13)
 	class_label.add_theme_color_override("font_color", Color(0.55, 0.66, 0.78))
 	class_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(class_label)
@@ -321,13 +341,7 @@ func _create_planet_row(planet: PlanetData) -> Button:
 
 
 func _planet_row_style(background: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = background
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_right = 4
-	style.corner_radius_bottom_left = 4
-	return style
+	return LCARS.row_style(background)
 
 
 func hide_panel(immediate := false) -> void:

@@ -7,34 +7,34 @@ content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
 content_margin_bottom = 16.0
-bg_color = Color(0.035, 0.071, 0.125, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.52, 0.82, 0.72)
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_icon"]
+bg_color = Color(0, 0.627, 0.188, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
 corner_radius_top_left = 18
 corner_radius_top_right = 18
 corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.42)
-shadow_size = 12
-shadow_offset = Vector2(0, 5)
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_icon"]
-bg_color = Color(0.07, 0.17, 0.3, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.32, 0.64, 0.95, 0.8)
-corner_radius_top_left = 34
-corner_radius_top_right = 34
-corner_radius_bottom_right = 34
-corner_radius_bottom_left = 34
 
 [node name="TechNode" type="PanelContainer"]
-custom_minimum_size = Vector2(200, 200)
+custom_minimum_size = Vector2(200, 232)
 theme_override_styles/panel = SubResource("StyleBox_tile")
 script = ExtResource("1_node")
 
@@ -54,7 +54,7 @@ theme_override_styles/panel = SubResource("StyleBox_icon")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "FTL"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -62,8 +62,8 @@ vertical_alignment = 1
 [node name="NameLabel" type="Label" parent="Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 22
 text = "FTL Probes"
 horizontal_alignment = 1
 
@@ -71,8 +71,8 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(168, 30)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.68, 0.8, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 16
 text = "Faster-than-light probes for deep-space reconnaissance."
 horizontal_alignment = 1
 autowrap_mode = 2
@@ -92,20 +92,20 @@ alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.35, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "50 RD"
 
 [node name="CostSeparator" type="Label" parent="Content/CostRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "•"
 
 [node name="TimeLabel" type="Label" parent="Content/CostRow"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.35, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "3 TURNS"
 
 [node name="StatusLabel" type="Label" parent="Content"]
@@ -113,6 +113,6 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.6, 0.3, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "AWAITING FUNDING"
 horizontal_alignment = 1

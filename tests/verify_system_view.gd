@@ -55,7 +55,7 @@ func _run() -> void:
 	_check(panel.no_fleets_label.visible, "Fleet Command shows its empty state")
 	_check(panel.no_fleets_label.text == "No fleets", "Fleet Command says no fleets")
 	_check(panel.shipyard_button.visible, "Shipyard button is visible")
-	_check(panel.shipyard_button.text == "Shipyard", "Shipyard button has the right label")
+	_check(panel.shipyard_button.text == "SHIPYARD", "Shipyard button has the right label")
 
 	var planet_row := panel.planet_list.get_child(0) as Button
 	_check(planet_row != null, "Planet rows are clickable")

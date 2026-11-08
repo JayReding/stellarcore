@@ -23,66 +23,66 @@ content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.08, 0.19, 0.32, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.05, 0.13, 0.23, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_sidebar"]
 content_margin_left = 18.0
 content_margin_top = 16.0
 content_margin_right = 18.0
 content_margin_bottom = 16.0
-bg_color = Color(0.027, 0.047, 0.082, 0.94)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.52, 0.85, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 14
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 6)
 
 [node name="SystemView" type="CanvasLayer" unique_id=1643796303]
@@ -155,8 +155,8 @@ offset_left = 40.0
 offset_top = 26.0
 offset_right = 480.0
 offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 14
 text = "SYSTEM VIEW"
 
 [node name="NameLabel" type="Label" parent="Root/UI" unique_id=1564929503]
@@ -166,8 +166,8 @@ offset_left = 38.0
 offset_top = 44.0
 offset_right = 640.0
 offset_bottom = 92.0
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 38
 text = "Newhome"
 
 [node name="MetaLabel" type="Label" parent="Root/UI" unique_id=1004730978]
@@ -177,8 +177,8 @@ offset_left = 40.0
 offset_top = 92.0
 offset_right = 720.0
 offset_bottom = 114.0
-theme_override_colors/font_color = Color(0.66, 0.77, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 17
 text = "G2V  •  Yellow-class star  •  4 planets"
 
 [node name="BackButton" type="Button" parent="Root/UI" unique_id=895897493]
@@ -194,10 +194,10 @@ offset_bottom = 68.0
 grow_horizontal = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
@@ -217,7 +217,7 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.48, 0.62, 0.78, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "ESC TO RETURN  •  CLICK A PLANET TO INSPECT"
 horizontal_alignment = 1
 
@@ -248,20 +248,20 @@ theme_override_constants/separation = 8
 [node name="OverviewEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1396579680]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 24
 text = "SYSTEM OVERVIEW"
 
 [node name="SystemResourceEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=5198778]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "SYSTEM RESOURCES"
 
 [node name="ResourceLegend" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1964172740]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.53, 0.66, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "AMOUNT  /  PER-TURN CHANGE"
 horizontal_alignment = 2
 
@@ -271,13 +271,13 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="SeparatorResources" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2100750431]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="GalaxyEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=817719292]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "GALAXY-WIDE"
 
 [node name="ResearchResourceList" type="VBoxContainer" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2042370407]
@@ -286,20 +286,20 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="SeparatorStructures" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=1572863705]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="StructureEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=651569532]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "STRUCTURES"
 
 [node name="StructureSummary" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=315650036]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.62, 0.72, 0.84, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "No structures built in this system."
 autowrap_mode = 2
 
@@ -309,20 +309,20 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="SeparatorPlanet" type="HSeparator" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=2013506923]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="PlanetDetailEyebrow" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=601752313]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "PLANET DETAIL"
 
 [node name="PlanetHint" type="Label" parent="Root/UI/Sidebar/SidebarScroll/SidebarContent" unique_id=673528798]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.52, 0.63, 0.76, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "Click a planet in the view above, or a structure row, to inspect its output and upkeep."
 autowrap_mode = 2
 
@@ -355,8 +355,8 @@ theme_override_constants/separation = 6
 
 [node name="PlanetDetailEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334505]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "PLANET DETAIL"
 
 [node name="PlanetHeader" type="HBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334506]
@@ -368,7 +368,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 23
 text = "Planet"
 
 [node name="PlanetCloseButton" type="Button" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail/PlanetHeader" unique_id=1717334507]
@@ -376,10 +376,10 @@ unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
@@ -389,13 +389,13 @@ text = "CLOSE"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.56, 0.68, 0.82, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "Class  •  0 structures"
 
 [node name="PlanetStructureEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1234878711]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "STRUCTURES"
 
 [node name="PlanetStructureList" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=517115294]
@@ -405,8 +405,8 @@ theme_override_constants/separation = 4
 
 [node name="PlanetFlowEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1244405942]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "RESOURCE FLOW"
 
 [node name="PlanetFlowList" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1463207530]
@@ -415,7 +415,7 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="SeparatorBuild" type="HSeparator" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334508]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="BuildButton" type="Button" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334509]
@@ -425,10 +425,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
@@ -439,9 +439,24 @@ tooltip_text = "Open construction options for this planet."
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.52, 0.9, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = ""
 autowrap_mode = 2
+
+[node name="SeparatorConstructionQueue" type="HSeparator" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334519]
+modulate = Color(0, 0.565, 0.941, 0.85)
+layout_mode = 2
+
+[node name="ConstructionQueueEyebrow" type="Label" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334520]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "CONSTRUCTION QUEUE"
+
+[node name="ConstructionQueueList" type="VBoxContainer" parent="Root/UI/PlanetSidebar/PlanetSidebarScroll/PlanetDetail" unique_id=1717334521]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="ConstructBackdrop" type="ColorRect" parent="Root/UI" unique_id=1717334511]
 unique_name_in_owner = true
@@ -453,7 +468,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0, 0, 0, 0.6)
+color = Color(0, 0, 0, 0.82)
 
 [node name="ConstructPopup" type="PanelContainer" parent="Root/UI" unique_id=1717334512]
 unique_name_in_owner = true
@@ -464,10 +479,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -250.0
-offset_right = 230.0
-offset_bottom = 250.0
+offset_left = -300.0
+offset_top = -300.0
+offset_right = 300.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBox_sidebar")
@@ -478,33 +493,38 @@ theme_override_constants/separation = 10
 
 [node name="ConstructEyebrow" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334514]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "CONSTRUCT STRUCTURE"
 
 [node name="ConstructSubtitle" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334515]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.86, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 19
 text = "Planet"
 
 [node name="ConstructSeparator" type="HSeparator" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334516]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="ConstructStatus" type="Label" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334501]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.52, 0.63, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Select a structure to build."
 autowrap_mode = 2
 
 [node name="ConstructList" type="VBoxContainer" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334502]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 16
+
+[node name="ConstructSpacer" type="Control" parent="Root/UI/ConstructPopup/ConstructContent"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
 
 [node name="ConstructButtons" type="HBoxContainer" parent="Root/UI/ConstructPopup/ConstructContent" unique_id=1717334517]
 layout_mode = 2
@@ -516,10 +536,10 @@ unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")

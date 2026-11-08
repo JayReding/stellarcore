@@ -7,18 +7,18 @@ content_margin_left = 18.0
 content_margin_top = 18.0
 content_margin_right = 18.0
 content_margin_bottom = 18.0
-bg_color = Color(0.027, 0.047, 0.082, 0.94)
-border_width_left = 2
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.52, 0.85, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 14
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_scan_normal"]
@@ -26,64 +26,64 @@ content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.08, 0.19, 0.32, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_scan_pressed"]
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.05, 0.13, 0.23, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_scan_hover"]
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_scan_disabled"]
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.035, 0.065, 0.105, 0.8)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.16, 0.26, 0.36, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.07, 0.07, 0.08, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [node name="StarInfoPanel" type="PanelContainer" unique_id=273631228]
 anchors_preset = 1
@@ -104,8 +104,8 @@ theme_override_constants/separation = 8
 [node name="Eyebrow" type="Label" parent="Content" unique_id=1640045394]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "SELECTED SYSTEM"
 
 [node name="Header" type="HBoxContainer" parent="Content" unique_id=337832589]
@@ -122,27 +122,27 @@ color = Color(1, 0.93, 0.82, 1)
 [node name="NameLabel" type="Label" parent="Content/Header" unique_id=1847949018]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 29
 text = "SC-000"
 
 [node name="ClassLabel" type="Label" parent="Content" unique_id=2051956107]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.93, 0.82, 1)
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 30
 text = "G2V"
 
 [node name="DescriptionLabel" type="Label" parent="Content" unique_id=484018333]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.63, 0.72, 0.83, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 text = "Yellow main-sequence star. Stable, familiar, Sun-like."
 autowrap_mode = 3
 
 [node name="SeparatorTop" type="HSeparator" parent="Content" unique_id=321774452]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="Stats" type="GridContainer" parent="Content" unique_id=2116879577]
@@ -154,7 +154,7 @@ columns = 2
 [node name="TemperatureKey" type="Label" parent="Content/Stats" unique_id=579199600]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Temperature"
 
 [node name="TemperatureLabel" type="Label" parent="Content/Stats" unique_id=1811500619]
@@ -162,14 +162,14 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "5,778 K"
 horizontal_alignment = 2
 
 [node name="SizeKey" type="Label" parent="Content/Stats" unique_id=358905779]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Relative size"
 
 [node name="SizeLabel" type="Label" parent="Content/Stats" unique_id=328573888]
@@ -177,28 +177,28 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "0.92 × G-class"
 horizontal_alignment = 2
 
 [node name="LuminosityKey" type="Label" parent="Content/Stats" unique_id=1539298100]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Luminosity"
 
 [node name="LuminosityLabel" type="Label" parent="Content/Stats" unique_id=963618658]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Main sequence (V)"
 horizontal_alignment = 2
 
 [node name="DistanceKey" type="Label" parent="Content/Stats" unique_id=250553335]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "From Newhome"
 
 [node name="DistanceLabel" type="Label" parent="Content/Stats" unique_id=260544137]
@@ -206,18 +206,18 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "0.0 ly"
 horizontal_alignment = 2
 
 [node name="SeparatorBottom" type="HSeparator" parent="Content" unique_id=1767583433]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="ResourceEyebrow" type="Label" parent="Content" unique_id=381245900]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "SYSTEM RESOURCES"
 
 [node name="ResourceList" type="VBoxContainer" parent="Content" unique_id=1592848077]
@@ -226,20 +226,20 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="SeparatorSurvey" type="HSeparator" parent="Content" unique_id=586318509]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="SurveyEyebrow" type="Label" parent="Content" unique_id=1651518925]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "PLANETARY SURVEY"
 
 [node name="PlanetCountLabel" type="Label" parent="Content" unique_id=360502998]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 text = "4 planets"
 
 [node name="PlanetList" type="VBoxContainer" parent="Content" unique_id=597352605]
@@ -251,7 +251,7 @@ theme_override_constants/separation = 4
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.66, 0.78, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "Unsurveyed"
 
 [node name="ScanButton" type="Button" parent="Content" unique_id=459747371]
@@ -260,23 +260,23 @@ visible = false
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.78, 0.9, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.7, 0.84, 0.96, 1)
-theme_override_colors/font_hover_color = Color(0.95, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBox_scan_normal")
 theme_override_styles/pressed = SubResource("StyleBox_scan_pressed")
 theme_override_styles/hover = SubResource("StyleBox_scan_hover")
-text = "Scan"
+text = "SCAN"
 
 [node name="SeparatorFleet" type="HSeparator" parent="Content" unique_id=722295467]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
 [node name="FleetEyebrow" type="Label" parent="Content" unique_id=1061721355]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.62, 0.84, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "FLEET COMMAND"
 
 [node name="FleetList" type="VBoxContainer" parent="Content" unique_id=1897285729]
@@ -288,7 +288,7 @@ theme_override_constants/separation = 4
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.66, 0.78, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "No fleets"
 
 [node name="ShipyardButton" type="Button" parent="Content" unique_id=1200462393]
@@ -297,13 +297,13 @@ layout_mode = 2
 tooltip_text = "Open shipyard"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.78, 0.9, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.7, 0.84, 0.96, 1)
-theme_override_colors/font_hover_color = Color(0.95, 0.98, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.38, 0.48, 0.6, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBox_scan_normal")
 theme_override_styles/pressed = SubResource("StyleBox_scan_pressed")
 theme_override_styles/hover = SubResource("StyleBox_scan_hover")
 theme_override_styles/disabled = SubResource("StyleBox_scan_disabled")
-text = "Shipyard"
+text = "SHIPYARD"

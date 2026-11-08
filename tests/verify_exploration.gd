@@ -92,12 +92,12 @@ func _run() -> void:
 	)
 	_check(menu.fleet_name_label.text == "Newhome Alpha", "Popup names the fleet")
 	_check(
-		menu.set_destination_button.text == "Set Fleet Destination",
+		menu.set_destination_button.text == "SET FLEET DESTINATION",
 		"Set Fleet Destination is present"
 	)
-	_check(menu.rename_button.text == "Rename Fleet", "Rename Fleet is present")
-	_check(menu.modify_button.text == "Modify Fleet", "Modify Fleet is present")
-	_check(menu.delete_button.text == "Delete Fleet", "Delete Fleet is present")
+	_check(menu.rename_button.text == "RENAME FLEET", "Rename Fleet is present")
+	_check(menu.modify_button.text == "MODIFY FLEET", "Modify Fleet is present")
+	_check(menu.delete_button.text == "DELETE FLEET", "Delete Fleet is present")
 	_check(not menu.set_destination_button.disabled, "Set Destination is available")
 	_check(menu.rename_button.disabled, "Rename is not implemented yet")
 	_check(menu.modify_button.disabled, "Modify is not implemented yet")
@@ -198,7 +198,7 @@ func _run() -> void:
 		"Confirmation shows the required turns"
 	)
 	_check(
-		dialog.confirm_button.text == "Confirm Destination",
+		dialog.confirm_button.text == "CONFIRM DESTINATION",
 		"Confirmation has a confirm button"
 	)
 	_check(not dialog.confirm_button.disabled, "Confirmation can be accepted")
@@ -333,7 +333,7 @@ func _run() -> void:
 	)
 	if scene._fleet_labels.size() == 1:
 		_check(
-			(scene._fleet_labels[0] as Label3D).font_size == 22,
+			(scene._fleet_labels[0] as Label3D).font_size == 26,
 			"Stacked fleet labels use the smaller type size"
 		)
 		_check(
@@ -362,6 +362,12 @@ func _run() -> void:
 		marker_click.pressed = true
 		marker_click.position = marker_screen
 		root.push_input(marker_click)
+		await process_frame
+		var marker_release := InputEventMouseButton.new()
+		marker_release.button_index = MOUSE_BUTTON_RIGHT
+		marker_release.pressed = false
+		marker_release.position = marker_screen
+		root.push_input(marker_release)
 		await process_frame
 		_check(
 			scene._fleet_menu.visible,
@@ -442,13 +448,20 @@ func _run() -> void:
 		scene.status_label.text.contains("arrived at"),
 		"The status line announces the arrival"
 	)
+	# The first arrival surveys the system and burns its probe; the second
+	# arrival finds a surveyed system, so its probe survives and the final
+	# notice reports no destruction.
 	_check(
-		scene.status_label.text.contains("FTL Probe was destroyed"),
-		"The arrival notice reports the probe destruction"
+		second.ships == ["FTL Probe"],
+		"The second arrival keeps its probe at the surveyed system"
 	)
 	_check(
-		scene.status_label.text.contains("fleet was disbanded"),
-		"The arrival notice reports the fleet deletion"
+		scene.status_label.text.contains("Newhome Beta arrived at"),
+		"The status line announces the second arrival"
+	)
+	_check(
+		not scene.status_label.text.contains("FTL Probe was destroyed"),
+		"The second arrival burns no probe at the surveyed system"
 	)
 	_check(
 		scene.status_label.text.contains(
@@ -473,10 +486,18 @@ func _run() -> void:
 	)
 	_check(not panel.scan_button.visible, "A surveyed system hides Scan")
 	_check(
-		panel.fleet_list.get_child_count() == 0,
-		"The destroyed fleet is removed from Fleet Command"
+		panel.fleet_list.get_child_count() == 1,
+		"Fleet Command lists the surviving second fleet"
 	)
-	_check(panel.no_fleets_label.visible, "Fleet Command reports no surviving fleets")
+	var survivor_row := panel.fleet_list.get_child(0) as Button
+	_check(
+		survivor_row != null and survivor_row.tooltip_text.contains("Newhome Beta"),
+		"The surviving fleet is listed by name"
+	)
+	_check(
+		not panel.no_fleets_label.visible,
+		"Fleet Command reports the surviving fleet"
+	)
 	_check(
 		scene._galaxy.next_fleet_name("Newhome") == "Newhome Alpha",
 		"The destroyed fleet's name is available again"
@@ -535,6 +556,105 @@ func _run() -> void:
 	home.fleets.erase(rider)
 	scene._rebuild_fleet_markers()
 	await process_frame
+
+	# Extra probes survive: only the first probe to reach a new system burns
+	# out transmitting its survey data. The rest stay docked and reusable.
+	var unsurveyed: Array[StarData] = []
+	for star in scene._galaxy.stars:
+		if not star.surveyed and star != home:
+			unsurveyed.append(star)
+	_check(unsurveyed.size() >= 2, "Two unexplored systems remain for the probe test")
+	if unsurveyed.size() >= 2:
+		var first_target: StarData = unsurveyed[0]
+		var second_target: StarData = unsurveyed[1]
+		var research_before: int = scene.research_data
+		var probe_fleet := FleetData.new()
+		probe_fleet.name = "Newhome Gamma"
+		probe_fleet.add_ship("FTL Probe")
+		probe_fleet.add_ship("FTL Probe")
+		probe_fleet.dock_at(home)
+		home.fleets.append(probe_fleet)
+		scene._complete_fleet_arrival(home, probe_fleet, first_target)
+		_check(first_target.surveyed, "The first probe surveys its target")
+		_check(
+			probe_fleet.ships == ["FTL Probe"],
+			"Only the first of two probes is deleted"
+		)
+		_check(
+			first_target.fleets.has(probe_fleet),
+			"The surviving probe stays docked with its fleet"
+		)
+		_check(
+			scene.research_data == research_before + 25,
+			"The survey grants its Research Data"
+		)
+		# The survivor flies on, and the second survey burns the second probe.
+		scene._complete_fleet_arrival(first_target, probe_fleet, second_target)
+		_check(second_target.surveyed, "The surviving probe surveys the next system")
+		_check(probe_fleet.ships.is_empty(), "The second probe burns out surveying")
+		_check(
+			not second_target.fleets.has(probe_fleet),
+			"An emptied fleet is removed instead of docking"
+		)
+		# Arrivals at surveyed systems burn nothing and grant nothing.
+		var spare := FleetData.new()
+		spare.name = "Newhome Delta"
+		spare.add_ship("FTL Probe")
+		spare.dock_at(home)
+		home.fleets.append(spare)
+		var surveyed_before: int = scene.research_data
+		scene._complete_fleet_arrival(home, spare, first_target)
+		_check(
+			spare.ships == ["FTL Probe"] and first_target.fleets.has(spare),
+			"Arriving at a surveyed system preserves the probe"
+		)
+		_check(
+			scene.research_data == surveyed_before,
+			"Repeat visits grant no extra Research Data"
+		)
+		home.fleets.erase(spare)
+		first_target.fleets.erase(spare)
+
+	# Docked fleets are counted beneath the star name.
+	var counter := FleetData.new()
+	counter.name = "Newhome Epsilon"
+	counter.add_ship("FTL Probe")
+	counter.dock_at(home)
+	home.fleets.append(counter)
+	home_node.refresh_fleet_label()
+	var docked := home_node.stationed_fleet_count()
+	_check(docked >= 1, "Home has a docked fleet to count")
+	_check(home_node.fleet_label.visible, "A docked fleet is noted beneath the star")
+	_check(
+		home_node.fleet_label.text
+		== "%d %s" % [docked, "Fleet" if docked == 1 else "Fleets"],
+		"The note reads '1 Fleet' or 'N Fleets'"
+	)
+	_check(
+		home_node.fleet_label.position.y < 0.0,
+		"The fleet note sits below the star"
+	)
+	var counter_two := FleetData.new()
+	counter_two.name = "Newhome Zeta"
+	counter_two.add_ship("FTL Probe")
+	counter_two.dock_at(home)
+	home.fleets.append(counter_two)
+	home_node.refresh_fleet_label()
+	var redocked := home_node.stationed_fleet_count()
+	_check(
+		redocked == docked + 1
+		and home_node.fleet_label.text
+			== "%d %s" % [redocked, "Fleet" if redocked == 1 else "Fleets"],
+		"The note tracks additional fleets"
+	)
+	home.fleets.erase(counter)
+	home.fleets.erase(counter_two)
+	home_node.refresh_fleet_label()
+	if home_node.stationed_fleet_count() == 0:
+		_check(
+			not home_node.fleet_label.visible,
+			"The note clears when no fleets remain"
+		)
 
 	_finish()
 

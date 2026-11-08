@@ -10,6 +10,7 @@ const HOME_LABEL_REFERENCE_DISTANCE := 120.0
 @onready var selection_ring: MeshInstance3D = $SelectionRing
 @onready var home_label: Label3D = $HomeLabel
 @onready var survey_label: Label3D = $SurveyLabel
+@onready var fleet_label: Label3D = $FleetLabel
 @onready var pick_body: StaticBody3D = $PickBody
 @onready var pick_shape: CollisionShape3D = $PickBody/CollisionShape3D
 
@@ -19,6 +20,7 @@ var _star_color := Color.WHITE
 var _ring_base_scale := 1.0
 var _selected := false
 var _surveyed := false
+var _fleet_count := -1
 var _pulse_time := 0.0
 
 static var _halo_texture: ImageTexture
@@ -43,6 +45,7 @@ func setup(star_data: StarData) -> void:
 		home_label.position = Vector3(0.0, radius + 2.0, 0.0)
 
 	refresh_survey_label()
+	refresh_fleet_label()
 
 	var surface_material := visual.material_override as ShaderMaterial
 	if surface_material != null:
@@ -77,8 +80,10 @@ func set_selected(value: bool) -> void:
 func _process(delta: float) -> void:
 	if data != null and data.surveyed != _surveyed:
 		refresh_survey_label()
+	if data != null and stationed_fleet_count() != _fleet_count:
+		refresh_fleet_label()
 
-	if home_label.visible or survey_label.visible:
+	if home_label.visible or survey_label.visible or fleet_label.visible:
 		_update_label_scales()
 
 	if not _selected:
@@ -93,13 +98,42 @@ func _process(delta: float) -> void:
 ## Colonized systems get a dot after their name.
 func refresh_survey_label() -> void:
 	_surveyed = data != null and data.surveyed
-	survey_label.visible = _surveyed and not data.is_home
-	if not survey_label.visible:
+	survey_label.visible = _surveyed and data != null and not data.is_home
+	if survey_label.visible:
+		survey_label.text = data.display_name
+		if data.has_colony():
+			survey_label.text += " ●"
+		survey_label.position = Vector3(0.0, -(data.visual_radius + 1.35), 0.0)
+	# A new survey label may need the fleet count to slide down beneath it.
+	refresh_fleet_label()
+
+
+## Counts fleets docked in the system. Fleets passing through in transit
+## belong to no system while they travel.
+func stationed_fleet_count() -> int:
+	var count := 0
+	if data == null:
+		return count
+	for fleet in data.fleets:
+		if fleet != null and not fleet.in_transit:
+			count += 1
+	return count
+
+
+## Notes docked fleets beneath the star name: "1 Fleet", "2 Fleets", and so
+## on. Sits below the survey label when one is shown.
+func refresh_fleet_label() -> void:
+	_fleet_count = stationed_fleet_count()
+	fleet_label.visible = _fleet_count > 0
+	if not fleet_label.visible:
 		return
-	survey_label.text = data.display_name
-	if data.has_colony():
-		survey_label.text += " ●"
-	survey_label.position = Vector3(0.0, -(data.visual_radius + 1.35), 0.0)
+	fleet_label.text = "%d %s" % [
+		_fleet_count, "Fleet" if _fleet_count == 1 else "Fleets"
+	]
+	var offset := data.visual_radius + 1.35
+	if survey_label.visible:
+		offset += 2.6
+	fleet_label.position = Vector3(0.0, -offset, 0.0)
 
 
 func _update_label_scales() -> void:
@@ -114,6 +148,8 @@ func _update_label_scales() -> void:
 		home_label.scale = Vector3.ONE * scale_factor
 	if survey_label.visible:
 		survey_label.scale = Vector3.ONE * scale_factor
+	if fleet_label.visible:
+		fleet_label.scale = Vector3.ONE * scale_factor
 
 
 func _refresh_halo() -> void:

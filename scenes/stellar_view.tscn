@@ -42,78 +42,78 @@ content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
-bg_color = Color(0.027, 0.052, 0.09, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.46, 0.74, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.627, 0.188, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_bg"]
-bg_color = Color(0.025, 0.07, 0.12, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_research_progress_fill"]
-bg_color = Color(0.38, 0.8, 0.66, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_tech_normal"]
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.05, 0.13, 0.22, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.65)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_tech_pressed"]
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.04, 0.1, 0.18, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_tech_hover"]
 content_margin_left = 16.0
 content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.24, 0.39, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [node name="StellarView" type="Node3D" unique_id=906409263]
 script = ExtResource("1_view")
@@ -154,34 +154,80 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Title" type="Label" parent="UI/HUD" unique_id=1677898033]
+[node name="MenuButton" type="Button" parent="UI/HUD"]
+unique_name_in_owner = true
 layout_mode = 1
 offset_left = 28.0
 offset_top = 16.0
-offset_right = 480.0
+offset_right = 72.0
+offset_bottom = 52.0
+tooltip_text = "Open the main menu"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBox_tech_normal")
+theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
+
+[node name="Hamburger" type="VBoxContainer" parent="UI/HUD/MenuButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Bar1" type="ColorRect" parent="UI/HUD/MenuButton/Hamburger"]
+custom_minimum_size = Vector2(20, 3)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Bar2" type="ColorRect" parent="UI/HUD/MenuButton/Hamburger"]
+custom_minimum_size = Vector2(20, 3)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Bar3" type="ColorRect" parent="UI/HUD/MenuButton/Hamburger"]
+custom_minimum_size = Vector2(20, 3)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Title" type="Label" parent="UI/HUD" unique_id=1677898033]
+layout_mode = 1
+offset_left = 96.0
+offset_top = 16.0
+offset_right = 548.0
 offset_bottom = 54.0
 theme_override_colors/font_color = Color(0.76, 0.89, 1, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 34
 text = "STELLAR CORE"
 
 [node name="Subtitle" type="Label" parent="UI/HUD" unique_id=621854560]
 layout_mode = 1
-offset_left = 31.0
+offset_left = 99.0
 offset_top = 56.0
 offset_right = 480.0
 offset_bottom = 74.0
 theme_override_colors/font_color = Color(0.36, 0.55, 0.76, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "STELLAR VIEW"
 
 [node name="SeedLabel" type="Label" parent="UI/HUD" unique_id=1289042639]
 layout_mode = 1
-offset_left = 31.0
+offset_left = 99.0
 offset_top = 78.0
 offset_right = 480.0
 offset_bottom = 96.0
 theme_override_colors/font_color = Color(0.3, 0.44, 0.6, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "GALAXY SEED  000000   /   25 SYSTEMS"
 
 [node name="ResearchPanel" type="PanelContainer" parent="UI/HUD" unique_id=1837429194]
@@ -210,21 +256,21 @@ custom_minimum_size = Vector2(7, 7)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
-color = Color(0.52, 0.92, 0.78, 1)
+color = Color(0.2, 0.85, 0.42, 1)
 
 [node name="ResearchName" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ResearchRow" unique_id=1917796454]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 text = "RESEARCH DATA"
 
 [node name="ResearchAmount" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ResearchRow" unique_id=849690035]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.52, 0.92, 0.78, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.2, 0.85, 0.42, 1)
+theme_override_font_sizes/font_size = 18
 text = "0 RD"
 horizontal_alignment = 2
 
@@ -238,21 +284,21 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.45, 0.58, 0.72, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 14
 text = "NO ACTIVE RESEARCH"
 autowrap_mode = 2
 
 [node name="ResearchTurns" type="Label" parent="UI/HUD/ResearchPanel/ResearchContent/ActiveResearchRow" unique_id=1497589499]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.68, 0.77, 0.88, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 2
 
 [node name="ResearchProgress" type="ProgressBar" parent="UI/HUD/ResearchPanel/ResearchContent" unique_id=1497724261]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 4)
+custom_minimum_size = Vector2(0, 6)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBox_research_progress_bg")
@@ -278,8 +324,8 @@ theme_override_constants/separation = 4
 
 [node name="ConstructionEyebrow" type="Label" parent="UI/HUD/ConstructionPanel/ConstructionContent" unique_id=1047388462]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.2, 0.85, 0.42, 1)
+theme_override_font_sizes/font_size = 13
 text = "CONSTRUCTION"
 
 [node name="ConstructionList" type="VBoxContainer" parent="UI/HUD/ConstructionPanel/ConstructionContent" unique_id=1358733400]
@@ -299,27 +345,8 @@ offset_right = 300.0
 offset_bottom = -20.0
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.76, 0.89, 1, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "Turn 1"
-
-[node name="TurnCountdownLabel" type="Label" parent="UI/HUD" unique_id=89318405]
-visible = false
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -320.0
-offset_top = -88.0
-offset_right = -28.0
-offset_bottom = -66.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.95, 0.78, 0.45, 1)
-theme_override_font_sizes/font_size = 12
-text = "Ending turn in 5..."
-horizontal_alignment = 2
 
 [node name="StatusLabel" type="Label" parent="UI/HUD" unique_id=2110549018]
 layout_mode = 1
@@ -340,7 +367,7 @@ tooltip_text = "Open message history"
 theme_override_colors/font_color = Color(0.68, 0.84, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.88)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
@@ -361,13 +388,133 @@ grow_vertical = 0
 tooltip_text = "End the turn after the countdown"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_tech_normal")
 theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
 theme_override_styles/hover = SubResource("StyleBox_tech_hover")
-text = "End Turn"
+text = "END TURN"
+
+[node name="MenuDim" type="ColorRect" parent="UI"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="MenuCenter" type="CenterContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MenuPopup" type="PanelContainer" parent="UI/MenuCenter"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_research")
+
+[node name="MenuContent" type="VBoxContainer" parent="UI/MenuCenter/MenuPopup"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MenuEyebrow" type="Label" parent="UI/MenuCenter/MenuPopup/MenuContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "MAIN MENU"
+horizontal_alignment = 1
+
+[node name="ExitToMenuButton" type="Button" parent="UI/MenuCenter/MenuPopup/MenuContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBox_tech_normal")
+theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
+text = "EXIT TO MAIN MENU"
+
+[node name="QuitButton" type="Button" parent="UI/MenuCenter/MenuPopup/MenuContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBox_tech_normal")
+theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
+text = "QUIT GAME"
+
+[node name="MenuConfirm" type="PanelContainer" parent="UI/MenuCenter"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_research")
+
+[node name="MenuConfirmContent" type="VBoxContainer" parent="UI/MenuCenter/MenuConfirm"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ConfirmLabel" type="Label" parent="UI/MenuCenter/MenuConfirm/MenuConfirmContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "EXIT TO THE TITLE SCREEN?"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ConfirmRow" type="HBoxContainer" parent="UI/MenuCenter/MenuConfirm/MenuConfirmContent"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="ConfirmCancelButton" type="Button" parent="UI/MenuCenter/MenuConfirm/MenuConfirmContent/ConfirmRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_tech_normal")
+theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
+text = "CANCEL"
+
+[node name="ConfirmExitButton" type="Button" parent="UI/MenuCenter/MenuConfirm/MenuConfirmContent/ConfirmRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_tech_normal")
+theme_override_styles/pressed = SubResource("StyleBox_tech_pressed")
+theme_override_styles/hover = SubResource("StyleBox_tech_hover")
+text = "EXIT"
 
 [node name="StarInfoPanel" parent="UI" unique_id=167650799 instance=ExtResource("3_panel")]

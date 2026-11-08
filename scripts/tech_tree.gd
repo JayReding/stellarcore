@@ -18,11 +18,11 @@ const CATEGORY_ORDER: Array[String] = [
 	"Advanced Technology",
 ]
 const CATEGORY_COLORS := {
-	"Propulsion": Color(0.48, 0.74, 1.0),
-	"Exploration": Color(0.55, 0.9, 0.76),
-	"Industrial": Color(0.95, 0.72, 0.38),
-	"Military": Color(0.96, 0.48, 0.48),
-	"Advanced Technology": Color(0.8, 0.6, 1.0),
+	"Propulsion": Color(0.2, 0.68, 1.0),
+	"Exploration": Color(0.2, 0.85, 0.42),
+	"Industrial": Color(1.0, 0.8, 0.4),
+	"Military": Color(1.0, 0.38, 0.36),
+	"Advanced Technology": Color(0.55, 0.76, 1.0),
 }
 ## Categories stay hidden until unlocked by a later game stage. Advanced
 ## Technology has no unlock yet, so its column is reserved for the future.
@@ -105,7 +105,6 @@ const TECHNOLOGIES := [
 
 @onready var root: Control = $Root
 @onready var back_button: Button = %BackButton
-@onready var meta_label: Label = %MetaLabel
 @onready var funds_label: Label = %FundsLabel
 @onready var tech_scroll: ScrollContainer = %TreeScroll
 @onready var tech_grid: GridContainer = %TechGrid
@@ -271,17 +270,11 @@ func _populate() -> void:
 			tech_grid.add_child(cell)
 			_populate_tech_cell(cell, tier, str(category))
 
-	var noun := "TECHNOLOGY" if TECHNOLOGIES.size() == 1 else "TECHNOLOGIES"
-	meta_label.text = "TECH TREE  •  %d %s  •  %d CATEGORIES  •  %d %s" % [
-		TECHNOLOGIES.size(), noun,
-		categories.size(),
-		max_tier, "TIER" if max_tier == 1 else "TIERS",
-	]
 	refresh_tech_cards()
 
 
 func _category_color(category: String) -> Color:
-	return CATEGORY_COLORS.get(category, Color(0.48, 0.7, 0.92))
+	return CATEGORY_COLORS.get(category, Color(0.2, 0.68, 1.0))
 
 
 ## One centered header per category column, in the configured category order.
@@ -291,7 +284,7 @@ func _make_category_header(category: String) -> Label:
 	header.text = category.to_upper()
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_theme_font_size_override("font_size", 14)
+	header.add_theme_font_size_override("font_size", 17)
 	header.add_theme_color_override("font_color", _category_color(category))
 	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return header
@@ -305,8 +298,8 @@ func _make_tier_cell(tier: int) -> Label:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 15)
-	label.add_theme_color_override("font_color", Color(0.48, 0.7, 0.92))
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(0.2, 0.68, 1.0))
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 

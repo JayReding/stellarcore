@@ -7,18 +7,18 @@ content_margin_left = 18.0
 content_margin_top = 18.0
 content_margin_right = 18.0
 content_margin_bottom = 18.0
-bg_color = Color(0.027, 0.047, 0.082, 0.96)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.22, 0.52, 0.85, 0.45)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0, 0, 0, 0.42)
-shadow_size = 12
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.565, 0.941, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_normal"]
@@ -26,66 +26,66 @@ content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.08, 0.19, 0.32, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.24, 0.54, 0.86, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.565, 0.941, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_hover"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.12, 0.28, 0.46, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.68, 1, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0.2, 0.68, 1, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_back_pressed"]
 content_margin_left = 14.0
 content_margin_top = 9.0
 content_margin_right = 14.0
 content_margin_bottom = 9.0
-bg_color = Color(0.05, 0.13, 0.23, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(0, 0.42, 0.72, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_produce_normal"]
 content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(0.08, 0.24, 0.4, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.38, 0.7, 1, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 8
+bg_color = Color(0, 0.627, 0.188, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_produce_hover"]
@@ -93,18 +93,18 @@ content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(0.12, 0.34, 0.55, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.55, 0.82, 1, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 8
+bg_color = Color(0.2, 0.85, 0.42, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_produce_pressed"]
@@ -112,50 +112,50 @@ content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(0.045, 0.16, 0.28, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.32, 0.6, 0.9, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0.42, 0.13, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_produce_disabled"]
 content_margin_left = 18.0
 content_margin_top = 10.0
 content_margin_right = 18.0
 content_margin_bottom = 10.0
-bg_color = Color(0.035, 0.055, 0.08, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.16, 0.22, 0.3, 0.8)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.07, 0.07, 0.08, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_icon"]
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.05, 0.12, 0.21, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.6, 0.9, 0.7)
-corner_radius_top_left = 38
-corner_radius_top_right = 38
-corner_radius_bottom_right = 38
-corner_radius_bottom_left = 38
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 10
+bg_color = Color(0, 0.627, 0.188, 1)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
 shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_no_options"]
@@ -163,16 +163,16 @@ content_margin_left = 14.0
 content_margin_top = 10.0
 content_margin_right = 14.0
 content_margin_bottom = 10.0
-bg_color = Color(0.02, 0.04, 0.07, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.16, 0.3, 0.46, 0.65)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.627, 0.188, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="Shipyard" type="CanvasLayer"]
 layer = 10
@@ -196,7 +196,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.005, 0.011, 0.022, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="UI" type="Control" parent="Root"]
 layout_mode = 1
@@ -214,8 +214,8 @@ offset_top = 26.0
 offset_right = 480.0
 offset_bottom = 46.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.5, 0.7, 0.94, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 14
 text = "ORBITAL CONSTRUCTION"
 
 [node name="NameLabel" type="Label" parent="Root/UI"]
@@ -225,8 +225,8 @@ offset_top = 44.0
 offset_right = 640.0
 offset_bottom = 92.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 41
 text = "Shipyard"
 
 [node name="MetaLabel" type="Label" parent="Root/UI"]
@@ -237,8 +237,8 @@ offset_top = 94.0
 offset_right = 760.0
 offset_bottom = 114.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.6, 0.72, 0.85, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 16
 text = "NEWHOME III  •  NEWHOME SYSTEM  •  0 FLEETS"
 
 [node name="BackButton" type="Button" parent="Root/UI"]
@@ -254,10 +254,10 @@ offset_bottom = 68.0
 grow_horizontal = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.75, 0.88, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
@@ -293,15 +293,15 @@ theme_override_constants/separation = 8
 [node name="HullEyebrow" type="Label" parent="Root/UI/Content/HullColumn/HullContent/HullHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "HULL TYPES"
 
 [node name="HullCountLabel" type="Label" parent="Root/UI/Content/HullColumn/HullContent/HullHeader"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.68, 0.82, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 12
 text = "1"
 
 [node name="HullList" type="VBoxContainer" parent="Root/UI/Content/HullColumn/HullContent"]
@@ -317,232 +317,248 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "One hull type is available.\nAdditional hulls will unlock through research."
 autowrap_mode = 3
 
-[node name="CenterColumn" type="PanelContainer" parent="Root/UI/Content"]
+[node name="CenterColumn" type="VBoxContainer" parent="Root/UI/Content"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="CustomBox" type="PanelContainer" parent="Root/UI/Content/CenterColumn"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
-[node name="CenterContent" type="VBoxContainer" parent="Root/UI/Content/CenterColumn"]
+[node name="CustomContent" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CustomBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="CustomEyebrow" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="CustomEyebrow" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "CUSTOMIZATION"
 
-[node name="PreviewRow" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="PreviewRow" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="IconWell" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CenterContent/PreviewRow"]
+[node name="IconWell" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/PreviewRow"]
 custom_minimum_size = Vector2(76, 76)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBox_icon")
 
-[node name="HullIconLabel" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/PreviewRow/IconWell"]
+[node name="HullIconLabel" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/PreviewRow/IconWell"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.92, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 29
 text = "FTL"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PreviewInfo" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent/PreviewRow"]
+[node name="PreviewInfo" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/PreviewRow"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 2
 
-[node name="HullNameLabel" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/PreviewRow/PreviewInfo"]
+[node name="HullNameLabel" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/PreviewRow/PreviewInfo"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.92, 0.97, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 29
 text = "FTL Probe"
 
-[node name="HullRoleLabel" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/PreviewRow/PreviewInfo"]
+[node name="HullRoleLabel" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/PreviewRow/PreviewInfo"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.48, 0.74, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Reconnaissance"
 
-[node name="HullDescriptionLabel" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="HullDescriptionLabel" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.63, 0.72, 0.83, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 14
 text = "A small, unmanned faster-than-light probe built for deep-space reconnaissance and survey support."
 autowrap_mode = 3
 
-[node name="Separator" type="HSeparator" parent="Root/UI/Content/CenterColumn/CenterContent"]
-modulate = Color(0.45, 0.6, 0.8, 0.35)
+[node name="Separator" type="HSeparator" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
+modulate = Color(0, 0.565, 0.941, 0.85)
 layout_mode = 2
 
-[node name="Stats" type="GridContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="Stats" type="GridContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 6
 columns = 2
 
-[node name="HullTypeKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullTypeKey" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Hull type"
 
-[node name="HullTypeValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullTypeValue" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "FTL Probe"
 horizontal_alignment = 2
 
-[node name="HullRoleKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullRoleKey" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Role"
 
-[node name="HullRoleValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullRoleValue" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Reconnaissance"
 horizontal_alignment = 2
 
-[node name="HullCustomizationKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullCustomizationKey" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Customization"
 
-[node name="HullCustomizationValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullCustomizationValue" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "None"
 horizontal_alignment = 2
 
-[node name="HullTimeKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullTimeKey" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Build time"
 
-[node name="HullTimeValue" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="HullTimeValue" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "1 turn"
 horizontal_alignment = 2
 
-[node name="CostKey" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="CostKey" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.76, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Resource cost"
 
-[node name="CostValue" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent/Stats"]
+[node name="CostValue" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/Stats"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 alignment = 2
 
-[node name="NoOptionsPanel" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="NoOptionsPanel" type="PanelContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_no_options")
 
-[node name="NoOptionsContent" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent/NoOptionsPanel"]
+[node name="NoOptionsContent" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/NoOptionsPanel"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="NoOptionsLabel" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/NoOptionsPanel/NoOptionsContent"]
+[node name="NoOptionsLabel" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/NoOptionsPanel/NoOptionsContent"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "NO CUSTOMIZATION OPTIONS"
 
-[node name="NoOptionsNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent/NoOptionsPanel/NoOptionsContent"]
+[node name="NoOptionsNote" type="Label" parent="Root/UI/Content/CenterColumn/CustomBox/CustomContent/NoOptionsPanel/NoOptionsContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 13
 text = "This hull type has no modules or variants to configure."
 autowrap_mode = 3
 
-[node name="CenterSpacer" type="Control" parent="Root/UI/Content/CenterColumn/CenterContent"]
-layout_mode = 2
-size_flags_vertical = 3
 
-[node name="QueueEyebrow" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="QueueBox" type="PanelContainer" parent="Root/UI/Content/CenterColumn"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="QueueContent" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/QueueBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="QueueEyebrow" type="Label" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "CONSTRUCTION QUEUE"
 
-[node name="QueueList" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="QueueList" type="VBoxContainer" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="QueueNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="QueueNote" type="Label" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "Ships are built in order, one turn of work per turn. Cancelling refunds unused resources; Antimatter is always fully refunded."
 autowrap_mode = 3
 
-[node name="ResourceNote" type="Label" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="ResourceNote" type="Label" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "Ship production costs are not yet assigned."
 autowrap_mode = 3
 
-[node name="ProduceRow" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/CenterContent"]
+[node name="QueueSpacer" type="Control" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ProduceRow" type="HBoxContainer" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent"]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 2
 
-[node name="ProduceButton" type="Button" parent="Root/UI/Content/CenterColumn/CenterContent/ProduceRow"]
+[node name="ProduceButton" type="Button" parent="Root/UI/Content/CenterColumn/QueueBox/QueueContent/ProduceRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
-theme_override_colors/font_disabled_color = Color(0.38, 0.44, 0.52, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.57, 0.6, 1)
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBox_produce_normal")
 theme_override_styles/hover = SubResource("StyleBox_produce_hover")
 theme_override_styles/pressed = SubResource("StyleBox_produce_pressed")
 theme_override_styles/disabled = SubResource("StyleBox_produce_disabled")
-text = "Add To Construction Queue"
+text = "ADD TO CONSTRUCTION QUEUE"
 
 [node name="FleetColumn" type="PanelContainer" parent="Root/UI/Content"]
 custom_minimum_size = Vector2(300, 0)
@@ -561,15 +577,15 @@ theme_override_constants/separation = 8
 [node name="FleetEyebrow" type="Label" parent="Root/UI/Content/FleetColumn/FleetContent/FleetHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.46, 0.67, 0.9, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.68, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "FLEETS"
 
 [node name="FleetCountLabel" type="Label" parent="Root/UI/Content/FleetColumn/FleetContent/FleetHeader"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.68, 0.82, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.5, 0.64, 0.82, 1)
+theme_override_font_sizes/font_size = 12
 text = "0"
 
 [node name="NewFleetButton" type="Button" parent="Root/UI/Content/FleetColumn/FleetContent/FleetHeader"]
@@ -577,10 +593,10 @@ unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.84, 0.93, 1, 1)
-theme_override_colors/font_hover_color = Color(0.97, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.74, 0.88, 1, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBox_back_normal")
 theme_override_styles/hover = SubResource("StyleBox_back_hover")
 theme_override_styles/pressed = SubResource("StyleBox_back_pressed")
@@ -602,7 +618,7 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.66, 0.78, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "No fleets in this system.\nProduce a ship to create one."
 autowrap_mode = 3
 
@@ -614,7 +630,7 @@ size_flags_vertical = 3
 [node name="FleetHint" type="Label" parent="Root/UI/Content/FleetColumn/FleetContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.57, 0.7, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "Drag a ship onto another fleet to move it.\nA fleet that loses its last ship is removed.\nRight-click an empty fleet to delete it."
 autowrap_mode = 3
 
@@ -634,7 +650,7 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Queued ships join the newest fleet with no destination."
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -650,5 +666,5 @@ offset_bottom = -20.0
 grow_vertical = 0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.4, 0.54, 0.68, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "ESC TO RETURN"
