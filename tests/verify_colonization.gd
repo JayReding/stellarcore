@@ -256,13 +256,17 @@ func _run() -> void:
 		),
 		"The status line reports the founded colony"
 	)
+	_check(
+		destination.resources.titanium == 250,
+		"Founding grants 250 Titanium in bootstrapping supplies"
+	)
 
 	# The new Colony produces like any other from the next turn.
 	scene.turn_manager.advance_turn()
 	await process_frame
 	_check(
-		destination.resources.titanium == 10,
-		"The new Colony produces Titanium"
+		destination.resources.titanium == 260,
+		"The new Colony adds 10 Titanium to the bonus"
 	)
 	_check(
 		destination.resources.helium_3 == 2,

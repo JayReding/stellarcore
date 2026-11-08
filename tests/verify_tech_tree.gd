@@ -33,7 +33,7 @@ func _run() -> void:
 
 	var grid := tech_tree.tech_grid
 	_check(grid != null, "The tree renders a category grid")
-	_check(grid.columns == 5, "The grid has a tier gutter plus four shown categories")
+	_check(grid.columns == 6, "The grid has a category gutter plus five tiers")
 
 	var headers: Array[String] = []
 	for child in grid.get_children():

@@ -12,8 +12,10 @@ const COLOR_COST := Color(1.0, 0.8, 0.4)
 const COLOR_AVAILABLE := Color(0.2, 0.85, 0.42)
 const COLOR_AWAITING := Color(0.72, 0.55, 0.28)
 const COLOR_BLOCKED := Color(0.38, 0.48, 0.62)
+const COLOR_LOCKED := Color(0.5, 0.55, 0.62)
 
 @onready var icon_label: Label = %IconLabel
+@onready var content: VBoxContainer = $Content
 @onready var name_label: Label = %NameLabel
 @onready var description_label: Label = %DescriptionLabel
 @onready var cost_row: HBoxContainer = %CostRow
@@ -40,7 +42,6 @@ func setup(technology_data: Dictionary) -> void:
 	icon_label.text = str(technology.get("icon", "T"))
 	name_label.text = display_name
 	description_label.text = description
-
 	if bool(technology.get("available_by_default", false)):
 		_show_available()
 		tooltip_text = "%s\n%s\nAvailable by default." % [
@@ -54,6 +55,15 @@ func setup(technology_data: Dictionary) -> void:
 			int(technology.get("cost", 0)),
 			int(technology.get("time", 0)),
 		]
+
+
+## Empty framed box for a tree slot with no technology yet. The box keeps
+## the grid's shape; new options appear here as technologies are added.
+func setup_placeholder() -> void:
+	technology = {}
+	content.visible = false
+	tooltip_text = ""
+	mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 
 ## Refreshes the card for the player's research state: available, active,
@@ -83,6 +93,12 @@ func set_research_state(state: String, turns_remaining := 0) -> void:
 			_show_cost_and_time()
 			_set_status("AWAITING CURRENT RESEARCH", COLOR_BLOCKED, false)
 			tooltip_text = "%s\n%s\nAnother research project is in progress." % [
+				display_name, description
+			]
+		"locked":
+			_show_cost_and_time()
+			_set_status("LOCKED — FINISH TIER %d" % maxi(int(technology.get("tier", 1)) - 1, 1), COLOR_LOCKED, false)
+			tooltip_text = "%s\n%s\nFinish the previous tier to unlock this research." % [
 				display_name, description
 			]
 		_:

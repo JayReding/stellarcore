@@ -27,6 +27,9 @@ const CATEGORY_COLORS := {
 ## Categories stay hidden until unlocked by a later game stage. Advanced
 ## Technology has no unlock yet, so its column is reserved for the future.
 const HIDDEN_CATEGORIES: Array[String] = ["Advanced Technology"]
+## Traditional tree depth: every category shows this many tier slots.
+## Slots with no technology yet render as placeholders.
+const TECH_TIERS := 5
 ## Mouse-wheel zoom limits for the tech tree grid.
 const MIN_ZOOM := 0.5
 const MAX_ZOOM := 2.0
@@ -250,22 +253,22 @@ func _populate() -> void:
 		child.queue_free()
 	_tech_nodes.clear()
 
-	var max_tier := 1
+	var max_tier := TECH_TIERS
 	for technology in TECHNOLOGIES:
 		max_tier = maxi(max_tier, int(technology.get("tier", 1)))
 
 	var categories := _shown_categories()
-	tech_grid.columns = categories.size() + 1
+	tech_grid.columns = max_tier + 1
 
 	var corner := Control.new()
 	corner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tech_grid.add_child(corner)
-	for category in categories:
-		tech_grid.add_child(_make_category_header(str(category)))
-
 	for tier in range(1, max_tier + 1):
 		tech_grid.add_child(_make_tier_cell(tier))
-		for category in categories:
+
+	for category in categories:
+		tech_grid.add_child(_make_category_header(str(category)))
+		for tier in range(1, max_tier + 1):
 			var cell := _make_tech_cell(tier, str(category))
 			tech_grid.add_child(cell)
 			_populate_tech_cell(cell, tier, str(category))
@@ -277,20 +280,22 @@ func _category_color(category: String) -> Color:
 	return CATEGORY_COLORS.get(category, Color(0.2, 0.68, 1.0))
 
 
-## One centered header per category column, in the configured category order.
+## One centered header per category lane, in the configured category order.
+## The gutter hugs its labels instead of stretching across spare width.
 func _make_category_header(category: String) -> Label:
 	var header := Label.new()
 	header.name = "CategoryHeader_%s" % category.replace(" ", "")
 	header.text = category.to_upper()
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	header.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	header.add_theme_font_size_override("font_size", 17)
 	header.add_theme_color_override("font_color", _category_color(category))
 	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return header
 
 
-## Tier gutter label marking the start of each technology row.
+## Tier label marking each technology column across the top.
 func _make_tier_cell(tier: int) -> Label:
 	var label := Label.new()
 	label.name = "TierLabel_%d" % tier
@@ -309,26 +314,31 @@ func _make_tier_cell(tier: int) -> Label:
 func _make_tech_cell(tier: int, category: String) -> VBoxContainer:
 	var cell := VBoxContainer.new()
 	cell.name = "TechCell_%d_%s" % [tier, category.replace(" ", "")]
-	cell.custom_minimum_size = Vector2(208, 0)
+	cell.custom_minimum_size = Vector2(176, 0)
 	cell.add_theme_constant_override("separation", 16)
 	cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return cell
 
 
 func _populate_tech_cell(cell: VBoxContainer, tier: int, category: String) -> void:
+	var match_data: Dictionary = {}
 	for technology in TECHNOLOGIES:
 		if (
-			int(technology.get("tier", 1)) != tier
-			or str(technology.get("category", "")) != category
+			int(technology.get("tier", 1)) == tier
+			and str(technology.get("category", "")) == category
 		):
-			continue
-		var node := TECH_NODE_SCENE.instantiate() as TechNode
-		if node == null:
-			continue
-		cell.add_child(node)
-		node.setup(technology)
+			match_data = technology
+			break
+	var node := TECH_NODE_SCENE.instantiate() as TechNode
+	if node == null:
+		return
+	cell.add_child(node)
+	if match_data.is_empty():
+		node.setup_placeholder()
+	else:
+		node.setup(match_data)
 		node.research_requested.connect(_on_research_requested)
-		_tech_nodes.append(node)
+	_tech_nodes.append(node)
 
 
 func active_research() -> Dictionary:
@@ -386,6 +396,8 @@ func refresh_tech_cards() -> void:
 		var tech_id := str(node.technology.get("id", ""))
 		if _completed_tech_ids.has(tech_id):
 			node.set_research_state("completed")
+		elif _tier_locked(node.technology):
+			node.set_research_state("locked")
 		elif _active_research.is_empty():
 			node.set_research_state("available")
 		elif str(_active_research.get("id", "")) == tech_id:
@@ -399,10 +411,32 @@ func _on_research_requested(technology: Dictionary) -> void:
 		return
 	if bool(technology.get("available_by_default", false)):
 		return
+	if _tier_locked(technology):
+		return
 	var tech_id := str(technology.get("id", ""))
 	if _completed_tech_ids.has(tech_id):
 		return
 	_show_research_dialog(technology)
+
+
+## A technology above tier 1 stays locked until the previous tier in its
+## category is finished. Technologies granted by default count as finished,
+## and empty previous slots impose no requirement.
+func _tier_locked(technology: Dictionary) -> bool:
+	var tier := int(technology.get("tier", 1))
+	if tier <= 1:
+		return false
+	var category := str(technology.get("category", ""))
+	for previous in TECHNOLOGIES:
+		if (
+			int(previous.get("tier", 1)) != tier - 1
+			or str(previous.get("category", "")) != category
+		):
+			continue
+		if bool(previous.get("available_by_default", false)):
+			return false
+		return not _completed_tech_ids.has(str(previous.get("id", "")))
+	return false
 
 
 func _show_research_dialog(technology: Dictionary) -> void:

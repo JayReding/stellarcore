@@ -102,6 +102,22 @@ func _run() -> void:
 		scene.menu_popup.visible and not scene.menu_confirm.visible,
 		"Cancel returns to the menu"
 	)
+	scene.quit_button.pressed.emit()
+	await process_frame
+	_check(
+		not scene.menu_popup.visible and scene.menu_confirm.visible,
+		"Quit also asks for confirmation"
+	)
+	_check(
+		scene.confirm_exit_button.text == "QUIT",
+		"The quit confirmation offers QUIT"
+	)
+	scene.confirm_cancel_button.pressed.emit()
+	await process_frame
+	_check(
+		scene.menu_popup.visible and not scene.menu_confirm.visible,
+		"Cancel backs out of the quit confirmation"
+	)
 	scene.menu_button.pressed.emit()
 	await process_frame
 	_check(not scene.menu_popup.visible, "MENU toggles the popup closed")

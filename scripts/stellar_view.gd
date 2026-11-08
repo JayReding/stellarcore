@@ -57,8 +57,11 @@ const GAMEPLAY_MUSIC_VOLUME_DB := -18.0
 @onready var exit_to_menu_button: Button = %ExitToMenuButton
 @onready var quit_button: Button = %QuitButton
 @onready var menu_confirm: PanelContainer = %MenuConfirm
+@onready var confirm_label: Label = %ConfirmLabel
 @onready var confirm_cancel_button: Button = %ConfirmCancelButton
 @onready var confirm_exit_button: Button = %ConfirmExitButton
+
+var _confirm_action := ""
 @onready var status_label: Label = $UI/HUD/StatusLabel
 @onready var music_player: AudioStreamPlayer = %GameplayMusic
 
@@ -1288,9 +1291,15 @@ func _on_colony_chosen(
 		fleet.clear_route()
 		fleet.in_transit = false
 
+	# A new colony arrives with bootstrapping supplies.
+	if star.resources == null:
+		star.resources = ResourceStockpile.new()
+	star.resources.add_amount(ResourceStockpile.TITANIUM, 250)
+
 	var message := "Colony founded on %s (%s)." % [
 		planet.designation, star.display_name
 	]
+	message += " +250 Titanium bootstrapping bonus."
 	if disbanded:
 		message += " The fleet was disbanded."
 	_set_status(message, STATUS_SUCCESS_COLOR, star)
@@ -1541,6 +1550,7 @@ func _on_menu_dim_input(event: InputEvent) -> void:
 
 
 func _close_menu() -> void:
+	_confirm_action = ""
 	if menu_dim != null:
 		menu_dim.visible = false
 	if menu_popup != null:
@@ -1552,6 +1562,21 @@ func _close_menu() -> void:
 
 ## Exiting needs confirmation, so swap the menu for the confirm dialog.
 func _on_exit_to_menu_pressed() -> void:
+	_confirm_menu_action(
+		"exit", "EXIT TO THE TITLE SCREEN?", "EXIT"
+	)
+
+
+## Quitting needs confirmation too.
+func _on_quit_pressed() -> void:
+	_confirm_menu_action("quit", "QUIT THE GAME?", "QUIT")
+
+
+## Shows the shared confirm dialog for a pending menu action.
+func _confirm_menu_action(action: String, prompt: String, verb: String) -> void:
+	_confirm_action = action
+	confirm_label.text = prompt
+	confirm_exit_button.text = verb
 	if menu_popup != null:
 		menu_popup.visible = false
 	if menu_confirm != null:
@@ -1568,15 +1593,15 @@ func _on_confirm_cancel_pressed() -> void:
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 
-## Confirmed: return to the title screen.
+## Confirmed: carry out the pending menu action.
 func _on_confirm_exit_pressed() -> void:
+	var action := _confirm_action
+	_confirm_action = ""
 	_close_menu()
-	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
-
-
-## Quits the game.
-func _on_quit_pressed() -> void:
-	get_tree().quit()
+	if action == "quit":
+		get_tree().quit()
+	else:
+		get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
 
 
 func _clear_selection() -> void:
